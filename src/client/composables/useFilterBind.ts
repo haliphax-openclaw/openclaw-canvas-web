@@ -33,7 +33,7 @@ export function useFilterBind(props: { def: Record<string, unknown>; componentId
         op: bind.value.op ?? 'eq',
         value,
         nullValue,
-        isNull: isNullValue(value, nullValue),
+        isNull: isNullValue(value, nullValue) || (Array.isArray(value) && value.length === 0),
         componentId: props.componentId,
       })
     }
