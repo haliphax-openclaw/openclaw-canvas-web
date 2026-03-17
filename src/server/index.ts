@@ -13,6 +13,7 @@ import { agentProxyRoute } from './routes/agent-proxy.js'
 import { registerCanvasCommands } from './commands/canvas.js'
 import { registerA2UICommands } from './commands/a2ui.js'
 import { A2UIManager } from './services/a2ui-manager.js'
+import { A2UIStore } from './services/a2ui-store.js'
 import { NodeClient } from './services/node-client.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -88,9 +89,21 @@ const server = app.listen(PORT, HOST, () => {
 })
 
 const gateway = new Gateway(server)
-const a2uiManager = new A2UIManager()
+const a2uiStore = new A2UIStore()
+const a2uiManager = new A2UIManager(a2uiStore)
 registerCanvasCommands(gateway, sessionManager)
 registerA2UICommands(gateway, a2uiManager)
+
+// Replay cached A2UI state to newly connected SPA clients
+gateway.onSpaConnect((ws) => {
+  for (const surface of a2uiManager.allSurfaces()) {
+    const components = Array.from(surface.components.entries()).map(([id, component]) => ({ id, component }))
+    gateway.sendToSpa(ws, { type: 'a2ui.surfaceUpdate', surfaceId: surface.surfaceId, components })
+    if (surface.root) {
+      gateway.sendToSpa(ws, { type: 'a2ui.beginRendering', surfaceId: surface.surfaceId, root: surface.root })
+    }
+  }
+})
 const watchPaths = [CANVAS_ROOT, ...agentWorkspaceMap.values()]
 const fileWatcher = new FileWatcher(watchPaths, gateway)
 

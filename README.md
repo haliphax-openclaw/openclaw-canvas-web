@@ -30,6 +30,7 @@ Open `http://localhost:9999` in a browser.
 | `OPENCLAW_CANVAS_ROOT` | `~/.openclaw-canvas` | Root directory for session files |
 | `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
 | `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
+| `OPENCLAW_CANVAS_A2UI_DB` | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence |
 
 ## Architecture
 
@@ -43,7 +44,8 @@ src/
 │   │   ├── file-resolver.ts  # Path resolution with traversal guard
 │   │   ├── file-watcher.ts   # chokidar live reload
 │   │   ├── node-client.ts    # OpenClaw gateway node registration (Ed25519 auth, invoke handling)
-│   │   └── a2ui-manager.ts   # A2UI surface state
+│   │   ├── a2ui-manager.ts   # A2UI surface state (in-memory cache, backed by a2ui-store)
+│   │   └── a2ui-store.ts     # SQLite persistence for A2UI surfaces (better-sqlite3)
 │   ├── shared/
 │   │   ├── deep-link-script.ts  # Injected script for openclaw:// deep links
 │   │   └── snapshot-script.ts   # Injected script for canvas snapshots (inlines dom-to-image-more)
@@ -112,6 +114,15 @@ Connect via WebSocket to `/gateway`. Send JSON messages with a `command` field. 
 ```json
 { "id": "8", "command": "a2ui.reset" }
 ```
+
+## A2UI Persistence
+
+A2UI surface state is persisted to a local SQLite database so it survives server restarts. On startup, all cached surfaces are loaded from the database and replayed to connecting SPA clients.
+
+- The database is managed by `A2UIStore` (`better-sqlite3`, synchronous)
+- The in-memory `Map` in `A2UIManager` remains the primary data source; SQLite is the backing store
+- Every mutation (`upsertSurface`, `setRoot`, `updateDataModel`, `deleteSurface`, `clearAll`) writes through to SQLite
+- DB location defaults to `~/.openclaw-canvas/a2ui-cache.db`, configurable via `OPENCLAW_CANVAS_A2UI_DB`
 
 ## Custom URL Protocols
 

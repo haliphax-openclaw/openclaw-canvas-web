@@ -3,6 +3,7 @@ type Handler = (data: Record<string, unknown>) => void
 class WsClient {
   private ws: WebSocket | null = null
   private handlers = new Map<string, Set<Handler>>()
+  private pendingMessages: Array<Record<string, unknown>> = []
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private destroyed = false
 
@@ -15,7 +16,13 @@ class WsClient {
       let data: Record<string, unknown>
       try { data = JSON.parse(e.data) } catch { return }
       const type = data.type as string
-      if (type) this.handlers.get(type)?.forEach((h) => h(data))
+      if (!type) return
+      const typeHandlers = this.handlers.get(type)
+      if (typeHandlers?.size) {
+        typeHandlers.forEach((h) => h(data))
+      } else {
+        this.pendingMessages.push(data)
+      }
     }
     this.ws.onclose = () => {
       if (!this.destroyed) {
@@ -30,6 +37,16 @@ class WsClient {
   on(type: string, handler: Handler) {
     if (!this.handlers.has(type)) this.handlers.set(type, new Set())
     this.handlers.get(type)!.add(handler)
+    // Flush any buffered messages for this type
+    const remaining: Array<Record<string, unknown>> = []
+    for (const msg of this.pendingMessages) {
+      if (msg.type === type) {
+        handler(msg)
+      } else {
+        remaining.push(msg)
+      }
+    }
+    this.pendingMessages = remaining
   }
 
   off(type: string, handler: Handler) {

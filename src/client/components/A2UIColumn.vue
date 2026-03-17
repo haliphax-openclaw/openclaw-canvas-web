@@ -24,5 +24,5 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-column { display: flex; flex-direction: column; }
+.a2ui-column { display: flex; flex-direction: column; gap: 8px; }
 </style>

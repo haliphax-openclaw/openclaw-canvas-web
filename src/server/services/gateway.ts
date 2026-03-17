@@ -18,6 +18,7 @@ export class Gateway {
   private spaClients = new Set<WebSocket>()
   private pendingSnapshots = new Map<string, (data: Record<string, unknown>) => void>()
   private pingTimer: ReturnType<typeof setInterval> | null = null
+  private spaConnectListeners: Array<(ws: WebSocket) => void> = []
 
   constructor(server: Server) {
     this.wss = new WebSocketServer({ noServer: true })
@@ -45,6 +46,7 @@ export class Gateway {
               }
             } catch { /* ignore malformed */ }
           })
+          for (const listener of this.spaConnectListeners) listener(ws)
         })
       } else {
         socket.destroy()
@@ -91,6 +93,14 @@ export class Gateway {
 
   on(command: string, handler: CommandHandler) {
     this.handlers.set(command, handler)
+  }
+
+  onSpaConnect(listener: (ws: WebSocket) => void) {
+    this.spaConnectListeners.push(listener)
+  }
+
+  sendToSpa(ws: WebSocket, data: Record<string, unknown>) {
+    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data))
   }
 
   /** Request snapshot from SPA and wait for result */

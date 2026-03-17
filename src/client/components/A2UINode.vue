@@ -12,6 +12,13 @@ import A2UIButton from './A2UIButton.vue'
 import A2UIImage from './A2UIImage.vue'
 import A2UIStack from './A2UIStack.vue'
 import A2UISpacer from './A2UISpacer.vue'
+import A2UISelect from './A2UISelect.vue'
+import A2UITable from './A2UITable.vue'
+import A2UICheckbox from './A2UICheckbox.vue'
+import A2UIProgressBar from './A2UIProgressBar.vue'
+import A2UISlider from './A2UISlider.vue'
+import A2UIBadge from './A2UIBadge.vue'
+import A2UIDivider from './A2UIDivider.vue'
 
 const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Column: A2UIColumn,
@@ -21,6 +28,13 @@ const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Image: A2UIImage,
   Stack: A2UIStack,
   Spacer: A2UISpacer,
+  Select: A2UISelect,
+  Table: A2UITable,
+  Checkbox: A2UICheckbox,
+  ProgressBar: A2UIProgressBar,
+  Slider: A2UISlider,
+  Badge: A2UIBadge,
+  Divider: A2UIDivider,
 }
 
 export default defineComponent({
