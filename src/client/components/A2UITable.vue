@@ -1,9 +1,9 @@
 <template>
   <div class="a2ui-table-wrapper">
-    <table class="a2ui-table">
+    <table class="a2ui-table" :class="{ sortable }">
     <thead v-if="headers.length">
       <tr>
-        <th v-for="(h, i) in headers" :key="i" :style="sortable ? 'cursor:pointer' : ''" @click="sortable && cycleSort(h)">{{ sortIndicator(h) }}{{ h }}</th>
+        <th v-for="(h, i) in headers" :key="i" @click="sortable && cycleSort(h)">{{ sortIndicator(h) }}{{ h }}</th>
       </tr>
     </thead>
     <tbody>
@@ -72,5 +72,6 @@ export default defineComponent({
 .a2ui-table-wrapper .a2ui-table { width: max-content; min-width: 100%; }
 .a2ui-table th, .a2ui-table td { border: 1px solid #444; padding: 6px 10px; text-align: left; }
 .a2ui-table th { background: #16213e; }
+.a2ui-table.sortable th { cursor: pointer; }
 .a2ui-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
 </style>

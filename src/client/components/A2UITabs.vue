@@ -9,7 +9,7 @@
         @click="activeIndex = i"
       >{{ tab.label }}</div>
     </div>
-    <div class="a2ui-tabs-content" :style="contentStyle">
+    <div class="a2ui-tabs-content" :class="{ 'a2ui-tabs-content--fixed': height !== 'auto' }" :style="height !== 'auto' ? `--tabs-content-height: ${height}` : undefined">
       <div
         v-for="(tab, i) in tabs"
         :key="i"
@@ -38,14 +38,7 @@ export default defineComponent({
     const height = computed(() => (props.def as any).height ?? 'auto')
     const activeIndex = ref((props.def as any).active ?? 0)
 
-    const contentStyle = computed(() => {
-      if (height.value !== 'auto') {
-        return { height: height.value, overflow: 'auto' }
-      }
-      return {}
-    })
-
-    return { tabs, pos, height, activeIndex, contentStyle }
+    return { tabs, pos, height, activeIndex }
   },
 })
 </script>
@@ -84,5 +77,6 @@ export default defineComponent({
 .a2ui-tabs-bar--right .a2ui-tab--active { border-left-color: #e0e0e0; }
 
 .a2ui-tabs-content { position: relative; }
+.a2ui-tabs-content--fixed { height: var(--tabs-content-height); overflow: auto; }
 .a2ui-tabs-panel--hidden { visibility: hidden; position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
 </style>
