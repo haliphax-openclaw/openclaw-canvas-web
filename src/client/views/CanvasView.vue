@@ -22,6 +22,7 @@
       />
       <div v-else class="canvas-loading">Loading…</div>
     </template>
+    <DeepLinkConfirm ref="deepLinkConfirm" />
   </div>
 </template>
 
@@ -30,7 +31,9 @@ import { defineComponent, computed, ref, watch, onMounted, onUnmounted, reactive
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { wsClient } from '../services/ws-client'
+import { parseOpenclawUrl, executeDeepLink, fetchCanvasConfig, type DeepLinkRequest } from '../services/deep-link'
 import A2UIRenderer from '../components/A2UIRenderer.vue'
+import DeepLinkConfirm from '../components/DeepLinkConfirm.vue'
 import domtoimage from 'dom-to-image-more'
 
 const GEOMETRY_KEY = 'openclaw-canvas-geometry'
@@ -49,13 +52,14 @@ function saveGeometry(g: { width: string; height: string }) {
 
 export default defineComponent({
   name: 'CanvasView',
-  components: { A2UIRenderer },
+  components: { A2UIRenderer, DeepLinkConfirm },
   setup() {
     const route = useRoute()
     const router = useRouter()
     const store = useStore()
     const iframe = ref<HTMLIFrameElement | null>(null)
     const canvasRoot = ref<HTMLElement | null>(null)
+    const deepLinkConfirm = ref<InstanceType<typeof DeepLinkConfirm> | null>(null)
     const cacheBust = ref(0)
     const visible = computed(() => store.state.panel.visible)
     const activeSurfaceId = ref('main')
@@ -74,7 +78,8 @@ export default defineComponent({
 
     const iframeSrc = computed(() => {
       if (externalUrl.value) return null
-      const base = `/canvas/${sessionId.value}/${subpath.value}`
+      const baseUrl = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''
+      const base = `${baseUrl}/_c/${sessionId.value}/${subpath.value}`
       return cacheBust.value ? `${base}?_cb=${cacheBust.value}` : base
     })
 
@@ -90,6 +95,7 @@ export default defineComponent({
     }
     const onHide = () => store.commit('setVisible', false)
     const onNavigate = (d: Record<string, unknown>) => {
+      store.commit('setVisible', true)
       externalUrl.value = null
       const s = (d.session as string) || sessionId.value
       const p = (d.path as string) || ''
@@ -97,14 +103,37 @@ export default defineComponent({
     }
     const onNavigateExternal = (d: Record<string, unknown>) => {
       const url = d.url as string
-      if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+      if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:'))) {
+        store.commit('setVisible', true)
         externalUrl.value = url
       }
     }
     const onEval = (d: Record<string, unknown>) => {
+      const js = d.js as string
+      let result: unknown
+      let error: string | undefined
+
       try {
-        iframe.value?.contentWindow?.postMessage({ type: 'canvas.eval', js: d.js }, '*')
-      } catch { /* cross-origin */ }
+        if (iframe.value?.contentWindow) {
+          // Same-origin canvas iframe — direct eval
+          result = iframe.value.contentWindow.eval(js)
+        } else {
+          // A2UI mode or no iframe — eval in main window context
+          result = new Function(js)()
+        }
+      } catch (err) {
+        error = String(err)
+      }
+
+      // Send result back if the command had an id
+      if (d.id) {
+        wsClient.send({
+          type: 'canvas.evalResult',
+          id: d.id,
+          result: result !== undefined ? String(result) : undefined,
+          error,
+        })
+      }
     }
     const onSnapshot = async (d: Record<string, unknown>) => {
       try {
@@ -137,6 +166,19 @@ export default defineComponent({
     }
     const onClearAll = () => store.commit('a2ui/clearAll')
 
+    // Handle postMessage from iframes for openclaw:// deep links
+    async function onDeepLinkMessage(e: MessageEvent) {
+      if (e.data?.type !== 'openclaw-deeplink' || !e.data?.url) return
+      const req = parseOpenclawUrl(e.data.url)
+      if (!req) return
+      const config = await fetchCanvasConfig()
+      if (req.key || config.skipConfirmation) {
+        executeDeepLink(req)
+      } else {
+        deepLinkConfirm.value?.show(req)
+      }
+    }
+
     const handlers: [string, (d: Record<string, unknown>) => void][] = [
       ['reload', onReload],
       ['canvas.show', onShow],
@@ -153,10 +195,18 @@ export default defineComponent({
       ['a2ui.clearAll', onClearAll],
     ]
 
-    onMounted(() => { for (const [t, h] of handlers) wsClient.on(t, h) })
-    onUnmounted(() => { for (const [t, h] of handlers) wsClient.off(t, h) })
+    onMounted(() => {
+      for (const [t, h] of handlers) wsClient.on(t, h)
+      window.addEventListener('message', onDeepLinkMessage)
+    })
+    onUnmounted(() => {
+      for (const [t, h] of handlers) wsClient.off(t, h)
+      window.removeEventListener('message', onDeepLinkMessage)
+    })
 
-    return { iframeSrc, iframe, canvasRoot, visible, reload, hasA2UISurface, activeSurfaceId, panelStyle, externalUrl }
+    // Attach deep link interceptor on iframe load via @load in template
+
+    return { iframeSrc, iframe, canvasRoot, visible, reload, hasA2UISurface, activeSurfaceId, panelStyle, externalUrl, deepLinkConfirm }
   },
 })
 </script>
@@ -166,7 +216,6 @@ export default defineComponent({
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .canvas-view.canvas-hidden {

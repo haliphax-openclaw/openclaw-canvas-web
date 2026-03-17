@@ -8,23 +8,50 @@ import { Gateway } from './services/gateway.js'
 import { FileWatcher } from './services/file-watcher.js'
 import { canvasRoute } from './routes/canvas.js'
 import { scaffoldRoute } from './routes/scaffold.js'
+import { canvasConfigRoute } from './routes/canvas-config.js'
+import { agentProxyRoute } from './routes/agent-proxy.js'
 import { registerCanvasCommands } from './commands/canvas.js'
 import { registerA2UICommands } from './commands/a2ui.js'
 import { A2UIManager } from './services/a2ui-manager.js'
+import { NodeClient } from './services/node-client.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const HOST = process.env.OPENCLAW_CANVAS_HOST ?? '0.0.0.0'
 const PORT = parseInt(process.env.OPENCLAW_CANVAS_PORT ?? '3456', 10)
-const CANVAS_ROOT = process.env.OPENCLAW_CANVAS_ROOT ?? path.join(
+const WORKSPACE = process.env.OPENCLAW_WORKSPACE ?? path.join(
   process.env.HOME ?? process.env.USERPROFILE ?? '.',
-  '.openclaw-canvas'
+  '.openclaw', 'workspace'
 )
-
+const CANVAS_ROOT = process.env.OPENCLAW_CANVAS_ROOT ?? path.join(WORKSPACE, 'canvas')
 fs.mkdirSync(CANVAS_ROOT, { recursive: true })
-fs.mkdirSync(path.join(CANVAS_ROOT, 'main'), { recursive: true })
 
-const fileResolver = new FileResolver(CANVAS_ROOT)
+// Read OpenClaw config once
+const OPENCLAW_CONFIG_PATH = path.join(process.env.HOME ?? '.', '.openclaw', 'openclaw.json')
+const openclawConfig: Record<string, any> = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(OPENCLAW_CONFIG_PATH, 'utf8'))
+  } catch { return {} }
+})()
+
+// Resolve gateway connection details early (needed for agent proxy route)
+const GATEWAY_WS_URL = process.env.OPENCLAW_GATEWAY_WS_URL ?? 'ws://127.0.0.1:18789'
+const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? openclawConfig?.gateway?.auth?.token ?? ''
+const HOOKS_TOKEN = process.env.OPENCLAW_HOOKS_TOKEN ?? openclawConfig?.hooks?.token ?? ''
+
+// Build agent workspace map: agentId → <workspace>/canvas/
+const defaultWorkspace = openclawConfig?.agents?.defaults?.workspace ?? WORKSPACE
+const agentWorkspaceMap = new Map<string, string>()
+const agentsList = openclawConfig?.agents?.list ?? []
+for (const agent of agentsList) {
+  const ws = agent.workspace ?? defaultWorkspace
+  const canvasDir = path.join(ws, 'canvas')
+  fs.mkdirSync(canvasDir, { recursive: true })
+  agentWorkspaceMap.set(agent.id, canvasDir)
+  console.log(`Canvas workspace: ${agent.id} → ${canvasDir}`)
+}
+
+const fileResolver = new FileResolver(agentWorkspaceMap, CANVAS_ROOT)
 const sessionManager = new SessionManager()
 
 const app = express()
@@ -36,6 +63,12 @@ if (fs.existsSync(clientDist)) {
 
 app.use(canvasRoute(fileResolver))
 app.use(scaffoldRoute())
+app.use(canvasConfigRoute())
+
+// Deep link proxy: openclaw://agent?... or openclaw://<host>/agent?... → POST /api/agent → gateway /hooks/agent
+if (HOOKS_TOKEN) {
+  app.use(agentProxyRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
+}
 
 app.get('/{*path}', (_req, res) => {
   const indexPath = path.join(clientDist, 'index.html')
@@ -57,12 +90,30 @@ const gateway = new Gateway(server)
 const a2uiManager = new A2UIManager()
 registerCanvasCommands(gateway, sessionManager)
 registerA2UICommands(gateway, a2uiManager)
-const fileWatcher = new FileWatcher(CANVAS_ROOT, gateway)
+const watchPaths = [CANVAS_ROOT, ...agentWorkspaceMap.values()]
+const fileWatcher = new FileWatcher(watchPaths, gateway)
 
-export { app, server, fileResolver, sessionManager, gateway, a2uiManager }
+// Connect to OpenClaw gateway as a node
+let nodeClient: NodeClient | null = null
+if (GATEWAY_TOKEN) {
+  nodeClient = new NodeClient({
+    gatewayUrl: GATEWAY_WS_URL,
+    token: GATEWAY_TOKEN,
+    gateway,
+    a2uiManager,
+    sessionManager
+  })
+  nodeClient.start()
+  console.log(`Node client connecting to ${GATEWAY_WS_URL}`)
+} else {
+  console.warn('No gateway token found — node registration disabled')
+}
+
+export { app, server, fileResolver, sessionManager, gateway, a2uiManager, nodeClient }
 
 async function shutdown() {
   console.log('Shutting down…')
+  nodeClient?.stop()
   gateway.broadcastSpa({ type: 'server.shutdown' })
   await fileWatcher.close()
   gateway.close()

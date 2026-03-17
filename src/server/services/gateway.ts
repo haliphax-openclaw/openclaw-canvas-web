@@ -24,11 +24,12 @@ export class Gateway {
 
     server.on('upgrade', (req, socket, head) => {
       const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
-      if (url.pathname === '/gateway') {
+      const path = url.pathname
+      if (path === '/gateway') {
         this.wss.handleUpgrade(req, socket, head, (ws) => {
           this.wss.emit('connection', ws, req)
         })
-      } else if (url.pathname === '/ws') {
+      } else if (path === '/ws') {
         this.wss.handleUpgrade(req, socket, head, (ws) => {
           this.spaClients.add(ws)
           ws.on('close', () => this.spaClients.delete(ws))

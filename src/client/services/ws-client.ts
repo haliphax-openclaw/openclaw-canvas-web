@@ -9,7 +9,8 @@ class WsClient {
   connect() {
     if (this.destroyed) return
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
-    this.ws = new WebSocket(`${proto}://${location.host}/ws`)
+    const base = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''
+    this.ws = new WebSocket(`${proto}://${location.host}${base}/ws`)
     this.ws.onmessage = (e) => {
       let data: Record<string, unknown>
       try { data = JSON.parse(e.data) } catch { return }

@@ -2,12 +2,22 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 
 export class FileResolver {
-  constructor(private canvasRoot: string) {}
+  private workspaceMap: Map<string, string>
+  private defaultCanvasRoot: string
+
+  constructor(workspaceMap: Map<string, string>, defaultCanvasRoot: string) {
+    this.workspaceMap = workspaceMap
+    this.defaultCanvasRoot = defaultCanvasRoot
+  }
+
+  private canvasRootFor(session: string): string {
+    return this.workspaceMap.get(session) ?? path.join(this.defaultCanvasRoot, session)
+  }
 
   async resolve(session: string, subpath: string): Promise<string | null> {
-    if (!session || session.includes('..') || session.includes('/')) return null
+    if (!session || session.includes('..')) return null
 
-    const sessionRoot = path.join(this.canvasRoot, session)
+    const sessionRoot = this.canvasRootFor(session)
     const target = path.join(sessionRoot, subpath || 'index.html')
     const finalPath = target.endsWith('/') ? path.join(target, 'index.html') : target
 
@@ -18,8 +28,13 @@ export class FileResolver {
       return null
     }
 
-    const realSessionRoot = await fs.realpath(sessionRoot).catch(() => null)
-    if (!realSessionRoot || !real.startsWith(realSessionRoot + path.sep) && real !== realSessionRoot) {
+    let realSessionRoot: string | null
+    try {
+      realSessionRoot = await fs.realpath(sessionRoot)
+    } catch {
+      return null
+    }
+    if (!real.startsWith(realSessionRoot + path.sep) && real !== realSessionRoot) {
       return null
     }
 
@@ -27,9 +42,9 @@ export class FileResolver {
   }
 
   async sessionExists(session: string): Promise<boolean> {
-    if (!session || session.includes('..') || session.includes('/')) return false
+    if (!session || session.includes('..')) return false
     try {
-      const stat = await fs.stat(path.join(this.canvasRoot, session))
+      const stat = await fs.stat(this.canvasRootFor(session))
       return stat.isDirectory()
     } catch {
       return false
@@ -42,6 +57,6 @@ export class FileResolver {
   }
 
   getCanvasRoot(): string {
-    return this.canvasRoot
+    return this.defaultCanvasRoot
   }
 }

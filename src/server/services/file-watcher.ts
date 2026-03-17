@@ -4,8 +4,8 @@ import type { Gateway } from './gateway.js'
 export class FileWatcher {
   private watcher: FSWatcher
 
-  constructor(canvasRoot: string, gateway: Gateway) {
-    this.watcher = watch(canvasRoot, {
+  constructor(watchPaths: string | string[], gateway: Gateway) {
+    this.watcher = watch(watchPaths, {
       ignoreInitial: true,
       awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
     })
