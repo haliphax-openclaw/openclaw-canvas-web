@@ -148,6 +148,18 @@ Example configuration:
 
 Without `hooks.enabled` and `hooks.token`, the canvas server's `/api/agent` proxy will receive a connection error or authentication failure from the gateway.
 
+### Disabling the built-in canvas tool
+
+OpenClaw includes a built-in `canvas` tool designed for the desktop app. When using the canvas web server, this tool can cause confusion — agents may attempt to use it instead of `openclaw nodes invoke`, and its `jsonlPath` parameter rejects paths outside the OpenClaw state directory. To prevent this, add `canvas` to the global tool denylist:
+
+```json
+{
+  "tools": {
+    "deny": ["canvas"]
+  }
+}
+```
+
 ## Security Considerations
 
 - All deep links require user confirmation by default (confirmation dialog)
