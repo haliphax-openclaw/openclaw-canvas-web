@@ -138,13 +138,13 @@ describe('A2UIBadge', () => {
 
 describe('A2UICheckbox', () => {
   it('renders label and checked state', () => {
-    const w = mount(A2UICheckbox, { props: { def: { label: 'Agree', checked: true }, componentId: 'c1' } })
+    const w = mountWith(A2UICheckbox, { def: { label: 'Agree', checked: true }, componentId: 'c1', surfaceId: 's1' })
     expect(w.find('span').text()).toBe('Agree')
     expect((w.find('input').element as HTMLInputElement).checked).toBe(true)
   })
 
   it('sends checkboxChange on change', async () => {
-    const w = mount(A2UICheckbox, { props: { def: { label: 'X' }, componentId: 'cb1' } })
+    const w = mountWith(A2UICheckbox, { def: { label: 'X' }, componentId: 'cb1', surfaceId: 's1' })
     await w.find('input').setValue(true)
     expect(wsClient.send).toHaveBeenCalledWith(expect.objectContaining({ type: 'a2ui.checkboxChange', componentId: 'cb1' }))
   })
@@ -152,7 +152,7 @@ describe('A2UICheckbox', () => {
 
 describe('A2UISlider', () => {
   it('renders with min/max/value', () => {
-    const w = mount(A2UISlider, { props: { def: { min: 10, max: 50, value: 25, label: 'Vol' }, componentId: 'sl1' } })
+    const w = mountWith(A2UISlider, { def: { min: 10, max: 50, value: 25, label: 'Vol' }, componentId: 'sl1', surfaceId: 's1' })
     const input = w.find('input')
     expect(input.attributes('min')).toBe('10')
     expect(input.attributes('max')).toBe('50')
@@ -160,7 +160,7 @@ describe('A2UISlider', () => {
   })
 
   it('sends sliderChange on input', async () => {
-    const w = mount(A2UISlider, { props: { def: { min: 0, max: 100, value: 50 }, componentId: 'sl1' } })
+    const w = mountWith(A2UISlider, { def: { min: 0, max: 100, value: 50 }, componentId: 'sl1', surfaceId: 's1' })
     await w.find('input').setValue('75')
     expect(wsClient.send).toHaveBeenCalledWith(expect.objectContaining({ type: 'a2ui.sliderChange', componentId: 'sl1' }))
   })

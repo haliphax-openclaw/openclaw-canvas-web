@@ -8,20 +8,26 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { wsClient } from '../services/ws-client'
+import { useFilterBind } from '../composables/useFilterBind'
 
 export default defineComponent({
   name: 'A2UISlider',
   props: {
     def: { type: Object, required: true },
     componentId: { type: String, required: true },
+    surfaceId: { type: String, default: '' },
   },
   setup(props) {
     const min = computed(() => (props.def as any).min ?? 0)
     const max = computed(() => (props.def as any).max ?? 100)
     const value = computed(() => (props.def as any).value ?? 0)
     const label = computed(() => (props.def as any).label ?? '')
+    const { updateFilter, maybeEmit } = useFilterBind(props as any, { op: 'gte', get nullValue() { return min.value } })
     const onInput = (e: Event) => {
-      wsClient.send({ type: 'a2ui.sliderChange', componentId: props.componentId, value: Number((e.target as HTMLInputElement).value) })
+      const val = Number((e.target as HTMLInputElement).value)
+      wsClient.send({ type: 'a2ui.sliderChange', componentId: props.componentId, value: val })
+      updateFilter(val)
+      maybeEmit(val)
     }
     return { min, max, value, label, onInput }
   },
