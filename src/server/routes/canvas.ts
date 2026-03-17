@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import { FileResolver } from '../services/file-resolver.js'
 
 import { DEEP_LINK_SCRIPT } from '../shared/deep-link-script.js'
+import { SNAPSHOT_SCRIPT } from '../shared/snapshot-script.js'
 
 export function canvasRoute(fileResolver: FileResolver): Router {
   const router = Router()
@@ -28,12 +29,13 @@ export function canvasRoute(fileResolver: FileResolver): Router {
     const content = await fs.readFile(resolved)
     if (contentType === 'text/html') {
       let html = content.toString()
+      const injected = DEEP_LINK_SCRIPT + SNAPSHOT_SCRIPT
       if (html.includes('</head>')) {
-        html = html.replace('</head>', DEEP_LINK_SCRIPT + '</head>')
+        html = html.replace('</head>', injected + '</head>')
       } else if (html.includes('</body>')) {
-        html = html.replace('</body>', DEEP_LINK_SCRIPT + '</body>')
+        html = html.replace('</body>', injected + '</body>')
       } else {
-        html += DEEP_LINK_SCRIPT
+        html += injected
       }
       res.type(contentType).send(html)
     } else {

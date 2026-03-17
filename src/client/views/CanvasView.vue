@@ -9,6 +9,7 @@
     <template v-else>
       <iframe
         v-if="externalUrl"
+        ref="iframe"
         :src="externalUrl"
         class="canvas-frame"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
@@ -139,6 +140,39 @@ export default defineComponent({
       try {
         const el = canvasRoot.value
         if (!el) throw new Error('No canvas root element')
+
+        // A2UI renders in the parent DOM — use direct capture
+        // Also fall through to direct capture if no iframe is available
+        const iframeEl = iframe.value
+        if (!hasA2UISurface.value && iframeEl?.contentWindow) {
+          // Try iframe-based capture via postMessage
+          try {
+            const image = await new Promise<string>((resolve, reject) => {
+              const timeoutId = setTimeout(() => {
+                window.removeEventListener('message', handler)
+                reject(new Error('Iframe snapshot timed out'))
+              }, 10000)
+
+              function handler(e: MessageEvent) {
+                if (!e.data || e.data.type !== 'canvas-snapshot-result') return
+                if (e.data.id && e.data.id !== d.id) return
+                window.removeEventListener('message', handler)
+                clearTimeout(timeoutId)
+                if (e.data.error) reject(new Error(e.data.error))
+                else resolve(e.data.image)
+              }
+
+              window.addEventListener('message', handler)
+              iframeEl.contentWindow!.postMessage({ type: 'canvas-snapshot-request', id: d.id }, '*')
+            })
+            wsClient.send({ type: 'canvas.snapshotResult', id: d.id, image })
+            return
+          } catch {
+            // Fall through to parent-level capture
+          }
+        }
+
+        // Fallback: capture the parent element directly
         const image = await domtoimage.toPng(el, { bgcolor: '#000000' })
         wsClient.send({ type: 'canvas.snapshotResult', id: d.id, image })
       } catch (err) {

@@ -41,7 +41,11 @@ src/
 │   │   ├── session-manager.ts
 │   │   ├── file-resolver.ts  # Path resolution with traversal guard
 │   │   ├── file-watcher.ts   # chokidar live reload
+│   │   ├── node-client.ts    # OpenClaw gateway node registration (Ed25519 auth, invoke handling)
 │   │   └── a2ui-manager.ts   # A2UI surface state
+│   ├── shared/
+│   │   ├── deep-link-script.ts  # Injected script for openclaw:// deep links
+│   │   └── snapshot-script.ts   # Injected script for canvas snapshots (inlines dom-to-image-more)
 │   ├── commands/
 │   │   ├── canvas.ts         # show, hide, navigate, navigateExternal, eval, snapshot
 │   │   └── a2ui.ts           # push (JSONL), reset
@@ -92,13 +96,11 @@ Connect via WebSocket to `/gateway`. Send JSON messages with a `command` field. 
 { "id": "5", "command": "canvas.eval", "js": "document.title" }
 ```
 
-**canvas.snapshot** — Capture the canvas as a base64 PNG using `dom-to-image-more` (SVG foreignObject). The SPA resolves CSS variables and renders the current view, then returns the image via WebSocket. 30s timeout.
+**canvas.snapshot** — Capture the canvas as a base64 PNG. A snapshot helper script (using `dom-to-image-more`) is injected into canvas HTML at serve time — the same pattern as deep link injection. When a snapshot is requested, the parent SPA sends a `postMessage` to the iframe, the injected script captures `document.body` from within the frame, and sends the image back via `postMessage`. This works for same-origin files and `data:` URLs. External cross-origin URLs cannot be captured. Falls back to parent-level DOM capture for A2UI surfaces. 30s timeout.
 ```json
 { "id": "6", "command": "canvas.snapshot" }
 → { "id": "6", "ok": true, "image": "data:image/png;base64,..." }
 ```
-
-> **Note:** Snapshot colors may differ slightly from the live browser view due to how `dom-to-image-more` handles CSS custom properties and external fonts. A `bgcolor` of `#000000` is applied to ensure the terminal theme background renders correctly.
 
 **a2ui.push** — Push A2UI JSONL payload.
 ```json
@@ -199,13 +201,13 @@ Place HTML/CSS/JS files in `$OPENCLAW_CANVAS_ROOT/<session>/`. The server serves
 The canvas web server provides feature parity with the macOS OpenClaw app's canvas panel, with a few browser-inherent limitations:
 
 - **`file://` URLs** — The macOS app supports `file://` URLs in canvas.navigate. Browsers block these for security reasons. Use `openclaw-canvas://` or `http(s)` URLs instead.
-- **Snapshot fidelity** — The macOS app captures snapshots natively via WKWebView. The web server uses `dom-to-image-more`, which cannot capture cross-origin iframe content (including `data:` URLs and external sites). Snapshots of locally-served canvas HTML work fine.
+- **Snapshot fidelity** — The macOS app captures snapshots natively via WKWebView. The web server injects `dom-to-image-more` into canvas HTML and captures from within the iframe via `postMessage`. This works for locally-served canvas files and `data:` URLs. External cross-origin URLs (http/https from other domains) cannot be captured since the snapshot script can't be injected into third-party content.
 
 ## Extra Features
 
 Features available in the web server that are not present in the macOS app:
 
-- **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link script injection.
+- **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link and snapshot script injection.
 - **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
 - **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
 - **Container hostname URLs** — `openclaw://<hostname>/agent?message=...` is accepted alongside the standard `openclaw://agent?message=...` form, supporting Docker network hostnames in the URL authority.

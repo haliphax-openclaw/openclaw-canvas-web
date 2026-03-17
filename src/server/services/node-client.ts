@@ -4,6 +4,7 @@ import path from 'node:path'
 import { WebSocket } from 'ws'
 import type { Gateway } from './gateway.js'
 import { injectDeepLinkIntoDataUrl } from '../shared/deep-link-script.js'
+import { injectSnapshotIntoDataUrl } from '../shared/snapshot-script.js'
 import type { A2UIManager } from './a2ui-manager.js'
 import type { SessionManager } from './session-manager.js'
 
@@ -229,7 +230,7 @@ export class NodeClient {
         const session = 'main'
         this.sessionManager.setActive(session)
         if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('data:'))
-          this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectDeepLinkIntoDataUrl(target) })
+          this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectSnapshotIntoDataUrl(injectDeepLinkIntoDataUrl(target)) })
         else
           this.gateway.broadcastSpa({ type: 'canvas.show', session })
         return { ok: true }
@@ -241,7 +242,7 @@ export class NodeClient {
       case 'canvas.navigate': {
         const url = params.url ?? params.target ?? ''
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:'))
-          this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectDeepLinkIntoDataUrl(url) })
+          this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectSnapshotIntoDataUrl(injectDeepLinkIntoDataUrl(url)) })
         else {
           let session = 'main'
           let path = url
