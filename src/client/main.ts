@@ -4,6 +4,7 @@ import { router } from './router'
 import { store } from './store'
 import { wsClient } from './services/ws-client'
 import A2UINode from './components/A2UINode.vue'
+import './styles/mobile.css'
 
 // Extract session from URL path so initial WS connect uses the correct session
 const sessionMatch = window.location.pathname.match(/\/session\/([^/]+)/)

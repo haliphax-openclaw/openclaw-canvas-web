@@ -1,0 +1,5 @@
+@media (max-width: 959px) {
+  .a2ui-row.a2ui-row {
+    flex-direction: column;
+  }
+}
