@@ -74,7 +74,10 @@ export default defineComponent({
 
     function reload() { cacheBust.value = Date.now() }
 
-    const onReload = () => reload()
+    const onReload = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
+      reload()
+    }
     const onShow = (d: Record<string, unknown>) => {
       store.commit('setVisible', true)
       externalUrl.value = null

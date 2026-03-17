@@ -108,8 +108,12 @@ gateway.onSpaConnect((ws) => {
     }
   }
 })
-const watchPaths = [CANVAS_ROOT, ...agentWorkspaceMap.values()]
-const fileWatcher = new FileWatcher(watchPaths, gateway)
+const sessionPathMap = new Map<string, string>()
+sessionPathMap.set('main', CANVAS_ROOT)
+for (const [agentId, canvasDir] of agentWorkspaceMap) {
+  sessionPathMap.set(agentId, canvasDir)
+}
+const fileWatcher = new FileWatcher(sessionPathMap, gateway)
 
 // Connect to OpenClaw gateway as a node
 let nodeClient: NodeClient | null = null
