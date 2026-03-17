@@ -13,6 +13,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
+import { useDataSource } from '../composables/useDataSource'
 
 export default defineComponent({
   name: 'A2UITable',
@@ -22,8 +23,23 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const headers = computed(() => (props.def as any).headers ?? [])
-    const rows = computed(() => (props.def as any).rows ?? [])
+    const { filteredRows, binding } = useDataSource(props as any)
+
+    const headers = computed(() => {
+      if (binding.value && filteredRows.value?.length) {
+        return binding.value.columns ?? Object.keys(filteredRows.value[0])
+      }
+      return (props.def as any).headers ?? []
+    })
+
+    const rows = computed(() => {
+      if (binding.value && filteredRows.value) {
+        const cols = headers.value
+        return filteredRows.value.map((r: any) => cols.map((c: string) => r[c]))
+      }
+      return (props.def as any).rows ?? []
+    })
+
     return { headers, rows }
   },
 })
