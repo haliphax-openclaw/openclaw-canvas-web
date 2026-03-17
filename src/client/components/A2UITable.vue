@@ -20,6 +20,10 @@ import { defineComponent, computed } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
 import { useSortable } from '../composables/useSortable'
 
+const builtinFormatters: Record<string, (v: unknown) => string> = {
+  boolean: (v) => v ? '✅' : '❌',
+}
+
 export default defineComponent({
   name: 'A2UITable',
   props: {
@@ -30,6 +34,7 @@ export default defineComponent({
   setup(props) {
     const { filteredRows, binding } = useDataSource(props as any)
     const sortable = computed(() => !!(props.def as any).sortable)
+    const formatters = computed(() => (props.def as any).formatters as Record<string, string> | undefined)
 
     const headers = computed(() => {
       if (binding.value) {
@@ -48,10 +53,16 @@ export default defineComponent({
 
     const { sortField, sortDirection, sortedRows, cycleSort } = useSortable(rawRows)
 
+    function formatCell(column: string, value: unknown): unknown {
+      const fmt = formatters.value?.[column]
+      if (fmt && builtinFormatters[fmt]) return builtinFormatters[fmt](value)
+      return value
+    }
+
     const displayRows = computed(() => {
       if (binding.value && filteredRows.value) {
         const cols = headers.value
-        return sortedRows.value.map((r: any) => cols.map((c: string) => r[c]))
+        return sortedRows.value.map((r: any) => cols.map((c: string) => formatCell(c, r[c])))
       }
       return (props.def as any).rows ?? []
     })
