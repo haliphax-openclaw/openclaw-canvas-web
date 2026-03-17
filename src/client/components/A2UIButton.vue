@@ -5,17 +5,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { wsClient } from '../services/ws-client'
-
-function parseDeepLink(url: string): Record<string, string> | null {
-  if (!url.startsWith('openclaw://')) return null
-  try {
-    const asHttp = url.replace('openclaw://', 'http://')
-    const parsed = new URL(asHttp)
-    const params: Record<string, string> = {}
-    parsed.searchParams.forEach((v, k) => { params[k] = v })
-    return params
-  } catch { return null }
-}
+import { parseOpenClawUrl } from '../utils/url-schemes'
 
 export default defineComponent({
   name: 'A2UIButton',
@@ -30,18 +20,25 @@ export default defineComponent({
       return t?.literalString ?? t ?? 'Button'
     })
     const href = computed(() => (props.def as any).href as string | undefined)
+    const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
+
     const onClick = () => {
       wsClient.send({ type: 'a2ui.buttonClick', componentId: props.componentId })
-      if (href.value) {
-        const params = parseDeepLink(href.value)
-        if (params) {
-          const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
-          fetch(`${base}/api/agent`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(params),
-          }).catch(() => {})
-        }
+      if (!href.value) return
+      const parsed = parseOpenClawUrl(href.value)
+      if (!parsed) return
+      if (parsed.type === 'agent') {
+        fetch(`${base}/api/agent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsed.params),
+        }).catch(() => {})
+      } else if (parsed.type === 'cron') {
+        fetch(`${base}/api/cron-trigger`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsed.params),
+        }).catch(() => {})
       }
     }
     return { label, onClick }

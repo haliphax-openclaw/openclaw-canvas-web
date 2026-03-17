@@ -10,6 +10,7 @@ import { canvasRoute } from './routes/canvas.js'
 import { scaffoldRoute } from './routes/scaffold.js'
 import { canvasConfigRoute } from './routes/canvas-config.js'
 import { agentProxyRoute } from './routes/agent-proxy.js'
+import { cronTriggerRoute } from './routes/cron-trigger.js'
 import { registerCanvasCommands } from './commands/canvas.js'
 import { registerA2UICommands } from './commands/a2ui.js'
 import { A2UIManager } from './services/a2ui-manager.js'
@@ -70,6 +71,7 @@ app.use(canvasConfigRoute())
 // Deep link proxy: openclaw://agent?... or openclaw://<host>/agent?... → POST /api/agent → gateway /hooks/agent
 if (HOOKS_TOKEN) {
   app.use(agentProxyRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
+  app.use(cronTriggerRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
 }
 
 app.get('/{*path}', (_req, res) => {
