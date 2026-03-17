@@ -128,34 +128,13 @@ A2UI surface state is persisted to a local SQLite database so it survives server
 
 ### `openclaw://` — Agent Deep Links
 
-Trigger agent runs from links inside canvas HTML. When a user clicks an `openclaw://` link in the canvas iframe, the server-injected script intercepts it, posts a message to the parent SPA, and the SPA proxies the request to the gateway via `POST /api/agent`.
+Trigger agent runs from links inside canvas HTML. When a user clicks an `openclaw://` link in the canvas iframe, a confirmation dialog appears, and on approval the request is proxied to the gateway to start an agent run.
 
-Two URL forms are supported:
-
-| Form | Example |
-|------|---------|
-| Direct | `openclaw://agent?message=hello` |
-| Container hostname | `openclaw://<hostname>/agent?message=hello` |
-
-The container hostname form allows URLs where the OpenClaw container name appears in the authority position (e.g. `openclaw://openclaw/agent?message=...`). Both forms are equivalent — the hostname is ignored and the request always routes to the local `/api/agent` proxy.
-
-**Supported query parameters:**
-
-| Param | Required | Description |
-|-------|----------|-------------|
-| `message` | Yes | Message to send to the agent |
-| `sessionKey` | No | Target session key |
-| `thinking` | No | Thinking mode |
-| `deliver` | No | Delivery target |
-| `to` | No | Recipient |
-| `channel` | No | Channel override |
-| `timeoutSeconds` | No | Request timeout |
-| `key` | No | Unattended mode — skips confirmation dialog |
-
-**Example in canvas HTML:**
 ```html
-<a href="openclaw://agent?message=run+my+task&sessionKey=main">Run Task</a>
+<a href="openclaw://agent?message=run+my+task">Run Task</a>
 ```
+
+See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parameters, confirmation dialog, script injection details, and security considerations.
 
 ### `openclaw-canvas://` — Canvas File References
 
