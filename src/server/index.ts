@@ -113,7 +113,8 @@ sessionPathMap.set('main', CANVAS_ROOT)
 for (const [agentId, canvasDir] of agentWorkspaceMap) {
   sessionPathMap.set(agentId, canvasDir)
 }
-const fileWatcher = new FileWatcher(sessionPathMap, gateway)
+const CANVAS_IGNORE_DIRS = (process.env.OPENCLAW_CANVAS_IGNORE_DIRS ?? 'tmp,jsonl').split(',').map(s => s.trim()).filter(Boolean)
+const fileWatcher = new FileWatcher(sessionPathMap, gateway, { ignoreDirs: CANVAS_IGNORE_DIRS })
 
 // Connect to OpenClaw gateway as a node
 let nodeClient: NodeClient | null = null

@@ -2,14 +2,22 @@ import { watch, type FSWatcher } from 'chokidar'
 import path from 'path'
 import type { Gateway } from './gateway.js'
 
+export interface FileWatcherOptions {
+  /** Subfolder names to ignore (e.g. ['tmp', 'jsonl']) */
+  ignoreDirs?: string[]
+}
+
 export class FileWatcher {
   private watcher: FSWatcher
 
   constructor(
     sessionPathMap: Map<string, string>,
     gateway: Gateway,
+    options: FileWatcherOptions = {},
   ) {
     const watchPaths = [...sessionPathMap.values()]
+    const ignoreDirSet = new Set(options.ignoreDirs ?? [])
+
     this.watcher = watch(watchPaths, {
       ignoreInitial: true,
       awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
@@ -31,7 +39,14 @@ export class FileWatcher {
       return null
     }
 
+    function isIgnored(filePath: string): boolean {
+      if (ignoreDirSet.size === 0) return false
+      const parts = filePath.split(path.sep)
+      return parts.some(part => ignoreDirSet.has(part))
+    }
+
     const notify = (filePath: string) => {
+      if (isIgnored(filePath)) return
       const session = resolveSession(filePath)
       if (session) {
         gateway.broadcastSpaSession(session, { type: 'reload', path: filePath })
