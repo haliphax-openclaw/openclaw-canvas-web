@@ -74,7 +74,8 @@ export default defineComponent({
 .a2ui-tab:hover { color: #ccc; background: #2a2a2a; }
 .a2ui-tab--active { color: #e0e0e0; background: #16213e; border-bottom: 2px solid #e0e0e0; }
 
-.a2ui-tabs-bar--left .a2ui-tab--active,
+.a2ui-tabs-bar--bottom .a2ui-tab--active { border-bottom: none; border-top: 2px solid #e0e0e0; }
+.a2ui-tabs-bar--left .a2ui-tab--active { border-bottom: none; border-right: 2px solid #e0e0e0; }
 .a2ui-tabs-bar--right .a2ui-tab--active { border-bottom: none; border-left: 2px solid #e0e0e0; }
 
 .a2ui-tabs-content { position: relative; }
