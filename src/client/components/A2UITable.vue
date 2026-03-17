@@ -26,8 +26,9 @@ export default defineComponent({
     const { filteredRows, binding } = useDataSource(props as any)
 
     const headers = computed(() => {
-      if (binding.value && filteredRows.value?.length) {
-        return binding.value.columns ?? Object.keys(filteredRows.value[0])
+      if (binding.value) {
+        if (binding.value.columns) return binding.value.columns
+        if (filteredRows.value?.length) return Object.keys(filteredRows.value[0])
       }
       return (props.def as any).headers ?? []
     })
