@@ -37,6 +37,12 @@ export function applyFilters(rows: Row[], filters: FieldFilter[]): Row[] {
   return rows.filter(row => active.every(f => matchFilter(row, f)))
 }
 
+export function formatCompact(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M'
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K'
+  return String(n)
+}
+
 export function computeAggregate(spec: AggregateSpec, rows: Row[]): number {
   if (spec.fn === 'count') return rows.length
   const vals = rows.map(r => Number(r[spec.field!])).filter(n => !isNaN(n))

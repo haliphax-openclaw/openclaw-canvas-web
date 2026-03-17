@@ -1,9 +1,10 @@
 <template>
-  <span class="a2ui-badge" :class="'a2ui-badge--' + variant">{{ text }}</span>
+  <span class="a2ui-badge" :class="'a2ui-badge--' + variant">{{ displayText }}</span>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
+import { useDataSource } from '../composables/useDataSource'
 
 const validVariants = ['success', 'warning', 'error', 'info']
 
@@ -15,12 +16,19 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const text = computed(() => (props.def as any).text ?? '')
+    const { aggregatedValue, mappedProps, binding } = useDataSource(props as any)
+    const displayText = computed(() => {
+      if (binding.value) {
+        if (mappedProps.value.text != null) return mappedProps.value.text
+        if (aggregatedValue.value != null) return aggregatedValue.value
+      }
+      return (props.def as any).text ?? ''
+    })
     const variant = computed(() => {
       const v = (props.def as any).variant
       return validVariants.includes(v) ? v : 'info'
     })
-    return { text, variant }
+    return { displayText, variant }
   },
 })
 </script>
