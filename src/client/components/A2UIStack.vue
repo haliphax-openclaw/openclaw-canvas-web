@@ -25,6 +25,6 @@ export default defineComponent({
 
 <style scoped>
 .a2ui-stack { position: relative; display: inline-block; }
-.a2ui-stack > * { position: absolute; }
+.a2ui-stack > * { position: absolute; top: 0; left: 0; }
 .a2ui-stack > :first-child { position: relative; display: block; }
 </style>
