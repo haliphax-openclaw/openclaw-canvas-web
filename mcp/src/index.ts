@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { z } from "zod";
 
 import { readFileSync } from "fs";
@@ -11,9 +11,9 @@ const NODE_NAME = process.env.CANVAS_NODE_NAME ?? "Canvas Web Server";
 const WORKSPACE = process.env.OPENCLAW_WORKSPACE ?? process.cwd();
 
 function invoke(command: string, params: Record<string, string>): string {
-  const cmd = `openclaw nodes invoke --node ${JSON.stringify(NODE_NAME)} --command ${JSON.stringify(command)} --params ${JSON.stringify(JSON.stringify(params))}`;
+  const args = ["nodes", "invoke", "--node", NODE_NAME, "--command", command, "--params", JSON.stringify(params)];
   try {
-    return execSync(cmd, { encoding: "utf-8", timeout: 30_000 }).trim();
+    return execFileSync("openclaw", args, { encoding: "utf-8", timeout: 30_000 }).trim();
   } catch (e: any) {
     return `Error: ${e.stderr || e.message}`;
   }
