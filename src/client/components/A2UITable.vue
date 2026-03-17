@@ -1,10 +1,12 @@
 <template>
   <table class="a2ui-table">
     <thead v-if="headers.length">
-      <tr><th v-for="(h, i) in headers" :key="i">{{ h }}</th></tr>
+      <tr>
+        <th v-for="(h, i) in headers" :key="i" :style="sortable ? 'cursor:pointer' : ''" @click="sortable && cycleSort(h)">{{ sortIndicator(h) }}{{ h }}</th>
+      </tr>
     </thead>
     <tbody>
-      <tr v-for="(row, ri) in rows" :key="ri">
+      <tr v-for="(row, ri) in displayRows" :key="ri">
         <td v-for="(cell, ci) in row" :key="ci">{{ cell }}</td>
       </tr>
     </tbody>
@@ -14,6 +16,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
+import { useSortable } from '../composables/useSortable'
 
 export default defineComponent({
   name: 'A2UITable',
@@ -24,6 +27,7 @@ export default defineComponent({
   },
   setup(props) {
     const { filteredRows, binding } = useDataSource(props as any)
+    const sortable = computed(() => !!(props.def as any).sortable)
 
     const headers = computed(() => {
       if (binding.value) {
@@ -33,15 +37,29 @@ export default defineComponent({
       return (props.def as any).headers ?? []
     })
 
-    const rows = computed(() => {
+    const rawRows = computed(() => {
+      if (binding.value && filteredRows.value) {
+        return filteredRows.value as Record<string, unknown>[]
+      }
+      return [] as Record<string, unknown>[]
+    })
+
+    const { sortField, sortDirection, sortedRows, cycleSort } = useSortable(rawRows)
+
+    const displayRows = computed(() => {
       if (binding.value && filteredRows.value) {
         const cols = headers.value
-        return filteredRows.value.map((r: any) => cols.map((c: string) => r[c]))
+        return sortedRows.value.map((r: any) => cols.map((c: string) => r[c]))
       }
       return (props.def as any).rows ?? []
     })
 
-    return { headers, rows }
+    function sortIndicator(header: string): string {
+      if (!sortable.value || sortField.value !== header) return ''
+      return sortDirection.value === 'asc' ? '⬆ ' : '⬇ '
+    }
+
+    return { headers, displayRows, sortable, cycleSort, sortIndicator }
   },
 })
 </script>

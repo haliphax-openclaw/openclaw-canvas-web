@@ -1,20 +1,30 @@
 <template>
-  <template v-if="resolvedItems.length">
-    <component
-      v-for="(item, idx) in resolvedItems"
-      :key="idx"
-      :is="item.component"
-      :def="item.def"
-      :component-id="componentId + ':' + idx"
-      :surface-id="surfaceId"
-    />
-  </template>
-  <span v-else-if="def.emptyText">{{ def.emptyText }}</span>
+  <div>
+    <div v-if="sortable" class="a2ui-repeat-sort">
+      <select v-model="sortDir" class="a2ui-repeat-sort-select">
+        <option value="">Unsorted</option>
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+      </select>
+    </div>
+    <template v-if="resolvedItems.length">
+      <component
+        v-for="(item, idx) in resolvedItems"
+        :key="idx"
+        :is="item.component"
+        :def="item.def"
+        :component-id="componentId + ':' + idx"
+        :surface-id="surfaceId"
+      />
+    </template>
+    <span v-else-if="def.emptyText">{{ def.emptyText }}</span>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, ref, watch } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
+import { useSortable, type SortDirection } from '../composables/useSortable'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'
@@ -60,9 +70,19 @@ export default defineComponent({
   },
   setup(props) {
     const { filteredRows } = useDataSource({ def: props.def as any, surfaceId: props.surfaceId })
+    const sortable = computed(() => !!(props.def as any).sortable)
+    const sortFieldName = computed(() => (props.def as any).sortField as string | undefined)
+
+    const rawRows = computed(() => (filteredRows.value ?? []) as Record<string, unknown>[])
+    const { sortedRows, setSort } = useSortable(rawRows)
+
+    const sortDir = ref<'' | 'asc' | 'desc'>('')
+    watch(sortDir, (v) => {
+      setSort(sortFieldName.value ?? null, (v || null) as SortDirection)
+    })
 
     const resolvedItems = computed(() => {
-      const rows = filteredRows.value ?? []
+      const rows = sortedRows.value
       const template = (props.def as any).template
       if (!template || !rows.length) return []
       const transforms = (props.def as any).transforms ?? {}
@@ -76,7 +96,12 @@ export default defineComponent({
       }))
     })
 
-    return { resolvedItems }
+    return { resolvedItems, sortable, sortDir }
   },
 })
 </script>
+
+<style scoped>
+.a2ui-repeat-sort { margin-bottom: 8px; }
+.a2ui-repeat-sort-select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
+</style>

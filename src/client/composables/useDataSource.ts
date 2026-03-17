@@ -43,8 +43,10 @@ export function useDataSource(props: { def: Record<string, unknown>; surfaceId: 
     const hasCompound = Object.keys(aggs).length > 0
     const result: Record<string, unknown> = {}
     for (const [prop, template] of Object.entries(binding.value.map)) {
-      if (hasCompound && template.includes('{{')) {
-        result[prop] = template.replace(/\{\{(\$\w+)\}\}/g, (_, k) => String(aggs[k] ?? ''))
+      if (template.includes('{{')) {
+        const allKeys: Record<string, string | number> = { ...aggs }
+        if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
+        result[prop] = template.replace(/\{\{(\$\w+)\}\}/g, (_, k) => String(allKeys[k] ?? ''))
       } else if (template === '$value') {
         result[prop] = aggregatedValue.value
       } else if (filteredRows.value && filteredRows.value.length > 0) {
