@@ -19,6 +19,7 @@ import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UISlider from './A2UISlider.vue'
 import A2UIBadge from './A2UIBadge.vue'
 import A2UIDivider from './A2UIDivider.vue'
+import A2UIRepeat from './A2UIRepeat.vue'
 
 const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Column: A2UIColumn,
@@ -35,6 +36,7 @@ const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Slider: A2UISlider,
   Badge: A2UIBadge,
   Divider: A2UIDivider,
+  Repeat: A2UIRepeat,
 }
 
 export default defineComponent({
