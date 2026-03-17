@@ -76,7 +76,8 @@ export default defineComponent({
 .a2ui-tabs-bar--left .a2ui-tab--active { border-right-color: #e0e0e0; }
 .a2ui-tabs-bar--right .a2ui-tab--active { border-left-color: #e0e0e0; }
 
-.a2ui-tabs-content { position: relative; }
+.a2ui-tabs-content { position: relative; display: grid; }
 .a2ui-tabs-content--fixed { height: var(--tabs-content-height); overflow: auto; }
-.a2ui-tabs-panel--hidden { visibility: hidden; position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
+.a2ui-tabs-panel { grid-area: 1 / 1; }
+.a2ui-tabs-panel--hidden { visibility: hidden; pointer-events: none; }
 </style>
