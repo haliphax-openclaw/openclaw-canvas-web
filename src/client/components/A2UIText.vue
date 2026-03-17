@@ -1,5 +1,5 @@
 <template>
-  <component :is="tag">{{ displayText }}</component>
+  <component :is="tag" :class="{ 'a2ui-text--stroked': strokeWidth }" :style="strokeWidth ? `--text-stroke-width: ${strokeWidth}` : undefined">{{ displayText }}</component>
 </template>
 
 <script lang="ts">
@@ -18,6 +18,7 @@ export default defineComponent({
   setup(props) {
     const { aggregatedValue, mappedProps, binding } = useDataSource(props as any)
     const tag = computed(() => hintMap[(props.def as any).usageHint] ?? 'p')
+    const strokeWidth = computed(() => (props.def as any).strokeWidth ?? null)
     const displayText = computed(() => {
       if (binding.value) {
         if (mappedProps.value.text != null) return mappedProps.value.text
@@ -26,7 +27,15 @@ export default defineComponent({
       const t = (props.def as any).text
       return t?.literalString ?? t ?? ''
     })
-    return { tag, displayText }
+    return { tag, displayText, strokeWidth }
   },
 })
 </script>
+
+<style scoped>
+.a2ui-text--stroked {
+  -webkit-text-stroke: var(--text-stroke-width) black;
+  text-stroke: var(--text-stroke-width) black;
+  paint-order: stroke fill;
+}
+</style>
