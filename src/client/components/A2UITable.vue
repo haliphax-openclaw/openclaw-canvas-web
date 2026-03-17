@@ -1,5 +1,6 @@
 <template>
-  <table class="a2ui-table">
+  <div class="a2ui-table-wrapper">
+    <table class="a2ui-table">
     <thead v-if="headers.length">
       <tr>
         <th v-for="(h, i) in headers" :key="i" :style="sortable ? 'cursor:pointer' : ''" @click="sortable && cycleSort(h)">{{ sortIndicator(h) }}{{ h }}</th>
@@ -11,6 +12,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 </template>
 
 <script lang="ts">
@@ -66,6 +68,8 @@ export default defineComponent({
 
 <style scoped>
 .a2ui-table { border-collapse: collapse; width: 100%; color: #e0e0e0; }
+.a2ui-table-wrapper { overflow-x: auto; width: 100%; }
+.a2ui-table-wrapper .a2ui-table { width: max-content; min-width: 100%; }
 .a2ui-table th, .a2ui-table td { border: 1px solid #444; padding: 6px 10px; text-align: left; }
 .a2ui-table th { background: #16213e; }
 .a2ui-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
