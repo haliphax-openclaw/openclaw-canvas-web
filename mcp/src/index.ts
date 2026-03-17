@@ -5,8 +5,10 @@ import { execSync } from "child_process";
 import { z } from "zod";
 
 import { readFileSync } from "fs";
+import { resolve } from "path";
 
 const NODE_NAME = process.env.CANVAS_NODE_NAME ?? "Canvas Web Server";
+const WORKSPACE = process.env.OPENCLAW_WORKSPACE ?? process.cwd();
 
 function invoke(command: string, params: Record<string, string>): string {
   const cmd = `openclaw nodes invoke --node ${JSON.stringify(NODE_NAME)} --command ${JSON.stringify(command)} --params ${JSON.stringify(JSON.stringify(params))}`;
@@ -24,7 +26,8 @@ const S = z.string().optional().describe("Session ID (defaults to agent ID or 'm
 server.tool("canvas_push", "Push A2UI JSONL content to the canvas", { session: S, payload: z.string().optional().describe("Raw JSONL content"), file: z.string().optional().describe("Path to a JSONL file to push (avoids shell escaping issues)") }, ({ session, payload, file }) => {
   let content: string;
   if (file) {
-    try { content = readFileSync(file, "utf-8"); } catch (e: any) { return { content: [{ type: "text" as const, text: `Error reading file: ${e.message}` }] }; }
+    const resolvedPath = resolve(WORKSPACE, file);
+    try { content = readFileSync(resolvedPath, "utf-8"); } catch (e: any) { return { content: [{ type: "text" as const, text: `Error reading file: ${e.message}` }] }; }
   } else if (payload) {
     content = payload;
   } else {
