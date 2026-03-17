@@ -8,6 +8,5 @@
   .a2ui-tabs-content,
   .a2ui-tabs-panel {
     min-width: 0;
-    overflow-x: auto;
   }
 }
