@@ -36,20 +36,6 @@ import A2UIRenderer from '../components/A2UIRenderer.vue'
 import DeepLinkConfirm from '../components/DeepLinkConfirm.vue'
 import domtoimage from 'dom-to-image-more'
 
-const GEOMETRY_KEY = 'openclaw-canvas-geometry'
-
-function loadGeometry(): { width: string; height: string } {
-  try {
-    const raw = localStorage.getItem(GEOMETRY_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch { /* ignore */ }
-  return { width: '100%', height: '100%' }
-}
-
-function saveGeometry(g: { width: string; height: string }) {
-  try { localStorage.setItem(GEOMETRY_KEY, JSON.stringify(g)) } catch { /* ignore */ }
-}
-
 export default defineComponent({
   name: 'CanvasView',
   components: { A2UIRenderer, DeepLinkConfirm },
@@ -64,9 +50,6 @@ export default defineComponent({
     const visible = computed(() => store.state.panel.visible)
     const activeSurfaceId = ref('main')
     const externalUrl = ref<string | null>(null)
-
-    const geometry = reactive(loadGeometry())
-    const panelStyle = computed(() => ({ width: geometry.width, height: geometry.height }))
 
     const hasA2UISurface = computed(() => {
       if (subpath.value) return false // static file URL takes priority
@@ -182,11 +165,6 @@ export default defineComponent({
         wsClient.send({ type: 'canvas.snapshotResult', id: d.id, error: String(err) })
       }
     }
-    const onGeometry = (d: Record<string, unknown>) => {
-      if (d.width) geometry.width = d.width as string
-      if (d.height) geometry.height = d.height as string
-      saveGeometry(geometry)
-    }
 
     const onSurfaceUpdate = (d: Record<string, unknown>) => {
       if (d.session && d.session !== sessionId.value) return
@@ -232,7 +210,6 @@ export default defineComponent({
       ['canvas.navigateExternal', onNavigateExternal],
       ['canvas.eval', onEval],
       ['canvas.snapshot', onSnapshot],
-      ['canvas.geometry', onGeometry],
       ['a2ui.surfaceUpdate', onSurfaceUpdate],
       ['a2ui.beginRendering', onBeginRendering],
       ['a2ui.dataModelUpdate', onDataModelUpdate],
