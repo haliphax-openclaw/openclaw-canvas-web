@@ -9,7 +9,11 @@ const hintMap: Record<string, string> = { h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4'
 
 export default defineComponent({
   name: 'A2UIText',
-  props: { def: { type: Object, required: true } },
+  props: {
+    def: { type: Object, required: true },
+    surfaceId: { type: String, required: true },
+    componentId: { type: String, required: true },
+  },
   setup(props) {
     const tag = computed(() => hintMap[(props.def as any).usageHint] ?? 'p')
     const text = computed(() => {

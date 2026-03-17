@@ -12,7 +12,11 @@ import { defineComponent, computed } from 'vue'
 
 export default defineComponent({
   name: 'A2UIProgressBar',
-  props: { def: { type: Object, required: true } },
+  props: {
+    def: { type: Object, required: true },
+    surfaceId: { type: String, required: true },
+    componentId: { type: String, required: true },
+  },
   setup(props) {
     const clampedValue = computed(() => Math.min(100, Math.max(0, Number((props.def as any).value) || 0)))
     const label = computed(() => (props.def as any).label ?? '')

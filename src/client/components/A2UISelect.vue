@@ -12,6 +12,7 @@ export default defineComponent({
   name: 'A2UISelect',
   props: {
     def: { type: Object, required: true },
+    surfaceId: { type: String, required: true },
     componentId: { type: String, required: true },
   },
   setup(props) {

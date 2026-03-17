@@ -16,7 +16,11 @@ import { defineComponent, computed } from 'vue'
 
 export default defineComponent({
   name: 'A2UITable',
-  props: { def: { type: Object, required: true } },
+  props: {
+    def: { type: Object, required: true },
+    surfaceId: { type: String, required: true },
+    componentId: { type: String, required: true },
+  },
   setup(props) {
     const headers = computed(() => (props.def as any).headers ?? [])
     const rows = computed(() => (props.def as any).rows ?? [])

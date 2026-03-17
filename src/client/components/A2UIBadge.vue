@@ -9,7 +9,11 @@ const validVariants = ['success', 'warning', 'error', 'info']
 
 export default defineComponent({
   name: 'A2UIBadge',
-  props: { def: { type: Object, required: true } },
+  props: {
+    def: { type: Object, required: true },
+    surfaceId: { type: String, required: true },
+    componentId: { type: String, required: true },
+  },
   setup(props) {
     const text = computed(() => (props.def as any).text ?? '')
     const variant = computed(() => {
