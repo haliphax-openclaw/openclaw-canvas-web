@@ -21,6 +21,7 @@ import A2UIBadge from './A2UIBadge.vue'
 import A2UIDivider from './A2UIDivider.vue'
 import A2UIRepeat from './A2UIRepeat.vue'
 import A2UIAccordion from './A2UIAccordion.vue'
+import A2UITabs from './A2UITabs.vue'
 
 const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Column: A2UIColumn,
@@ -40,6 +41,7 @@ const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Divider: A2UIDivider,
   Repeat: A2UIRepeat,
   Accordion: A2UIAccordion,
+  Tabs: A2UITabs,
 }
 
 export default defineComponent({

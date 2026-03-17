@@ -60,7 +60,7 @@ src/
 │   ├── views/
 │   │   ├── CanvasView.vue    # Main canvas — iframe, A2UI, external URLs
 │   │   └── ScaffoldView.vue  # Placeholder when no index.html
-│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer, Badge, Checkbox, Divider, ProgressBar, Select, Slider, Table, Accordion)
+│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer, Badge, Checkbox, Divider, ProgressBar, Select, Slider, Table, Accordion, Tabs)
 │   ├── store/                # Vuex (session, panel visibility, a2ui surfaces)
 │   └── services/
 │       ├── ws-client.ts      # Browser WebSocket client
@@ -255,6 +255,23 @@ The Accordion is a container component with collapsible panels. Each panel has a
 | `expanded` | `number[]` | Optional array of panel indices to start expanded (default: all collapsed) |
 
 Panel headers display ▶ when collapsed and ▼ when expanded. In `single` mode, opening a panel automatically closes any other open panel.
+
+## A2UI Tabs Component
+
+The Tabs component is a container that organizes child components into switchable tabbed panels.
+
+```json
+{"Tabs": {"tabs": [{"label": "Overview", "child": "overview-content"}, {"label": "Details", "child": "details-content"}], "active": 0, "position": "top", "height": "auto"}}
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `tabs` | `{ label: string, child: string }[]` | Tab definitions — `label` is the tab header text, `child` is the component ID to render |
+| `active` | `number` | 0-based index of the initially active tab (default: `0`) |
+| `position` | `string` | Tab bar placement: `"top"` (default), `"bottom"`, `"left"`, `"right"`, or `"hidden"` |
+| `height` | `string` | Content panel height. `"auto"` (default) sizes to the tallest child; a CSS value (e.g. `"300px"`, `"50vh"`) sets a fixed height with `overflow: auto` |
+
+When `height` is `"auto"`, all tab panels remain in the DOM (inactive panels use `visibility: hidden; position: absolute`) so the content area grows to accommodate the tallest child. When `position` is `"hidden"`, the tab bar is not rendered — useful when tab switching is driven programmatically.
 
 ## License
 
