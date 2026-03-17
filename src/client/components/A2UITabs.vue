@@ -51,7 +51,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-tabs { display: flex; flex-direction: column; }
+.a2ui-tabs { display: flex; flex-direction: column; gap: 12px; }
 .a2ui-tabs--left { flex-direction: row; }
 .a2ui-tabs--right { flex-direction: row-reverse; }
 .a2ui-tabs--bottom { flex-direction: column-reverse; }
