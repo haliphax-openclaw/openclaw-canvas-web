@@ -233,6 +233,69 @@ Data-driven iteration component. Renders a template component for each row in a 
 
 Repeated items are rendered with a 12px vertical gap between them.
 
+#### Template syntax
+
+Templates use `{{field}}` placeholders that are resolved against each row:
+
+```json
+{
+  "template": {
+    "ProgressBar": {
+      "label": "{{name}}: {{score}} pts",
+      "value": "{{score | percentOfMax}}"
+    }
+  }
+}
+```
+
+Placeholders are resolved recursively through all string values in the template definition, including nested objects and arrays.
+
+#### Transforms
+
+Transforms modify field values using the `{{field | transformName}}` pipe syntax.
+
+Built-in transforms:
+
+| Transform | Description |
+|-----------|-------------|
+| `percentOfMax` | Converts the value to a percentage of the maximum value for that field across all rows |
+
+Transforms are defined in the `transforms` property:
+
+```json
+{
+  "Repeat": {
+    "dataSource": { "source": "scores" },
+    "transforms": {
+      "percentOfMax": { "fn": "percentOfMax" }
+    },
+    "template": {
+      "ProgressBar": {
+        "label": "{{name}}",
+        "value": "{{score | percentOfMax}}"
+      }
+    }
+  }
+}
+```
+
+The `percentOfMax` transform optionally accepts a `field` override. If omitted, it uses the field from the placeholder.
+
+#### Empty state
+
+When the filtered data source has no rows, the `emptyText` string is displayed instead of the template:
+
+```json
+{ "Repeat": { "dataSource": { "source": "results" }, "template": { "Text": { "text": "{{name}}" } }, "emptyText": "No results match your filters" } }
+```
+
+#### Supported template components
+
+The Repeat component can render these component types as templates:
+- `ProgressBar`
+- `Text`
+- `Badge`
+
 ---
 
 ## Input Components
