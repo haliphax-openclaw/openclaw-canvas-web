@@ -76,6 +76,7 @@ export default defineComponent({
 
     const onReload = (d: Record<string, unknown>) => {
       if (d.session && d.session !== sessionId.value) return
+      if (hasA2UISurface.value) return // A2UI surfaces update via WebSocket, not file changes
       reload()
     }
     const onShow = (d: Record<string, unknown>) => {
