@@ -119,6 +119,7 @@ Text display component. Renders as `<p>` by default, or as heading/span based on
 |------|------|-------------|
 | `text` | `string \| { literalString: string }` | Static text content |
 | `usageHint` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
+| `strokeWidth` | `string` | CSS text stroke width (e.g. `"1px"`). Renders a black outline for readability over images. |
 | `dataSource` | `DataSourceBinding` | Bind to a data source |
 
 Display priority: `mappedProps.text` > `aggregatedValue` > static `text`.
