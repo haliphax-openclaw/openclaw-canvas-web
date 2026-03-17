@@ -214,6 +214,7 @@ The canvas web server provides feature parity with the macOS OpenClaw app's canv
 
 - **`file://` URLs** — The macOS app supports `file://` URLs in canvas.navigate. Browsers block these for security reasons. Use `openclaw-canvas://` or `http(s)` URLs instead.
 - **Snapshot fidelity** — The macOS app captures snapshots natively via WKWebView. The web server injects `dom-to-image-more` into canvas HTML and captures from within the iframe via `postMessage`. This works for locally-served canvas files and `data:` URLs. External cross-origin URLs (http/https from other domains) cannot be captured since the snapshot script can't be injected into third-party content.
+- **Panel geometry** — The macOS app's canvas is a floating, resizable panel sharing screen space with the menu bar, webchat, and voice overlay. It supports `canvas.geometry` commands and persists size/position per session. The web server omits this — the canvas owns the full browser tab, so viewport sizing is handled by the browser itself.
 
 ## Extra Features
 
