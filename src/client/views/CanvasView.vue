@@ -70,6 +70,7 @@ export default defineComponent({
     const panelStyle = computed(() => ({ width: geometry.width, height: geometry.height }))
 
     const hasA2UISurface = computed(() => {
+      if (subpath.value) return false // static file URL takes priority
       const surface = store.state.a2ui?.surfaces?.[activeSurfaceId.value]
       return surface?.root != null
     })
