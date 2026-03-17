@@ -60,7 +60,7 @@ src/
 │   ├── views/
 │   │   ├── CanvasView.vue    # Main canvas — iframe, A2UI, external URLs
 │   │   └── ScaffoldView.vue  # Placeholder when no index.html
-│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer)
+│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer, Badge, Checkbox, Divider, ProgressBar, Select, Slider, Table)
 │   ├── store/                # Vuex (session, panel visibility, a2ui surfaces)
 │   └── services/
 │       ├── ws-client.ts      # Browser WebSocket client
