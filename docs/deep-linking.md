@@ -30,7 +30,7 @@ openclaw://my-container/agent?message=Run+the+tests
 | `message` | Yes | The message to send to the agent |
 | `agentId` | No | Target agent ID (uses default if omitted) |
 | `model` | No | Model override (e.g. `claude-sonnet-4-20250514`) |
-| `sessionKey` | No | Target session key (auto-resolved if omitted) |
+| `sessionKey` | No | Target session key (auto-resolved if omitted). Requires `hooks.allowRequestSessionKey=true` in gateway config. |
 | `thinking` | No | Thinking mode: `on`, `off`, or `stream` |
 | `deliver` | No | Delivery mode for the response |
 | `to` | No | Delivery target |
@@ -111,6 +111,42 @@ The `/api/canvas-config` endpoint provides client-side configuration:
 - `agents` — List of available agent IDs for the confirmation dialog's agent selector
 - `allowedAgentIds` — Agent IDs permitted for deep link execution
 - `skipConfirmation` — Whether to bypass the confirmation dialog
+
+## A2UI Button Deep Links
+
+A2UI Button components support deep links via the `href` prop. Unlike iframe-based deep links, A2UI buttons POST directly to the `/api/agent` endpoint without showing a confirmation dialog. This is appropriate for trusted A2UI content where the agent controls the button labels and URLs.
+
+```json
+{"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+data&agentId=developer"}}
+```
+
+## Gateway Configuration
+
+Deep linking requires the OpenClaw gateway's hooks system to be enabled and configured. The following settings in `openclaw.json` control deep link behavior:
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `hooks.enabled` | `boolean` | Must be `true` for the hooks endpoint to accept requests |
+| `hooks.token` | `string` | Bearer token used by the canvas server to authenticate with the gateway's hooks endpoint. Must match the `HOOKS_TOKEN` environment variable passed to the canvas server |
+| `hooks.allowedAgentIds` | `string[]` | Restricts which agent IDs can be targeted by deep links. Omit to allow all agents |
+| `hooks.allowRequestSessionKey` | `boolean` | Must be `true` if deep links include a `sessionKey` parameter for session-targeted routing. Default: `false` |
+| `hooks.allowedSessionKeyPrefixes` | `string[]` | Optional allowlist of session key prefixes accepted when `allowRequestSessionKey` is enabled. Use narrow prefixes to prevent arbitrary session injection |
+
+Example configuration:
+
+```json
+{
+  "hooks": {
+    "enabled": true,
+    "token": "your-hooks-token",
+    "allowedAgentIds": ["developer", "main"],
+    "allowRequestSessionKey": true,
+    "allowedSessionKeyPrefixes": ["agent:developer:"]
+  }
+}
+```
+
+Without `hooks.enabled` and `hooks.token`, the canvas server's `/api/agent` proxy will receive a connection error or authentication failure from the gateway.
 
 ## Security Considerations
 
