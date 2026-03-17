@@ -14,6 +14,13 @@ export function useFilterBind(props: { def: Record<string, unknown>; componentId
   const store = useStore()
   const bind = computed(() => (props.def as any).bind as FilterBind | undefined)
 
+  function isNullValue(value: unknown, nullValue: unknown): boolean {
+    if (Array.isArray(value) && Array.isArray(nullValue)) {
+      return value.length === nullValue.length && value.every((v, i) => v === nullValue[i])
+    }
+    return value === nullValue
+  }
+
   function updateFilter(value: unknown) {
     if (!bind.value) return
     const sources = Array.isArray(bind.value.source) ? bind.value.source : [bind.value.source]
@@ -26,7 +33,7 @@ export function useFilterBind(props: { def: Record<string, unknown>; componentId
         op: bind.value.op ?? 'eq',
         value,
         nullValue,
-        isNull: value === nullValue,
+        isNull: isNullValue(value, nullValue),
         componentId: props.componentId,
       })
     }
