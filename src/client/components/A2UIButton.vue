@@ -35,7 +35,8 @@ export default defineComponent({
       if (href.value) {
         const params = parseDeepLink(href.value)
         if (params) {
-          fetch('/api/agent', {
+          const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
+          fetch(`${base}/api/agent`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(params),

@@ -69,7 +69,7 @@ app.use(canvasConfigRoute())
 
 // Deep link proxy: openclaw://agent?... or openclaw://<host>/agent?... → POST /api/agent → gateway /hooks/agent
 if (HOOKS_TOKEN) {
-  app.use(agentProxyRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
+  app.use(BASE_PATH, agentProxyRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
 }
 
 app.get('/{*path}', (_req, res) => {
