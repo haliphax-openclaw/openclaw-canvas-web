@@ -24,6 +24,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-stack { position: relative; }
+.a2ui-stack { position: relative; display: inline-block; }
 .a2ui-stack > * { position: absolute; inset: 0; }
+.a2ui-stack > :first-child { position: relative; display: block; }
 </style>
