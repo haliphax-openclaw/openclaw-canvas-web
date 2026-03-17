@@ -212,6 +212,8 @@ The following components support reactive data binding. See [components.md](comp
 **Filter inputs** (drive filtering via `bind`):
 - Select
 - MultiSelect
+- Checkbox (boolean fields, `op: "eq"`)
+- Slider (numeric fields, `op: "gte"`)
 
 **Display binding** (read from data sources via `dataSource`):
 - Table

@@ -315,16 +315,17 @@ Clickable button. Sends an `a2ui.buttonClick` WebSocket message with the compone
 
 ### Checkbox
 
-Toggle checkbox with label. Sends an `a2ui.checkboxChange` WebSocket message with the component ID and checked state on change.
+Toggle checkbox with label. Sends an `a2ui.checkboxChange` WebSocket message with the component ID and checked state on change. Supports optional filter binding.
 
 ```json
-{"Checkbox": {"label": "Enable notifications", "checked": true}}
+{"Checkbox": {"label": "Show remote only", "checked": false, "bind": {"source": "members", "field": "remote", "op": "eq", "nullValue": false}}}
 ```
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `label` | `string` | Label text displayed next to the checkbox |
 | `checked` | `boolean` | Initial checked state (default: `false`) |
+| `bind` | `FilterBind` | Optional filter binding (sends `true`/`false`; best with boolean fields) |
 
 ### Select
 
@@ -368,10 +369,10 @@ The `bind.source` prop accepts an array to filter multiple data sources simultan
 
 ### Slider
 
-Range slider input. Sends an `a2ui.sliderChange` WebSocket message with the component ID and value on change.
+Range slider input. Sends an `a2ui.sliderChange` WebSocket message with the component ID and value on change. Supports optional filter binding.
 
 ```json
-{"Slider": {"label": "Volume", "min": 0, "max": 100, "value": 50}}
+{"Slider": {"label": "Min Priority", "min": 1, "max": 5, "value": 1, "bind": {"source": "tasks", "field": "priority", "op": "gte", "nullValue": 1}}}
 ```
 
 | Prop | Type | Description |
@@ -380,6 +381,7 @@ Range slider input. Sends an `a2ui.sliderChange` WebSocket message with the comp
 | `min` | `number` | Minimum value (default: `0`) |
 | `max` | `number` | Maximum value (default: `100`) |
 | `value` | `number` | Current value (default: `0`) |
+| `bind` | `FilterBind` | Optional filter binding (typically with `op: "gte"`; `nullValue` defaults to `min`) |
 
 ---
 
