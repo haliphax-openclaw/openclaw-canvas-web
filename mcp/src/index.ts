@@ -6,9 +6,19 @@ import { z } from "zod";
 
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { homedir } from "os";
 
 const NODE_NAME = process.env.CANVAS_NODE_NAME ?? "Canvas Web Server";
-const WORKSPACE = process.env.OPENCLAW_WORKSPACE ?? process.cwd();
+const HOME = homedir();
+const ALLOWED_ROOTS = [
+  resolve(HOME, ".openclaw", "workspaces"),
+  resolve(HOME, ".openclaw", "workspace"),
+];
+
+function isWithinWorkspace(filePath: string): boolean {
+  const resolved = resolve(filePath);
+  return ALLOWED_ROOTS.some((root) => resolved.startsWith(root + "/"));
+}
 
 function invoke(command: string, params: Record<string, string>): string {
   const args = ["nodes", "invoke", "--node", NODE_NAME, "--command", command, "--params", JSON.stringify(params)];
@@ -26,7 +36,10 @@ const S = z.string().optional().describe("Session ID (defaults to agent ID or 'm
 server.tool("canvas_push", "Push A2UI JSONL content to the canvas", { session: S, payload: z.string().optional().describe("Raw JSONL content"), file: z.string().optional().describe("Path to a JSONL file to push (avoids shell escaping issues)") }, ({ session, payload, file }) => {
   let content: string;
   if (file) {
-    const resolvedPath = resolve(WORKSPACE, file);
+    const resolvedPath = resolve(file);
+    if (!isWithinWorkspace(resolvedPath)) {
+      return { content: [{ type: "text" as const, text: `Error: file path must be within an agent workspace directory` }] };
+    }
     try { content = readFileSync(resolvedPath, "utf-8"); } catch (e: any) { return { content: [{ type: "text" as const, text: `Error reading file: ${e.message}` }] }; }
   } else if (payload) {
     content = payload;
