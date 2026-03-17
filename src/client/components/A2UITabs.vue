@@ -58,7 +58,7 @@ export default defineComponent({
 
 .a2ui-tabs-bar { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid #444; }
 .a2ui-tabs-bar--left,
-.a2ui-tabs-bar--right { flex-direction: column; flex-wrap: nowrap; border-bottom: none; }
+.a2ui-tabs-bar--right { flex-direction: column; flex-wrap: nowrap; border-bottom: none; width: fit-content; max-width: 33%; flex-shrink: 0; }
 .a2ui-tabs-bar--left { border-right: 1px solid #444; }
 .a2ui-tabs-bar--right { border-left: 1px solid #444; }
 .a2ui-tabs-bar--bottom { border-bottom: none; border-top: 1px solid #444; }
