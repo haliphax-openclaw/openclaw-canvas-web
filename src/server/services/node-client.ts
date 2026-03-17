@@ -302,6 +302,11 @@ export class NodeClient {
             const dm = parsed.dataModelUpdate
             this.a2uiManager.updateDataModel(dm.surfaceId, dm.data ?? {})
             this.gateway.broadcastSpa({ type: 'a2ui.dataModelUpdate', surfaceId: dm.surfaceId, data: dm.data ?? {} })
+          } else if (parsed.dataSourcePush) {
+            const dp = parsed.dataSourcePush
+            const data = { $sources: dp.sources ?? {} }
+            this.a2uiManager.updateDataModel(dp.surfaceId, data)
+            this.gateway.broadcastSpa({ type: 'a2ui.dataModelUpdate', surfaceId: dp.surfaceId, data })
           } else if (parsed.deleteSurface) {
             const ds = parsed.deleteSurface
             this.a2uiManager.deleteSurface(ds.surfaceId)

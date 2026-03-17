@@ -43,6 +43,15 @@ export function registerA2UICommands(gateway: Gateway, a2uiManager: A2UIManager)
         }
         a2uiManager.updateDataModel(dm.surfaceId, dm.data ?? {})
         gateway.broadcastSpa({ type: 'a2ui.dataModelUpdate', surfaceId: dm.surfaceId, data: dm.data ?? {} })
+      } else if (parsed.dataSourcePush) {
+        const dp = parsed.dataSourcePush as { surfaceId: string; sources: Record<string, unknown> }
+        if (!dp.surfaceId) {
+          console.warn('[a2ui] Invalid dataSourcePush — missing surfaceId')
+          continue
+        }
+        const data = { $sources: dp.sources ?? {} }
+        a2uiManager.updateDataModel(dp.surfaceId, data)
+        gateway.broadcastSpa({ type: 'a2ui.dataModelUpdate', surfaceId: dp.surfaceId, data })
       } else if (parsed.deleteSurface) {
         const ds = parsed.deleteSurface as { surfaceId: string }
         if (!ds.surfaceId) {
