@@ -282,6 +282,8 @@ The Repeat component can render these component types as templates:
 
 ## Components Reference
 
+> For the full component reference (all props, layout components, containers, inputs), see [components.md](components.md). This section covers data binding specifics.
+
 ### Select
 
 Single-selection dropdown. Sends `a2ui.selectChange` with `{ componentId, value }` on change.

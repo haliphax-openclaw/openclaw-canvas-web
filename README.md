@@ -238,40 +238,7 @@ Key capabilities:
 - **Display Binding** — Table, Badge, and Text components accept a `dataSource` prop for dynamic content with built-in aggregates (`count`, `sum`, `avg`, `min`, `max`) and compact number formatting.
 - **Repeat** — The Repeat component iterates over filtered rows, rendering a template per row with `{{field}}` placeholders and transforms like `percentOfMax`.
 
-See [docs/a2ui-reactive.md](docs/a2ui-reactive.md) for the full guide with schemas, examples, and component reference.
-
-## A2UI Accordion Component
-
-The Accordion is a container component with collapsible panels. Each panel has a header that toggles visibility of a child component.
-
-```json
-{"Accordion": {"panels": [{"title": "Section 1", "child": "section-1-content"}, {"title": "Section 2", "child": "section-2-content"}], "mode": "single", "expanded": [0]}}
-```
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `panels` | `{ title: string, child: string }[]` | Panel definitions — `title` is the header text, `child` is the component ID to render |
-| `mode` | `string` | `"single"` (default) — one panel open at a time; `"multi"` — multiple panels can be open simultaneously |
-| `expanded` | `number[]` | Optional array of panel indices to start expanded (default: all collapsed) |
-
-Panel headers display ▶ when collapsed and ▼ when expanded. In `single` mode, opening a panel automatically closes any other open panel.
-
-## A2UI Tabs Component
-
-The Tabs component is a container that organizes child components into switchable tabbed panels.
-
-```json
-{"Tabs": {"tabs": [{"label": "Overview", "child": "overview-content"}, {"label": "Details", "child": "details-content"}], "active": 0, "position": "top", "height": "auto"}}
-```
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `tabs` | `{ label: string, child: string }[]` | Tab definitions — `label` is the tab header text, `child` is the component ID to render |
-| `active` | `number` | 0-based index of the initially active tab (default: `0`) |
-| `position` | `string` | Tab bar placement: `"top"` (default), `"bottom"`, `"left"`, `"right"`, or `"hidden"` |
-| `height` | `string` | Content panel height. `"auto"` (default) sizes to the tallest child; a CSS value (e.g. `"300px"`, `"50vh"`) sets a fixed height with `overflow: auto` |
-
-When `height` is `"auto"`, all tab panels remain in the DOM (inactive panels use `visibility: hidden; position: absolute`) so the content area grows to accommodate the tallest child. When `position` is `"hidden"`, the tab bar is not rendered — useful when tab switching is driven programmatically.
+See [docs/a2ui-reactive.md](docs/a2ui-reactive.md) for the full data binding guide and [docs/components.md](docs/components.md) for the complete component reference.
 
 ## License
 
