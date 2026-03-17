@@ -76,7 +76,7 @@ src/client/
   services/deep-link.ts       # openclaw:// URL parser, executeDeepLink, fetchCanvasConfig
   services/url-rewriter.ts    # openclaw-canvas:// → http:// rewriter
   components/DeepLinkConfirm.vue # Confirmation dialog with collapsible agent/model/thinking controls
-  components/A2UI*.vue         # A2UI component renderers
+  components/A2UI*.vue         # A2UI component renderers (incl. Accordion)
 ```
 
 ## Environment Variables

@@ -60,7 +60,7 @@ src/
 │   ├── views/
 │   │   ├── CanvasView.vue    # Main canvas — iframe, A2UI, external URLs
 │   │   └── ScaffoldView.vue  # Placeholder when no index.html
-│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer, Badge, Checkbox, Divider, ProgressBar, Select, Slider, Table)
+│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer, Badge, Checkbox, Divider, ProgressBar, Select, Slider, Table, Accordion)
 │   ├── store/                # Vuex (session, panel visibility, a2ui surfaces)
 │   └── services/
 │       ├── ws-client.ts      # Browser WebSocket client
@@ -239,6 +239,22 @@ Key capabilities:
 - **Repeat** — The Repeat component iterates over filtered rows, rendering a template per row with `{{field}}` placeholders and transforms like `percentOfMax`.
 
 See [docs/a2ui-reactive.md](docs/a2ui-reactive.md) for the full guide with schemas, examples, and component reference.
+
+## A2UI Accordion Component
+
+The Accordion is a container component with collapsible panels. Each panel has a header that toggles visibility of a child component.
+
+```json
+{"Accordion": {"panels": [{"title": "Section 1", "child": "section-1-content"}, {"title": "Section 2", "child": "section-2-content"}], "mode": "single", "expanded": [0]}}
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `panels` | `{ title: string, child: string }[]` | Panel definitions — `title` is the header text, `child` is the component ID to render |
+| `mode` | `string` | `"single"` (default) — one panel open at a time; `"multi"` — multiple panels can be open simultaneously |
+| `expanded` | `number[]` | Optional array of panel indices to start expanded (default: all collapsed) |
+
+Panel headers display ▶ when collapsed and ▼ when expanded. In `single` mode, opening a panel automatically closes any other open panel.
 
 ## License
 

@@ -432,6 +432,30 @@ Data-driven iteration component. Renders a template component for each row in a 
 
 See the [Repeat Component](#repeat-component) section above for detailed usage.
 
+### Accordion
+
+Collapsible container with expandable/collapsible panels. Each panel has a clickable header that toggles visibility of its child component.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `panels` | `{ title: string, child: string }[]` | Panel definitions — `title` is the header text, `child` is the component ID to render |
+| `mode` | `string` | `"single"` (default) — one panel open at a time; `"multi"` — multiple panels can be open simultaneously |
+| `expanded` | `number[]` | Optional array of panel indices to start expanded (default: all collapsed) |
+
+**Single mode (default):**
+
+```json
+{"Accordion": {"panels": [{"title": "Section 1", "child": "section-1-content"}, {"title": "Section 2", "child": "section-2-content"}]}}
+```
+
+**Multi mode with initial expansion:**
+
+```json
+{"Accordion": {"panels": [{"title": "Details", "child": "details-content"}, {"title": "Settings", "child": "settings-content"}], "mode": "multi", "expanded": [0, 1]}}
+```
+
+Panel headers display ▶ when collapsed and ▼ when expanded. In `single` mode, opening a panel automatically closes any other open panel.
+
 ---
 
 ## Full Example
