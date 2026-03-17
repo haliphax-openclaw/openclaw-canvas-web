@@ -56,9 +56,9 @@ export default defineComponent({
 .a2ui-tabs--right { flex-direction: row-reverse; }
 .a2ui-tabs--bottom { flex-direction: column-reverse; }
 
-.a2ui-tabs-bar { display: flex; gap: 0; border-bottom: 1px solid #444; }
+.a2ui-tabs-bar { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid #444; }
 .a2ui-tabs-bar--left,
-.a2ui-tabs-bar--right { flex-direction: column; border-bottom: none; }
+.a2ui-tabs-bar--right { flex-direction: column; flex-wrap: nowrap; border-bottom: none; }
 .a2ui-tabs-bar--left { border-right: 1px solid #444; }
 .a2ui-tabs-bar--right { border-left: 1px solid #444; }
 .a2ui-tabs-bar--bottom { border-bottom: none; border-top: 1px solid #444; }
@@ -69,7 +69,8 @@ export default defineComponent({
   user-select: none;
   color: #999;
   background: transparent;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .a2ui-tab:hover { color: #ccc; background: #2a2a2a; }
 .a2ui-tab--active { color: #e0e0e0; background: #16213e; border-bottom: 2px solid #e0e0e0; }
