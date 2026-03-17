@@ -16,6 +16,7 @@ export class Gateway {
   private wss: WebSocketServer
   private handlers = new Map<string, CommandHandler>()
   private spaClients = new Set<WebSocket>()
+  private spaSessionMap = new Map<WebSocket, string>()
   private pendingSnapshots = new Map<string, (data: Record<string, unknown>) => void>()
   private pingTimer: ReturnType<typeof setInterval> | null = null
   private spaConnectListeners: Array<(ws: WebSocket) => void> = []
@@ -33,7 +34,13 @@ export class Gateway {
       } else if (path === '/ws') {
         this.wss.handleUpgrade(req, socket, head, (ws) => {
           this.spaClients.add(ws)
-          ws.on('close', () => this.spaClients.delete(ws))
+          // Track session from query param
+          const session = url.searchParams.get('session') ?? 'main'
+          this.spaSessionMap.set(ws, session)
+          ws.on('close', () => {
+            this.spaClients.delete(ws)
+            this.spaSessionMap.delete(ws)
+          })
           ws.on('message', (raw) => {
             try {
               const data = JSON.parse(raw.toString())
@@ -43,6 +50,8 @@ export class Gateway {
                   this.pendingSnapshots.delete(data.id)
                   resolve(data.error ? { error: data.error } : { ok: true, image: data.image })
                 }
+              } else if (data.type === 'session.switch' && data.session) {
+                this.spaSessionMap.set(ws, data.session as string)
               }
             } catch { /* ignore malformed */ }
           })
@@ -85,7 +94,11 @@ export class Gateway {
         ws.ping()
       }
       for (const ws of this.spaClients) {
-        if (ws.readyState !== WebSocket.OPEN) { this.spaClients.delete(ws); continue }
+        if (ws.readyState !== WebSocket.OPEN) {
+          this.spaClients.delete(ws)
+          this.spaSessionMap.delete(ws)
+          continue
+        }
         ws.ping()
       }
     }, PING_INTERVAL)
@@ -97,6 +110,10 @@ export class Gateway {
 
   onSpaConnect(listener: (ws: WebSocket) => void) {
     this.spaConnectListeners.push(listener)
+  }
+
+  getSpaSession(ws: WebSocket): string {
+    return this.spaSessionMap.get(ws) ?? 'main'
   }
 
   sendToSpa(ws: WebSocket, data: Record<string, unknown>) {
@@ -121,6 +138,16 @@ export class Gateway {
     const payload = JSON.stringify(data)
     for (const ws of this.spaClients) {
       if (ws.readyState === WebSocket.OPEN) ws.send(payload)
+    }
+  }
+
+  /** Broadcast only to SPA clients connected for a specific session */
+  broadcastSpaSession(session: string, data: Record<string, unknown>) {
+    const payload = JSON.stringify({ ...data, session })
+    for (const ws of this.spaClients) {
+      if (ws.readyState === WebSocket.OPEN && this.spaSessionMap.get(ws) === session) {
+        ws.send(payload)
+      }
     }
   }
 

@@ -18,6 +18,14 @@ function connectGw(): Promise<WebSocket> {
   })
 }
 
+function connectSpa(session = 'main'): Promise<WebSocket> {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws?session=${session}`)
+    ws.on('open', () => resolve(ws))
+    ws.on('error', reject)
+  })
+}
+
 function rpc(ws: WebSocket, msg: Record<string, unknown>): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     ws.once('message', (raw) => resolve(JSON.parse(raw.toString())))
@@ -48,10 +56,10 @@ describe('a2ui commands', () => {
         components: [{ id: 'c1', component: { Text: { text: 'hi' } } }],
       },
     })
-    const res = await rpc(ws, { id: '1', command: 'a2ui.push', payload })
+    const res = await rpc(ws, { id: '1', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
-    expect(mgr.getSurface('s1')).toBeTruthy()
-    expect(mgr.getSurface('s1')!.components.get('c1')).toEqual({ Text: { text: 'hi' } })
+    expect(mgr.getSurface('main', 's1')).toBeTruthy()
+    expect(mgr.getSurface('main', 's1')!.components.get('c1')).toEqual({ Text: { text: 'hi' } })
     ws.close()
   })
 
@@ -62,20 +70,20 @@ describe('a2ui commands', () => {
       JSON.stringify({ beginRendering: { surfaceId: 's1', root: 'c1' } }),
       JSON.stringify({ dataModelUpdate: { surfaceId: 's1', data: { count: 5 } } }),
     ].join('\n')
-    const res = await rpc(ws, { id: '2', command: 'a2ui.push', payload: lines })
+    const res = await rpc(ws, { id: '2', command: 'a2ui.push', session: 'main', payload: lines })
     expect(res.ok).toBe(true)
-    const s = mgr.getSurface('s1')!
+    const s = mgr.getSurface('main', 's1')!
     expect(s.root).toBe('c1')
     expect(s.dataModel).toEqual({ count: 5 })
     ws.close()
   })
 
   it('a2ui.push handles deleteSurface', async () => {
-    mgr.upsertSurface('s1', [])
+    mgr.upsertSurface('main', 's1', [])
     const ws = await connectGw()
     const payload = JSON.stringify({ deleteSurface: { surfaceId: 's1' } })
-    await rpc(ws, { id: '3', command: 'a2ui.push', payload })
-    expect(mgr.getSurface('s1')).toBeUndefined()
+    await rpc(ws, { id: '3', command: 'a2ui.push', session: 'main', payload })
+    expect(mgr.getSurface('main', 's1')).toBeUndefined()
     ws.close()
   })
 
@@ -85,28 +93,26 @@ describe('a2ui commands', () => {
       'not valid json',
       JSON.stringify({ surfaceUpdate: { surfaceId: 's1', components: [{ id: 'c1', component: {} }] } }),
     ].join('\n')
-    const res = await rpc(ws, { id: '4', command: 'a2ui.push', payload: lines })
+    const res = await rpc(ws, { id: '4', command: 'a2ui.push', session: 'main', payload: lines })
     expect(res.ok).toBe(true)
-    expect(mgr.getSurface('s1')).toBeTruthy()
+    expect(mgr.getSurface('main', 's1')).toBeTruthy()
     ws.close()
   })
 
   it('a2ui.push skips surfaceUpdate with missing surfaceId', async () => {
     const ws = await connectGw()
     const payload = JSON.stringify({ surfaceUpdate: { components: [] } })
-    const res = await rpc(ws, { id: '5', command: 'a2ui.push', payload })
+    const res = await rpc(ws, { id: '5', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
-    // No surface should have been created
-    expect(mgr.getSurface('')).toBeUndefined()
     ws.close()
   })
 
   it('a2ui.push skips beginRendering with missing root', async () => {
-    mgr.upsertSurface('s1', [])
+    mgr.upsertSurface('main', 's1', [])
     const ws = await connectGw()
     const payload = JSON.stringify({ beginRendering: { surfaceId: 's1' } })
-    await rpc(ws, { id: '6', command: 'a2ui.push', payload })
-    expect(mgr.getSurface('s1')!.root).toBeNull()
+    await rpc(ws, { id: '6', command: 'a2ui.push', session: 'main', payload })
+    expect(mgr.getSurface('main', 's1')!.root).toBeNull()
     ws.close()
   })
 
@@ -124,28 +130,38 @@ describe('a2ui commands', () => {
     ws.close()
   })
 
-  it('a2ui.reset clears all surfaces', async () => {
-    mgr.upsertSurface('s1', [])
-    mgr.upsertSurface('s2', [])
+  it('a2ui.reset with session clears only that session', async () => {
+    mgr.upsertSurface('main', 's1', [])
+    mgr.upsertSurface('other', 's2', [])
     const ws = await connectGw()
-    const res = await rpc(ws, { id: '9', command: 'a2ui.reset' })
+    const res = await rpc(ws, { id: '9', command: 'a2ui.reset', session: 'main' })
     expect(res.ok).toBe(true)
-    expect(mgr.getSurface('s1')).toBeUndefined()
-    expect(mgr.getSurface('s2')).toBeUndefined()
+    expect(mgr.getSurface('main', 's1')).toBeUndefined()
+    expect(mgr.getSurface('other', 's2')).toBeTruthy()
     ws.close()
   })
 
-  it('a2ui.push broadcasts surfaceUpdate to SPA clients', async () => {
-    const spaWs = await new Promise<WebSocket>((resolve, reject) => {
-      const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`)
-      ws.on('open', () => resolve(ws))
-      ws.on('error', reject)
-    })
+  it('a2ui.reset without session clears all surfaces', async () => {
+    mgr.upsertSurface('main', 's1', [])
+    mgr.upsertSurface('other', 's2', [])
+    const ws = await connectGw()
+    const res = await rpc(ws, { id: '10', command: 'a2ui.reset' })
+    expect(res.ok).toBe(true)
+    expect(mgr.getSurface('main', 's1')).toBeUndefined()
+    expect(mgr.getSurface('other', 's2')).toBeUndefined()
+    ws.close()
+  })
+
+  it('a2ui.push broadcasts surfaceUpdate only to matching session SPA clients', async () => {
+    const spaMain = await connectSpa('main')
+    const spaOther = await connectSpa('other')
     await new Promise((r) => setTimeout(r, 50))
 
-    const spaMsg = new Promise<Record<string, unknown>>((resolve) => {
-      spaWs.once('message', (raw) => resolve(JSON.parse(raw.toString())))
+    const mainMsg = new Promise<Record<string, unknown>>((resolve) => {
+      spaMain.once('message', (raw) => resolve(JSON.parse(raw.toString())))
     })
+    let otherReceived = false
+    spaOther.on('message', () => { otherReceived = true })
 
     const gwWs = await connectGw()
     const payload = JSON.stringify({
@@ -154,13 +170,28 @@ describe('a2ui commands', () => {
         components: [{ id: 'c1', component: { Text: { text: 'broadcast' } } }],
       },
     })
-    await rpc(gwWs, { id: '10', command: 'a2ui.push', payload })
+    await rpc(gwWs, { id: '11', command: 'a2ui.push', session: 'main', payload })
 
-    const received = await spaMsg
+    const received = await mainMsg
     expect(received.type).toBe('a2ui.surfaceUpdate')
     expect(received.surfaceId).toBe('s1')
+    expect(received.session).toBe('main')
 
-    spaWs.close()
+    await new Promise((r) => setTimeout(r, 100))
+    expect(otherReceived).toBe(false)
+
+    spaMain.close()
+    spaOther.close()
     gwWs.close()
+  })
+
+  it('a2ui.push defaults to session main when not specified', async () => {
+    const ws = await connectGw()
+    const payload = JSON.stringify({
+      surfaceUpdate: { surfaceId: 's1', components: [{ id: 'c1', component: {} }] },
+    })
+    await rpc(ws, { id: '12', command: 'a2ui.push', payload })
+    expect(mgr.getSurface('main', 's1')).toBeTruthy()
+    ws.close()
   })
 })

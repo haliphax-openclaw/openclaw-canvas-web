@@ -287,38 +287,46 @@ export class NodeClient {
       case 'canvas.a2ui.pushJSONL': {
         const jsonl = params.jsonl ?? params.payload ?? ''
         if (!jsonl) throw new Error('payload required')
+        const session = params.session ?? 'main'
         const lines = (typeof jsonl === 'string' ? jsonl : JSON.stringify(jsonl)).split('\n').filter((l: string) => l.trim())
         for (const line of lines) {
           const parsed = JSON.parse(line)
           if (parsed.surfaceUpdate) {
             const su = parsed.surfaceUpdate
-            this.a2uiManager.upsertSurface(su.surfaceId, su.components)
-            this.gateway.broadcastSpa({ type: 'a2ui.surfaceUpdate', surfaceId: su.surfaceId, components: su.components })
+            this.a2uiManager.upsertSurface(session, su.surfaceId, su.components)
+            this.gateway.broadcastSpaSession(session, { type: 'a2ui.surfaceUpdate', surfaceId: su.surfaceId, components: su.components })
           } else if (parsed.beginRendering) {
             const br = parsed.beginRendering
-            this.a2uiManager.setRoot(br.surfaceId, br.root)
-            this.gateway.broadcastSpa({ type: 'a2ui.beginRendering', surfaceId: br.surfaceId, root: br.root })
+            this.a2uiManager.setRoot(session, br.surfaceId, br.root)
+            this.gateway.broadcastSpaSession(session, { type: 'a2ui.beginRendering', surfaceId: br.surfaceId, root: br.root })
           } else if (parsed.dataModelUpdate) {
             const dm = parsed.dataModelUpdate
-            this.a2uiManager.updateDataModel(dm.surfaceId, dm.data ?? {})
-            this.gateway.broadcastSpa({ type: 'a2ui.dataModelUpdate', surfaceId: dm.surfaceId, data: dm.data ?? {} })
+            this.a2uiManager.updateDataModel(session, dm.surfaceId, dm.data ?? {})
+            this.gateway.broadcastSpaSession(session, { type: 'a2ui.dataModelUpdate', surfaceId: dm.surfaceId, data: dm.data ?? {} })
           } else if (parsed.dataSourcePush) {
             const dp = parsed.dataSourcePush
             const data = { $sources: dp.sources ?? {} }
-            this.a2uiManager.updateDataModel(dp.surfaceId, data)
-            this.gateway.broadcastSpa({ type: 'a2ui.dataModelUpdate', surfaceId: dp.surfaceId, data })
+            this.a2uiManager.updateDataModel(session, dp.surfaceId, data)
+            this.gateway.broadcastSpaSession(session, { type: 'a2ui.dataModelUpdate', surfaceId: dp.surfaceId, data })
           } else if (parsed.deleteSurface) {
             const ds = parsed.deleteSurface
-            this.a2uiManager.deleteSurface(ds.surfaceId)
-            this.gateway.broadcastSpa({ type: 'a2ui.deleteSurface', surfaceId: ds.surfaceId })
+            this.a2uiManager.deleteSurface(session, ds.surfaceId)
+            this.gateway.broadcastSpaSession(session, { type: 'a2ui.deleteSurface', surfaceId: ds.surfaceId })
           }
         }
         return { ok: true }
       }
-      case 'canvas.a2ui.reset':
-        this.a2uiManager.clearAll()
-        this.gateway.broadcastSpa({ type: 'a2ui.clearAll' })
+      case 'canvas.a2ui.reset': {
+        const session = params.session as string | undefined
+        if (session) {
+          this.a2uiManager.clearSession(session)
+          this.gateway.broadcastSpaSession(session, { type: 'a2ui.clearAll' })
+        } else {
+          this.a2uiManager.clearAll()
+          this.gateway.broadcastSpa({ type: 'a2ui.clearAll' })
+        }
         return { ok: true }
+      }
 
       default:
         throw new Error(`Unknown command: ${command}`)

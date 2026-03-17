@@ -85,7 +85,10 @@ export default defineComponent({
       return cacheBust.value ? `${base}?_cb=${cacheBust.value}` : base
     })
 
-    watch(sessionId, (s) => store.dispatch('switchSession', s), { immediate: true })
+    watch(sessionId, (s) => {
+      store.dispatch('switchSession', s)
+      wsClient.switchSession(s)
+    }, { immediate: true })
 
     function reload() { cacheBust.value = Date.now() }
 
@@ -187,20 +190,27 @@ export default defineComponent({
     }
 
     const onSurfaceUpdate = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
       store.commit('a2ui/upsertSurface', { surfaceId: d.surfaceId, components: d.components })
     }
     const onBeginRendering = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
       store.commit('a2ui/setRoot', { surfaceId: d.surfaceId, root: d.root })
       store.commit('setVisible', true)
       activeSurfaceId.value = d.surfaceId as string
     }
     const onDataModelUpdate = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
       store.commit('a2ui/updateDataModel', { surfaceId: d.surfaceId, data: d.data })
     }
     const onDeleteSurface = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
       store.commit('a2ui/deleteSurface', { surfaceId: d.surfaceId })
     }
-    const onClearAll = () => store.commit('a2ui/clearAll')
+    const onClearAll = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
+      store.commit('a2ui/clearAll')
+    }
 
     // Handle postMessage from iframes for openclaw:// deep links
     async function onDeepLinkMessage(e: MessageEvent) {

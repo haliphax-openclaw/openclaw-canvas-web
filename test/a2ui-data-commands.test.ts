@@ -18,6 +18,14 @@ function connectGw(): Promise<WebSocket> {
   })
 }
 
+function connectSpa(session = 'main'): Promise<WebSocket> {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws?session=${session}`)
+    ws.on('open', () => resolve(ws))
+    ws.on('error', reject)
+  })
+}
+
 function rpc(ws: WebSocket, msg: Record<string, unknown>): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     ws.once('message', (raw) => resolve(JSON.parse(raw.toString())))
@@ -41,48 +49,44 @@ afterEach(async () => {
 
 describe('a2ui commands - dataModelUpdate and dataSourcePush', () => {
   it('a2ui.push processes dataModelUpdate', async () => {
-    mgr.upsertSurface('s1', [])
+    mgr.upsertSurface('main', 's1', [])
     const ws = await connectGw()
     const payload = JSON.stringify({ dataModelUpdate: { surfaceId: 's1', data: { count: 42 } } })
-    const res = await rpc(ws, { id: '1', command: 'a2ui.push', payload })
+    const res = await rpc(ws, { id: '1', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
-    expect(mgr.getSurface('s1')!.dataModel).toEqual({ count: 42 })
+    expect(mgr.getSurface('main', 's1')!.dataModel).toEqual({ count: 42 })
     ws.close()
   })
 
   it('a2ui.push skips dataModelUpdate with missing surfaceId', async () => {
     const ws = await connectGw()
     const payload = JSON.stringify({ dataModelUpdate: { data: { x: 1 } } })
-    const res = await rpc(ws, { id: '2', command: 'a2ui.push', payload })
+    const res = await rpc(ws, { id: '2', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
     ws.close()
   })
 
   it('a2ui.push processes dataSourcePush', async () => {
-    mgr.upsertSurface('s1', [])
+    mgr.upsertSurface('main', 's1', [])
     const ws = await connectGw()
     const payload = JSON.stringify({ dataSourcePush: { surfaceId: 's1', sources: { items: { fields: ['name'], rows: [{ name: 'Alice' }] } } } })
-    const res = await rpc(ws, { id: '3', command: 'a2ui.push', payload })
+    const res = await rpc(ws, { id: '3', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
-    expect(mgr.getSurface('s1')!.dataModel.$sources).toBeTruthy()
+    expect(mgr.getSurface('main', 's1')!.dataModel.$sources).toBeTruthy()
     ws.close()
   })
 
   it('a2ui.push skips dataSourcePush with missing surfaceId', async () => {
     const ws = await connectGw()
     const payload = JSON.stringify({ dataSourcePush: { sources: {} } })
-    const res = await rpc(ws, { id: '4', command: 'a2ui.push', payload })
+    const res = await rpc(ws, { id: '4', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
     ws.close()
   })
 
-  it('a2ui.push broadcasts dataModelUpdate to SPA', async () => {
-    mgr.upsertSurface('s1', [])
-    const spaWs = await new Promise<WebSocket>((resolve, reject) => {
-      const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`)
-      ws.on('open', () => resolve(ws))
-      ws.on('error', reject)
-    })
+  it('a2ui.push broadcasts dataModelUpdate to matching session SPA', async () => {
+    mgr.upsertSurface('main', 's1', [])
+    const spaWs = await connectSpa('main')
     await new Promise((r) => setTimeout(r, 50))
 
     const spaMsg = new Promise<Record<string, unknown>>((resolve) => {
@@ -91,11 +95,12 @@ describe('a2ui commands - dataModelUpdate and dataSourcePush', () => {
 
     const gwWs = await connectGw()
     const payload = JSON.stringify({ dataModelUpdate: { surfaceId: 's1', data: { key: 'val' } } })
-    await rpc(gwWs, { id: '5', command: 'a2ui.push', payload })
+    await rpc(gwWs, { id: '5', command: 'a2ui.push', session: 'main', payload })
 
     const received = await spaMsg
     expect(received.type).toBe('a2ui.dataModelUpdate')
     expect(received.surfaceId).toBe('s1')
+    expect(received.session).toBe('main')
 
     spaWs.close()
     gwWs.close()

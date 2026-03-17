@@ -7,11 +7,12 @@ class WsClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private destroyed = false
 
-  connect() {
+  connect(session?: string) {
     if (this.destroyed) return
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
     const base = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''
-    this.ws = new WebSocket(`${proto}://${location.host}${base}/ws`)
+    const sessionParam = session ?? 'main'
+    this.ws = new WebSocket(`${proto}://${location.host}${base}/ws?session=${encodeURIComponent(sessionParam)}`)
     this.ws.onmessage = (e) => {
       let data: Record<string, unknown>
       try { data = JSON.parse(e.data) } catch { return }
@@ -57,6 +58,10 @@ class WsClient {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data))
     }
+  }
+
+  switchSession(session: string) {
+    this.send({ type: 'session.switch', session })
   }
 
   destroy() {
