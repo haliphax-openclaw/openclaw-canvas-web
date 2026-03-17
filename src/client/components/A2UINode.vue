@@ -30,6 +30,7 @@ const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Stack: A2UIStack,
   Spacer: A2UISpacer,
   Select: A2UISelect,
+  MultiSelect: A2UISelect,
   Table: A2UITable,
   Checkbox: A2UICheckbox,
   ProgressBar: A2UIProgressBar,
@@ -64,7 +65,12 @@ export default defineComponent({
       const entry = componentEntry.value
       const name = typeName.value
       if (!entry || !name) return null
-      return (entry as Record<string, unknown>)[name]
+      const def = (entry as Record<string, unknown>)[name]
+      // MultiSelect alias implies multi: true
+      if (name === 'MultiSelect' && def && typeof def === 'object') {
+        return { ...(def as Record<string, unknown>), multi: true }
+      }
+      return def
     })
 
     const resolvedComponent = computed(() => {
