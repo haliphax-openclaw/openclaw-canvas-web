@@ -96,6 +96,7 @@ export default defineComponent({
       }
     }
     const onEval = (d: Record<string, unknown>) => {
+      if (d.session && d.session !== sessionId.value) return
       const js = d.js as string
       let result: unknown
       let error: string | undefined

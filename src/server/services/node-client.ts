@@ -266,8 +266,9 @@ export class NodeClient {
       case 'canvas.eval': {
         const js = params.javaScript ?? ''
         if (!js) throw new Error('javaScript param required')
+        const session = params.session ?? 'main'
         const id = `eval_${Date.now()}`
-        this.gateway.broadcastSpa({ type: 'canvas.eval', js, id })
+        this.gateway.broadcastSpaSession(session, { type: 'canvas.eval', js, id })
         return { result: null, note: 'eval dispatched' }
       }
       case 'canvas.snapshot': {
