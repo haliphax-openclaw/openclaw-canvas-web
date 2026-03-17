@@ -99,6 +99,9 @@ gateway.onSpaConnect((ws) => {
   for (const surface of a2uiManager.allSurfaces()) {
     const components = Array.from(surface.components.entries()).map(([id, component]) => ({ id, component }))
     gateway.sendToSpa(ws, { type: 'a2ui.surfaceUpdate', surfaceId: surface.surfaceId, components })
+    if (surface.dataModel && Object.keys(surface.dataModel).length > 0) {
+      gateway.sendToSpa(ws, { type: 'a2ui.dataModelUpdate', surfaceId: surface.surfaceId, data: surface.dataModel })
+    }
     if (surface.root) {
       gateway.sendToSpa(ws, { type: 'a2ui.beginRendering', surfaceId: surface.surfaceId, root: surface.root })
     }
