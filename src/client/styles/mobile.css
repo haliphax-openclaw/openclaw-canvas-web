@@ -2,4 +2,8 @@
   .a2ui-row.a2ui-row {
     flex-direction: column;
   }
+
+  .a2ui-row > * {
+    min-width: 0;
+  }
 }
