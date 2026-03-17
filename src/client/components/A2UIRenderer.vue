@@ -24,5 +24,5 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-renderer { width: 100%; height: 100%; padding: 12px; box-sizing: border-box; }
+.a2ui-renderer { width: 100%; min-height: 100%; height: auto; padding: 12px; box-sizing: border-box; }
 </style>
