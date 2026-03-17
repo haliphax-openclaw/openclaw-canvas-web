@@ -46,7 +46,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-accordion { display: flex; flex-direction: column; gap: 2px; }
+.a2ui-accordion { display: flex; flex-direction: column; gap: 2px; width: fit-content; min-width: 200px; }
 .a2ui-accordion-panel { border: 1px solid #444; border-radius: 4px; overflow: hidden; }
 .a2ui-accordion-header { padding: 8px 12px; cursor: pointer; user-select: none; background: #2a2a2a; color: #e0e0e0; }
 .a2ui-accordion-header:hover { background: #3a3a3a; }
