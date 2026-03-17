@@ -53,7 +53,7 @@ src/
 │   │   ├── canvas.ts         # show, hide, navigate, navigateExternal, eval, snapshot
 │   │   └── a2ui.ts           # push (JSONL), reset
 │   └── routes/
-│       ├── canvas.ts         # GET /canvas/:session/:path
+│       ├── canvas.ts         # GET /:session/:path
 │       └── scaffold.ts       # GET /scaffold
 ├── client/
 │   ├── main.ts               # Vue app entry
@@ -148,7 +148,7 @@ Reference files in other canvas sessions without hardcoding the server origin or
 <a href="openclaw-canvas://dashboard/index.html">Open Dashboard</a>
 ```
 
-These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` based on the current origin and `BASE_URL`.
+These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` based on the current origin and `OPENCLAW_CANVAS_BASE_PATH`.
 
 ## API Endpoints
 
@@ -185,7 +185,7 @@ The dialog includes a collapsible "Options" section with controls for:
 
 ## Session Files
 
-Place HTML/CSS/JS files in `$OPENCLAW_CANVAS_ROOT/<session>/`. The server serves them at `/canvas/<session>/<path>`. File changes trigger live reload in the browser.
+Place HTML/CSS/JS files in `$OPENCLAW_CANVAS_ROOT/<session>/`. The server serves them at `/<session>/<path>`. File changes trigger live reload in the browser.
 
 ## Limitations vs macOS App
 
