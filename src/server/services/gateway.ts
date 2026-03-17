@@ -33,10 +33,12 @@ export class Gateway {
         })
       } else if (path === '/ws') {
         this.wss.handleUpgrade(req, socket, head, (ws) => {
+          (ws as any).__alive = true
           this.spaClients.add(ws)
           // Track session from query param
           const session = url.searchParams.get('session') ?? 'main'
           this.spaSessionMap.set(ws, session)
+          ws.on('pong', () => { (ws as any).__alive = true })
           ws.on('close', () => {
             this.spaClients.delete(ws)
             this.spaSessionMap.delete(ws)
