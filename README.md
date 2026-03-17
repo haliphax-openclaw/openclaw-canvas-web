@@ -194,6 +194,23 @@ The dialog includes a collapsible "Options" section with controls for:
 
 Place HTML/CSS/JS files in `$OPENCLAW_CANVAS_ROOT/<session>/`. The server serves them at `/canvas/<session>/<path>`. File changes trigger live reload in the browser.
 
+## Limitations vs macOS App
+
+The canvas web server provides feature parity with the macOS OpenClaw app's canvas panel, with a few browser-inherent limitations:
+
+- **`file://` URLs** — The macOS app supports `file://` URLs in canvas.navigate. Browsers block these for security reasons. Use `openclaw-canvas://` or `http(s)` URLs instead.
+- **Snapshot fidelity** — The macOS app captures snapshots natively via WKWebView. The web server uses `dom-to-image-more`, which cannot capture cross-origin iframe content (including `data:` URLs and external sites). Snapshots of locally-served canvas HTML work fine.
+
+## Extra Features
+
+Features available in the web server that are not present in the macOS app:
+
+- **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link script injection.
+- **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
+- **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
+- **Container hostname URLs** — `openclaw://<hostname>/agent?message=...` is accepted alongside the standard `openclaw://agent?message=...` form, supporting Docker network hostnames in the URL authority.
+- **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
+
 ## License
 
 Public Domain. See [LICENSE](LICENSE).
