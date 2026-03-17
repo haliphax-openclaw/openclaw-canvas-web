@@ -280,183 +280,28 @@ The Repeat component can render these component types as templates:
 
 ---
 
-## Components Reference
+## Reactive Components
 
-> For the full component reference (all props, layout components, containers, inputs), see [components.md](components.md). This section covers data binding specifics.
+The following components support reactive data binding. See [components.md](components.md) for full props, schemas, and usage examples.
 
-### Select
+**Filter inputs** (drive filtering via `bind`):
+- Select
+- MultiSelect
 
-Single-selection dropdown. Sends `a2ui.selectChange` with `{ componentId, value }` on change.
+**Display binding** (read from data sources via `dataSource`):
+- Table
+- Badge
+- Text
+- Repeat (iterates over rows, renders a template per row)
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `options` | `{ label: string, value: string }[]` | Dropdown options |
-| `selected` | `string` | Currently selected value |
-| `bind` | `FilterBind` | Optional filter binding |
-| `emitTo` | `string` | Optional deep link URL (supports `{{value}}` interpolation) |
+**Repeat template targets** (renderable inside Repeat):
+- ProgressBar
+- Text
+- Badge
 
-```json
-{"Select": {"options": [{"label": "All", "value": ""}, {"label": "Active", "value": "active"}], "selected": "", "bind": {"source": "items", "field": "status", "nullValue": ""}}}
-```
-
-### MultiSelect
-
-Alias for Select with `multi: true` injected automatically. Renders a `<select multiple>` element. Sends `a2ui.selectChange` with `{ componentId, values }` (array) on change.
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `options` | `{ label: string, value: string }[]` | Dropdown options |
-| `selected` | `string[]` | Currently selected values |
-| `bind` | `FilterBind` | Optional filter binding (typically with `op: "in"`) |
-
-```json
-{"MultiSelect": {"options": [{"label": "Admin", "value": "admin"}, {"label": "Editor", "value": "editor"}, {"label": "Viewer", "value": "viewer"}], "selected": ["admin", "editor", "viewer"], "bind": {"source": "users", "field": "role", "op": "in", "nullValue": ["admin", "editor", "viewer"]}}}
-```
-
-In the component map (`A2UINode`), `MultiSelect` resolves to the same `A2UISelect` component but with `multi: true` merged into the definition.
-
-### Table
-
-Displays tabular data. Supports two modes:
-
-**Static mode** — headers and rows provided directly:
-
-```json
-{"Table": {"headers": ["Name", "Role"], "rows": [["Alice", "Admin"], ["Bob", "Viewer"]]}}
-```
-
-**Data source mode** — bound to a filtered data source:
-
-```json
-{"Table": {"dataSource": {"source": "users", "columns": ["name", "role", "email"]}}}
-```
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `headers` | `string[]` | Static column headers |
-| `rows` | `unknown[][]` | Static row data |
-| `dataSource` | `DataSourceBinding` | Bind to a data source |
-| `sortable` | `boolean` | Enable click-to-sort on column headers |
-
-When using `dataSource`, if `columns` is omitted, all keys from the first row are used as headers.
-
-**Sorting:** When `sortable` is `true`, clicking a column header cycles through: unsorted → ascending (⬆) → descending (⬇) → unsorted. Only one column can be sorted at a time. Sorting operates on raw data values, not display-formatted strings.
-
-```json
-{"Table": {"dataSource": {"source": "runs", "columns": ["repo", "status", "duration"]}, "sortable": true}}
-```
-
-### Badge
-
-Inline badge with variant styling. Supports static text or data source binding with aggregates.
-
-**Static mode:**
-
-```json
-{"Badge": {"text": "Active", "variant": "success"}}
-```
-
-**Data source mode:**
-
-```json
-{"Badge": {"variant": "info", "dataSource": {"source": "users", "aggregate": {"fn": "count"}, "map": {"text": "$value"}}}}
-```
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `text` | `string` | Static display text |
-| `variant` | `string` | `success`, `warning`, `error`, or `info` (default) |
-| `dataSource` | `DataSourceBinding` | Bind to a data source |
-
-Display priority: `mappedProps.text` > `aggregatedValue` > static `text`.
-
-### Text
-
-Text display component. Renders as `<p>` by default, or as heading/span based on `usageHint`.
-
-**Static mode:**
-
-```json
-{"Text": {"text": "Hello world", "usageHint": "h2"}}
-```
-
-**Data source mode:**
-
-```json
-{"Text": {"dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total", "format": "compact"}, "map": {"text": "$value"}}, "usageHint": "h1"}}
-```
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `text` | `string \| { literalString: string }` | Static text content |
-| `usageHint` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
-| `dataSource` | `DataSourceBinding` | Bind to a data source |
-
-Display priority: `mappedProps.text` > `aggregatedValue` > static `text`.
-
-### ProgressBar
-
-Static progress bar. Commonly used inside Repeat templates for dynamic per-row rendering.
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `value` | `number` | Progress percentage (clamped 0–100) |
-| `label` | `string` | Optional label above the bar |
-
-```json
-{"ProgressBar": {"label": "Upload progress", "value": 75}}
-```
-
-Inside a Repeat template with transforms:
-
-```json
-{"Repeat": {"dataSource": {"source": "scores"}, "transforms": {"percentOfMax": {"fn": "percentOfMax"}}, "template": {"ProgressBar": {"label": "{{name}}: {{score}}", "value": "{{score | percentOfMax}}"}}}}
-```
-
-### Repeat
-
-Data-driven iteration component. Renders a template component for each row in a filtered data source.
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `dataSource` | `DataSourceBinding` | Data source to iterate over |
-| `template` | `Record<string, object>` | Component template (e.g. `{ "Text": { "text": "{{field}}" } }`) |
-| `transforms` | `Record<string, { fn: string, field?: string }>` | Named transform definitions |
-| `emptyText` | `string` | Text shown when no rows match |
-| `sortable` | `boolean` | Enable a sort direction dropdown above repeated content |
-| `sortField` | `string` | Field name to sort by (required when `sortable` is `true`) |
-
-**Sorting:** When `sortable` is `true`, a dropdown appears above the repeated content with options: "Unsorted" (default), "Ascending", and "Descending". The `sortField` prop specifies which field to sort by. Sorting operates on raw data values.
-
-```json
-{"Repeat": {"dataSource": {"source": "scores"}, "template": {"ProgressBar": {"label": "{{name}}", "value": "{{score | percentOfMax}}"}}, "sortable": true, "sortField": "score"}}
-```
-
-See the [Repeat Component](#repeat-component) section above for detailed usage.
-
-### Accordion
-
-Collapsible container with expandable/collapsible panels. Each panel has a clickable header that toggles visibility of its child component.
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `panels` | `{ title: string, child: string }[]` | Panel definitions — `title` is the header text, `child` is the component ID to render |
-| `mode` | `string` | `"single"` (default) — one panel open at a time; `"multi"` — multiple panels can be open simultaneously |
-| `expanded` | `number[]` | Optional array of panel indices to start expanded (default: all collapsed) |
-
-**Single mode (default):**
-
-```json
-{"Accordion": {"panels": [{"title": "Section 1", "child": "section-1-content"}, {"title": "Section 2", "child": "section-2-content"}]}}
-```
-
-**Multi mode with initial expansion:**
-
-```json
-{"Accordion": {"panels": [{"title": "Details", "child": "details-content"}, {"title": "Settings", "child": "settings-content"}], "mode": "multi", "expanded": [0, 1]}}
-```
-
-Panel headers display ▶ when collapsed and ▼ when expanded. In `single` mode, opening a panel automatically closes any other open panel.
+**Reactive prop updates** (respond to surface update pushes):
+- Accordion (`expanded`)
+- Tabs (`active`)
 
 ---
 
