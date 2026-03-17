@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="a2ui-repeat">
     <div v-if="sortable" class="a2ui-repeat-sort">
       <select v-model="sortDir" class="a2ui-repeat-sort-select">
         <option value="">Unsorted</option>
@@ -102,6 +102,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.a2ui-repeat { margin-bottom: 16px; }
 .a2ui-repeat-sort { margin-bottom: 8px; }
 .a2ui-repeat-sort-select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
 .a2ui-repeat-items { display: flex; flex-direction: column; gap: 12px; }
