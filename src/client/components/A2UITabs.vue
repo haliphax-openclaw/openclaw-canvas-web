@@ -71,13 +71,16 @@ export default defineComponent({
   background: transparent;
   overflow-wrap: break-word;
   word-break: break-word;
+  border-bottom: 2px solid transparent;
 }
 .a2ui-tab:hover { color: #ccc; background: #2a2a2a; }
 .a2ui-tab--active { color: #e0e0e0; background: #16213e; border-bottom: 2px solid #e0e0e0; }
 
 .a2ui-tabs-bar--bottom .a2ui-tab--active { border-bottom: none; border-top: 2px solid #e0e0e0; }
-.a2ui-tabs-bar--left .a2ui-tab--active { border-bottom: none; border-right: 2px solid #e0e0e0; }
-.a2ui-tabs-bar--right .a2ui-tab--active { border-bottom: none; border-left: 2px solid #e0e0e0; }
+.a2ui-tabs-bar--left .a2ui-tab { border-bottom: none; border-right: 2px solid transparent; }
+.a2ui-tabs-bar--right .a2ui-tab { border-bottom: none; border-left: 2px solid transparent; }
+.a2ui-tabs-bar--left .a2ui-tab--active { border-right-color: #e0e0e0; }
+.a2ui-tabs-bar--right .a2ui-tab--active { border-left-color: #e0e0e0; }
 
 .a2ui-tabs-content { position: relative; }
 .a2ui-tabs-panel--hidden { visibility: hidden; position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
