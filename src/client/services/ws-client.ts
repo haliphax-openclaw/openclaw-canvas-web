@@ -6,13 +6,14 @@ class WsClient {
   private pendingMessages: Array<Record<string, unknown>> = []
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private destroyed = false
+  private currentSession = 'main'
 
   connect(session?: string) {
     if (this.destroyed) return
+    if (session != null) this.currentSession = session
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
     const base = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''
-    const sessionParam = session ?? 'main'
-    this.ws = new WebSocket(`${proto}://${location.host}${base}/ws?session=${encodeURIComponent(sessionParam)}`)
+    this.ws = new WebSocket(`${proto}://${location.host}${base}/ws?session=${encodeURIComponent(this.currentSession)}`)
     this.ws.onmessage = (e) => {
       let data: Record<string, unknown>
       try { data = JSON.parse(e.data) } catch { return }
