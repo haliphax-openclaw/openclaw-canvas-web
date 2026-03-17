@@ -3,7 +3,6 @@
     ref="canvasRoot"
     class="canvas-view"
     :class="{ 'canvas-hidden': !visible }"
-    :style="panelStyle"
   >
     <A2UIRenderer v-if="hasA2UISurface" :surface-id="activeSurfaceId" />
     <template v-else>
@@ -252,7 +251,7 @@ export default defineComponent({
 
     // Attach deep link interceptor on iframe load via @load in template
 
-    return { iframeSrc, iframe, canvasRoot, visible, reload, hasA2UISurface, activeSurfaceId, panelStyle, externalUrl, deepLinkConfirm }
+    return { iframeSrc, iframe, canvasRoot, visible, reload, hasA2UISurface, activeSurfaceId, externalUrl, deepLinkConfirm }
   },
 })
 </script>
@@ -260,6 +259,8 @@ export default defineComponent({
 <style scoped>
 .canvas-view {
   width: 100%;
+  min-height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   transition: opacity 0.2s ease, transform 0.2s ease;
