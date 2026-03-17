@@ -208,6 +208,13 @@ Displays tabular data with optional sorting. Scrolls horizontally when content e
 | `rows` | `unknown[][]` | Static row data |
 | `dataSource` | `DataSourceBinding` | Bind to a data source |
 | `sortable` | `boolean` | Enable click-to-sort on column headers |
+| `formatters` | `Record<string, string>` | Column display formatters (key = column name, value = format type) |
+
+Built-in format types:
+
+| Format | Description |
+|--------|-------------|
+| `boolean` | Displays `✅` for truthy values, `❌` for falsy values |
 
 When using `dataSource`, if `columns` is omitted, all keys from the first row are used as headers. When all rows are filtered out, the table shows column headers with an empty body instead of disappearing.
 
