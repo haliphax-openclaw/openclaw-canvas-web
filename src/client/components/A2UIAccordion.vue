@@ -5,7 +5,7 @@
         <span class="a2ui-accordion-indicator">{{ isOpen(i) ? '▼' : '▶' }}</span>
         {{ panel.title }}
       </div>
-      <div v-if="isOpen(i)" class="a2ui-accordion-content">
+      <div class="a2ui-accordion-content" :class="{ collapsed: !isOpen(i) }">
         <A2UINode :component-id="panel.child" :surface-id="surfaceId" />
       </div>
     </div>
@@ -52,4 +52,5 @@ export default defineComponent({
 .a2ui-accordion-header:hover { background: #3a3a3a; }
 .a2ui-accordion-indicator { margin-right: 8px; font-size: 0.75em; }
 .a2ui-accordion-content { padding: 8px 12px; background: #1e1e1e; }
+.a2ui-accordion-content.collapsed { height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
 </style>
