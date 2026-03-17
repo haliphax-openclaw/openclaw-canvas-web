@@ -225,6 +225,19 @@ Features available in the web server that are not present in the macOS app:
 - **Container hostname URLs** — `openclaw://<hostname>/agent?message=...` is accepted alongside the standard `openclaw://agent?message=...` form, supporting Docker network hostnames in the URL authority.
 - **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
 
+## Reactive Data Binding (A2UI)
+
+A2UI surfaces support a reactive data-binding layer that lets agents push structured data sources and bind UI components to live, filterable data.
+
+Key capabilities:
+
+- **Data Sources** — Push named datasets via `dataModelUpdate` (with `$sources`) or the `dataSourcePush` JSONL shorthand. Supports incremental merges with `primaryKey`.
+- **Filtering** — Select and MultiSelect components can `bind` to data sources, applying filter operations (`eq`, `contains`, `gte`, `lte`, `range`, `in`) that reactively update all bound displays.
+- **Display Binding** — Table, Badge, and Text components accept a `dataSource` prop for dynamic content with built-in aggregates (`count`, `sum`, `avg`, `min`, `max`) and compact number formatting.
+- **Repeat** — The Repeat component iterates over filtered rows, rendering a template per row with `{{field}}` placeholders and transforms like `percentOfMax`.
+
+See [docs/a2ui-reactive.md](docs/a2ui-reactive.md) for the full guide with schemas, examples, and component reference.
+
 ## License
 
 Public Domain. See [LICENSE](LICENSE).
