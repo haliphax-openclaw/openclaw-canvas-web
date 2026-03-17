@@ -64,5 +64,5 @@ export default defineComponent({
 <style scoped>
 select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
 select[multiple] { min-height: 5em; }
-select[multiple] option { padding: 2px 4px; }
+select[multiple] option { padding: 1px 4px; line-height: 1; margin: 0; }
 </style>
