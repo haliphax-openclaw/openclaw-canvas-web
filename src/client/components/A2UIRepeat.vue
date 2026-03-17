@@ -104,5 +104,5 @@ export default defineComponent({
 <style scoped>
 .a2ui-repeat-sort { margin-bottom: 8px; }
 .a2ui-repeat-sort-select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
-.a2ui-repeat-items { display: flex; flex-direction: column; gap: 6px; }
+.a2ui-repeat-items { display: flex; flex-direction: column; gap: 12px; }
 </style>
