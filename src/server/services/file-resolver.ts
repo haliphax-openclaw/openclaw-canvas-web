@@ -19,11 +19,25 @@ export class FileResolver {
 
     const sessionRoot = this.canvasRootFor(session)
     const target = path.join(sessionRoot, subpath || 'index.html')
-    const finalPath = target.endsWith('/') ? path.join(target, 'index.html') : target
 
     let real: string
     try {
-      real = await fs.realpath(finalPath)
+      real = await fs.realpath(target)
+    } catch {
+      return null
+    }
+
+    // If the resolved path is a directory, look for index.html inside it
+    try {
+      const stat = await fs.stat(real)
+      if (stat.isDirectory()) {
+        const indexPath = path.join(real, 'index.html')
+        try {
+          real = await fs.realpath(indexPath)
+        } catch {
+          return null
+        }
+      }
     } catch {
       return null
     }

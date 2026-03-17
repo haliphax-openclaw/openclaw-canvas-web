@@ -28,6 +28,7 @@ Open `http://localhost:9999` in a browser.
 | `OPENCLAW_CANVAS_HOST` | `0.0.0.0` | Bind address |
 | `OPENCLAW_CANVAS_PORT` | `3456` | Listen port |
 | `OPENCLAW_CANVAS_ROOT` | `~/.openclaw-canvas` | Root directory for session files |
+| `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
 | `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
 
 ## Architecture

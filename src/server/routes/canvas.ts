@@ -6,7 +6,7 @@ import { FileResolver } from '../services/file-resolver.js'
 import { DEEP_LINK_SCRIPT } from '../shared/deep-link-script.js'
 import { SNAPSHOT_SCRIPT } from '../shared/snapshot-script.js'
 
-export function canvasRoute(fileResolver: FileResolver): Router {
+export function canvasRoute(fileResolver: FileResolver, basePath: string = ''): Router {
   const router = Router()
 
   // Shared handler for canvas file serving with deep link injection
@@ -18,7 +18,7 @@ export function canvasRoute(fileResolver: FileResolver): Router {
       const exists = await fileResolver.sessionExists(session)
       if (exists && (!subpath || subpath === 'index.html')) {
         if (!(await fileResolver.hasIndex(session))) {
-          res.redirect(`/scaffold?session=${encodeURIComponent(session)}`)
+          res.redirect(`${basePath}/scaffold?session=${encodeURIComponent(session)}`)
           return
         }
       }

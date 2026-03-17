@@ -17,6 +17,7 @@ import { NodeClient } from './services/node-client.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const BASE_PATH = (process.env.OPENCLAW_CANVAS_BASE_PATH ?? '/').replace(/\/+$/, '')
 const HOST = process.env.OPENCLAW_CANVAS_HOST ?? '0.0.0.0'
 const PORT = parseInt(process.env.OPENCLAW_CANVAS_PORT ?? '3456', 10)
 const WORKSPACE = process.env.OPENCLAW_WORKSPACE ?? path.join(
@@ -61,7 +62,7 @@ if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist))
 }
 
-app.use(canvasRoute(fileResolver))
+app.use(canvasRoute(fileResolver, BASE_PATH))
 app.use(scaffoldRoute())
 app.use(canvasConfigRoute())
 
