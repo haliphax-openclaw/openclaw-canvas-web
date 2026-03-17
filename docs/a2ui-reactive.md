@@ -104,6 +104,8 @@ For MultiSelect, `nullValue` can be an array. The comparison checks array equali
 
 When all options are selected (matching the `nullValue` array), the filter is inactive.
 
+**Empty selection:** When a MultiSelect has no options selected (empty array), the filter is also treated as inactive — all rows pass through. This ensures that clearing a MultiSelect shows all data rather than hiding everything.
+
 ### Multi-source filtering
 
 A single filter component can target multiple data sources by providing an array of source names:
@@ -332,8 +334,15 @@ Displays tabular data. Supports two modes:
 | `headers` | `string[]` | Static column headers |
 | `rows` | `unknown[][]` | Static row data |
 | `dataSource` | `DataSourceBinding` | Bind to a data source |
+| `sortable` | `boolean` | Enable click-to-sort on column headers |
 
 When using `dataSource`, if `columns` is omitted, all keys from the first row are used as headers.
+
+**Sorting:** When `sortable` is `true`, clicking a column header cycles through: unsorted → ascending (⬆) → descending (⬇) → unsorted. Only one column can be sorted at a time. Sorting operates on raw data values, not display-formatted strings.
+
+```json
+{"Table": {"dataSource": {"source": "runs", "columns": ["repo", "status", "duration"]}, "sortable": true}}
+```
 
 ### Badge
 
@@ -412,6 +421,14 @@ Data-driven iteration component. Renders a template component for each row in a 
 | `template` | `Record<string, object>` | Component template (e.g. `{ "Text": { "text": "{{field}}" } }`) |
 | `transforms` | `Record<string, { fn: string, field?: string }>` | Named transform definitions |
 | `emptyText` | `string` | Text shown when no rows match |
+| `sortable` | `boolean` | Enable a sort direction dropdown above repeated content |
+| `sortField` | `string` | Field name to sort by (required when `sortable` is `true`) |
+
+**Sorting:** When `sortable` is `true`, a dropdown appears above the repeated content with options: "Unsorted" (default), "Ascending", and "Descending". The `sortField` prop specifies which field to sort by. Sorting operates on raw data values.
+
+```json
+{"Repeat": {"dataSource": {"source": "scores"}, "template": {"ProgressBar": {"label": "{{name}}", "value": "{{score | percentOfMax}}"}}, "sortable": true, "sortField": "score"}}
+```
 
 See the [Repeat Component](#repeat-component) section above for detailed usage.
 
