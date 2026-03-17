@@ -190,6 +190,7 @@ export default defineComponent({
     }
     const onBeginRendering = (d: Record<string, unknown>) => {
       store.commit('a2ui/setRoot', { surfaceId: d.surfaceId, root: d.root })
+      store.commit('setVisible', true)
       activeSurfaceId.value = d.surfaceId as string
     }
     const onDataModelUpdate = (d: Record<string, unknown>) => {
