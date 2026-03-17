@@ -310,15 +310,16 @@ The Repeat component can render these component types as templates:
 
 ### Button
 
-Clickable button. Sends an `a2ui.buttonClick` WebSocket message with the component ID when clicked.
+Clickable button. Sends an `a2ui.buttonClick` WebSocket message with the component ID when clicked. Supports optional `href` for deep linking.
 
 ```json
-{"Button": {"label": "Submit"}}
+{"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+the+dashboard"}}
 ```
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `label` | `string` | Button text (also accepts `text`; falls back to `"Button"`) |
+| `href` | `string` | Optional `openclaw://` deep link URL to trigger on click |
 
 ### Checkbox
 
