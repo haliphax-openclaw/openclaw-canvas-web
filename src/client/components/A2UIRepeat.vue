@@ -7,7 +7,7 @@
         <option value="desc">Descending</option>
       </select>
     </div>
-    <template v-if="resolvedItems.length">
+    <div v-if="resolvedItems.length" class="a2ui-repeat-items">
       <component
         v-for="(item, idx) in resolvedItems"
         :key="idx"
@@ -16,7 +16,7 @@
         :component-id="componentId + ':' + idx"
         :surface-id="surfaceId"
       />
-    </template>
+    </div>
     <span v-else-if="def.emptyText">{{ def.emptyText }}</span>
   </div>
 </template>
@@ -104,4 +104,5 @@ export default defineComponent({
 <style scoped>
 .a2ui-repeat-sort { margin-bottom: 8px; }
 .a2ui-repeat-sort-select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
+.a2ui-repeat-items { display: flex; flex-direction: column; gap: 6px; }
 </style>
