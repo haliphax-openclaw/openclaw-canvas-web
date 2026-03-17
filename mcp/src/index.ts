@@ -4,6 +4,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { execSync } from "child_process";
 import { z } from "zod";
 
+import { readFileSync } from "fs";
+
 const NODE_NAME = process.env.CANVAS_NODE_NAME ?? "Canvas Web Server";
 
 function invoke(command: string, params: Record<string, string>): string {
@@ -19,9 +21,17 @@ const server = new McpServer({ name: "@openclaw-canvas-web/mcp", version: "0.1.0
 
 const S = z.string().optional().describe("Session ID (defaults to agent ID or 'main')");
 
-server.tool("canvas_push", "Push A2UI JSONL content to the canvas", { session: S, payload: z.string().describe("Raw JSONL content") }, ({ session, payload }) => ({
-  content: [{ type: "text", text: invoke("canvas.a2ui.pushJSONL", { session: session ?? "main", payload }) }],
-}));
+server.tool("canvas_push", "Push A2UI JSONL content to the canvas", { session: S, payload: z.string().optional().describe("Raw JSONL content"), file: z.string().optional().describe("Path to a JSONL file to push (avoids shell escaping issues)") }, ({ session, payload, file }) => {
+  let content: string;
+  if (file) {
+    try { content = readFileSync(file, "utf-8"); } catch (e: any) { return { content: [{ type: "text" as const, text: `Error reading file: ${e.message}` }] }; }
+  } else if (payload) {
+    content = payload;
+  } else {
+    return { content: [{ type: "text" as const, text: "Error: either payload or file is required" }] };
+  }
+  return { content: [{ type: "text" as const, text: invoke("canvas.a2ui.pushJSONL", { session: session ?? "main", payload: content }) }] };
+});
 
 server.tool("canvas_reset", "Clear all A2UI surfaces for a session", { session: S }, ({ session }) => ({
   content: [{ type: "text", text: invoke("canvas.a2ui.reset", { session: session ?? "main" }) }],
