@@ -162,6 +162,8 @@ Trigger agent runs from links inside canvas HTML. When a user clicks an `opencla
 <a href="openclaw://agent?message=run+my+task">Run Task</a>
 ```
 
+See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parameters, confirmation dialog, script injection details, and security considerations.
+
 ### `openclaw-cron://` — Cron Job Triggers
 
 Trigger cron job runs from canvas content. The request is proxied to the gateway's `/hooks/cron/run` endpoint.
@@ -169,8 +171,6 @@ Trigger cron job runs from canvas content. The request is proxied to the gateway
 ```html
 <a href="openclaw-cron://run?jobId=daily-backup&runMode=force">Run Backup</a>
 ```
-
-See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parameters, confirmation dialog, script injection details, and security considerations.
 
 ### `openclaw-canvas://` — Canvas File References
 
