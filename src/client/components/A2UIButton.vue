@@ -1,9 +1,9 @@
 <template>
-  <button ref="btnRef" :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
+  <button :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, nextTick } from 'vue'
+import { defineComponent, computed, ref } from 'vue'
 import { wsClient } from '../services/ws-client'
 import { parseOpenClawUrl } from '../utils/url-schemes'
 
@@ -22,7 +22,6 @@ export default defineComponent({
     const href = computed(() => (props.def as any).href as string | undefined)
     const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
     const sentFlash = ref(false)
-    const btnRef = ref<HTMLButtonElement | null>(null)
     const displayLabel = computed(() => sentFlash.value ? 'Sent!' : label.value)
 
     let flashTimer: ReturnType<typeof setTimeout> | null = null
@@ -30,7 +29,6 @@ export default defineComponent({
     const flashSent = () => {
       if (flashTimer) clearTimeout(flashTimer)
       sentFlash.value = true
-      nextTick(() => btnRef.value?.blur())
       flashTimer = setTimeout(() => {
         sentFlash.value = false
       }, 3000)
@@ -55,7 +53,7 @@ export default defineComponent({
         }).then(flashSent).catch(() => {})
       }
     }
-    return { displayLabel, onClick, btnRef, sentFlash }
+    return { displayLabel, onClick, sentFlash }
   },
 })
 </script>
