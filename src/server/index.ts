@@ -16,6 +16,7 @@ import { registerA2UICommands } from './commands/a2ui.js'
 import { A2UIManager } from './services/a2ui-manager.js'
 import { A2UIStore } from './services/a2ui-store.js'
 import { NodeClient } from './services/node-client.js'
+import { JSONLWatcher } from './services/jsonl-watcher.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -120,6 +121,7 @@ for (const [agentId, canvasDir] of agentWorkspaceMap) {
 }
 const CANVAS_IGNORE_DIRS = (process.env.OPENCLAW_CANVAS_IGNORE_DIRS ?? 'tmp,jsonl').split(',').map(s => s.trim()).filter(Boolean)
 const fileWatcher = new FileWatcher(sessionPathMap, gateway, { ignoreDirs: CANVAS_IGNORE_DIRS })
+const jsonlWatcher = new JSONLWatcher(sessionPathMap, gateway, a2uiManager)
 
 // Connect to OpenClaw gateway as a node
 let nodeClient: NodeClient | null = null
@@ -143,6 +145,7 @@ async function shutdown() {
   console.log('Shutting down…')
   nodeClient?.stop()
   gateway.broadcastSpa({ type: 'server.shutdown' })
+  jsonlWatcher.close()
   await fileWatcher.close()
   gateway.close()
   server.close(() => process.exit(0))
