@@ -35,6 +35,9 @@ Open `http://localhost:9999` in a browser.
 | `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
 | `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
 | `OPENCLAW_CANVAS_A2UI_DB` | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence |
+| `OPENCLAW_GATEWAY_WS_URL` | `ws://127.0.0.1:18789` | Gateway WebSocket URL for deep link and cron trigger proxying |
+| `OPENCLAW_GATEWAY_TOKEN` | *(from openclaw.json)* | Gateway auth token for agent deep links (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
+| `OPENCLAW_HOOKS_TOKEN` | *(from openclaw.json)* | Hooks token for cron trigger proxying (`/hooks/cron/run`). Falls back to `hooks.token` in `openclaw.json` |
 
 ## Architecture
 
@@ -58,7 +61,7 @@ src/
 │   │   └── a2ui.ts           # push (JSONL), reset
 │   └── routes/
 │       ├── canvas.ts         # GET /:session/:path
-│       ├── agent-proxy.ts    # POST /api/agent → gateway /hooks/agent
+│       ├── agent-proxy.ts    # POST /api/agent → gateway /tools/invoke (sessions_spawn)
 │       ├── cron-trigger.ts   # POST /api/cron-trigger → gateway /hooks/cron/run
 │       └── scaffold.ts       # GET /scaffold
 ├── client/
@@ -170,7 +173,7 @@ These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` base
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/agent` | POST | Proxies deep link requests to the gateway's `/hooks/agent` endpoint |
+| `/api/agent` | POST | Proxies deep link requests to the gateway's `/tools/invoke` endpoint (`sessions_spawn`) |
 | `/api/cron-trigger` | POST | Proxies cron trigger requests to the gateway's `/hooks/cron/run` endpoint |
 | `/api/canvas-config` | GET | Returns canvas configuration for the SPA |
 
@@ -188,7 +191,7 @@ Returns configuration used by the SPA for deep link handling.
 
 - `skipConfirmation` — controlled by `OPENCLAW_CANVAS_SKIP_CONFIRM` env var
 - `agents` — agent IDs read from `openclaw.json`
-- `allowedAgentIds` — agents allowed for hook delivery, from `hooks.allowedAgentIds`
+- `allowedAgentIds` — agents allowed for deep link execution, from `hooks.allowedAgentIds`
 
 ### Deep Link Confirmation Dialog
 
