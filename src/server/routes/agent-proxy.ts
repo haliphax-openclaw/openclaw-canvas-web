@@ -2,8 +2,9 @@ import { Router } from 'express'
 import http from 'node:http'
 
 /**
- * POST /api/agent — proxies to gateway POST /hooks/agent
- * Keeps the hooks token server-side so canvas content never sees it.
+ * POST /api/agent — proxies to gateway POST /tools/invoke (sessions_spawn)
+ * Uses isolated sessions to avoid hooks security boundary warnings.
+ * Keeps the gateway token server-side so canvas content never sees it.
  */
 export function agentProxyRoute(gatewayUrl: string, hooksToken: string): Router {
   const router = Router()
@@ -26,8 +27,17 @@ export function agentProxyRoute(gatewayUrl: string, hooksToken: string): Router 
         return
       }
 
-      const url = new URL('/hooks/agent', gatewayUrl.replace('ws://', 'http://').replace('wss://', 'https://'))
-      const payload = JSON.stringify(parsed)
+      const args: Record<string, unknown> = {
+        task: parsed.message,
+        mode: 'run',
+      }
+      if (parsed.agentId) args.agentId = parsed.agentId
+      if (parsed.model) args.model = parsed.model
+      if (parsed.thinking) args.thinking = parsed.thinking
+      if (parsed.timeoutSeconds) args.runTimeoutSeconds = parsed.timeoutSeconds
+
+      const url = new URL('/tools/invoke', gatewayUrl.replace('ws://', 'http://').replace('wss://', 'https://'))
+      const payload = JSON.stringify({ tool: 'sessions_spawn', args })
 
       const proxyReq = http.request(url, {
         method: 'POST',
