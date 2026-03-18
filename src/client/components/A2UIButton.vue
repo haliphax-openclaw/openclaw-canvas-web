@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from 'vue'
+import { defineComponent, computed, ref, nextTick } from 'vue'
 import { wsClient } from '../services/ws-client'
 import { parseOpenClawUrl } from '../utils/url-schemes'
 
@@ -30,10 +30,10 @@ export default defineComponent({
     const flashSent = () => {
       if (flashTimer) clearTimeout(flashTimer)
       sentFlash.value = true
-      btnRef.value?.blur()
+      nextTick(() => btnRef.value?.blur())
       flashTimer = setTimeout(() => {
         sentFlash.value = false
-        btnRef.value?.blur()
+        nextTick(() => btnRef.value?.blur())
       }, 3000)
     }
 
