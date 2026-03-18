@@ -1,5 +1,5 @@
 <template>
-  <button ref="btnRef" @click="onClick">{{ displayLabel }}</button>
+  <button ref="btnRef" :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
 </template>
 
 <script lang="ts">
@@ -33,7 +33,6 @@ export default defineComponent({
       nextTick(() => btnRef.value?.blur())
       flashTimer = setTimeout(() => {
         sentFlash.value = false
-        nextTick(() => btnRef.value?.blur())
       }, 3000)
     }
 
