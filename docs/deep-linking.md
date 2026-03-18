@@ -7,8 +7,8 @@ The canvas web server supports `openclaw://` deep links that allow rendered canv
 1. An agent pushes HTML content to the canvas (via file-served HTML or `data:` URLs)
 2. The server injects a script into served HTML that intercepts clicks on `openclaw://` links
 3. The SPA surfaces a confirmation dialog showing the message and options
-4. On confirmation, the request is proxied to the gateway's hooks endpoint
-5. The gateway triggers an agent run with the specified message
+4. On confirmation, the request is proxied to the gateway's `/tools/invoke` endpoint
+5. The gateway spawns an isolated subagent session via `sessions_spawn`
 
 ## URL Schemes
 
@@ -42,7 +42,7 @@ openclaw://my-container/agent?message=Run+the+tests
 | `message` | Yes | The message to send to the agent |
 | `agentId` | No | Target agent ID (uses default if omitted) |
 | `model` | No | Model override (e.g. `claude-sonnet-4-20250514`) |
-| `sessionKey` | No | Target session key (auto-resolved if omitted). Requires `hooks.allowRequestSessionKey=true` in gateway config. |
+| `sessionKey` | No | Parent session key for completion announcements. Defaults to `"devnull"` (suppresses announcements). Set to a real session key to receive completion events. |
 | `thinking` | No | Thinking mode: `on`, `off`, or `stream` |
 | `deliver` | No | Delivery mode for the response |
 | `to` | No | Delivery target |
@@ -123,17 +123,29 @@ openclaw-cron://<action>?jobId=<id>&runMode=<mode>
 
 ## API Proxy
 
-Deep link execution is proxied through the canvas server, which forwards requests to the OpenClaw gateway's hooks endpoints. The proxy handles authentication and routing transparently.
+Deep link execution is proxied through the canvas server's `/api/agent` endpoint, which calls the gateway's `/tools/invoke` endpoint to spawn an isolated subagent session via `sessions_spawn`. This avoids the hooks security boundary, which injects warning text into the agent's prompt.
 
 ```
 Client → POST /api/agent { message, agentId, ... }
-       → Gateway /hooks/agent
-       → Agent run triggered
+       → Gateway /tools/invoke (sessions_spawn)
+       → Isolated subagent run triggered
 
 Client → POST /api/cron-trigger { jobId, runMode }
        → Gateway /hooks/cron/run
        → Cron job triggered
 ```
+
+### Suppressing Completion Announcements
+
+By default, `sessions_spawn` auto-announces completion back to the parent session, which costs tokens. To suppress this, the proxy sets `sessionKey` to `"devnull"` by default — a nonexistent session that silently drops the announcement.
+
+To route the completion to a specific session instead (e.g., for monitoring), pass `sessionKey` in the deep link URL:
+
+```
+openclaw://agent?message=Refresh+data&agentId=developer&sessionKey=agent:developer:discord:channel:123
+```
+
+If `sessionKey` is omitted, it defaults to `"devnull"` (no announcement).
 
 ## Canvas Config Endpoint
 
@@ -167,31 +179,43 @@ Cron trigger:
 
 ## Gateway Configuration
 
-Deep linking requires the OpenClaw gateway's hooks system to be enabled and configured. The following settings in `openclaw.json` control deep link behavior:
+Agent deep links use the gateway's `/tools/invoke` endpoint with `sessions_spawn`, while cron deep links use the hooks system. The following settings control deep link behavior:
+
+### Agent Deep Links (`/tools/invoke`)
 
 | Setting | Type | Description |
 |---------|------|-------------|
-| `hooks.enabled` | `boolean` | Must be `true` for the hooks endpoint to accept requests |
-| `hooks.token` | `string` | Bearer token used by the canvas server to authenticate with the gateway's hooks endpoint. Must match the `HOOKS_TOKEN` environment variable passed to the canvas server |
-| `hooks.allowedAgentIds` | `string[]` | Restricts which agent IDs can be targeted by deep links. Omit to allow all agents |
-| `hooks.allowRequestSessionKey` | `boolean` | Must be `true` if deep links include a `sessionKey` parameter for session-targeted routing. Default: `false` |
-| `hooks.allowedSessionKeyPrefixes` | `string[]` | Optional allowlist of session key prefixes accepted when `allowRequestSessionKey` is enabled. Use narrow prefixes to prevent arbitrary session injection |
+| `gateway.auth.token` | `string` | Bearer token used by the canvas server to authenticate with the gateway. Must match the `OPENCLAW_GATEWAY_TOKEN` environment variable (or be readable from `openclaw.json`) |
+| `gateway.tools.allow` | `string[]` | Must include `"sessions_spawn"` to permit agent deep links via `/tools/invoke` |
+
+### Cron Deep Links (`/hooks/cron/run`)
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `hooks.enabled` | `boolean` | Must be `true` for the hooks endpoint to accept cron trigger requests |
+| `hooks.token` | `string` | Bearer token for cron trigger authentication. Must match the `OPENCLAW_HOOKS_TOKEN` environment variable (or be readable from `openclaw.json`) |
 
 Example configuration:
 
 ```json
 {
+  "gateway": {
+    "auth": {
+      "mode": "token",
+      "token": "your-gateway-token"
+    },
+    "tools": {
+      "allow": ["sessions_spawn", "sessions_send", "sessions_list"]
+    }
+  },
   "hooks": {
     "enabled": true,
-    "token": "your-hooks-token",
-    "allowedAgentIds": ["developer", "main"],
-    "allowRequestSessionKey": true,
-    "allowedSessionKeyPrefixes": ["agent:developer:"]
+    "token": "your-hooks-token"
   }
 }
 ```
 
-Without `hooks.enabled` and `hooks.token`, the canvas server's `/api/agent` proxy will receive a connection error or authentication failure from the gateway.
+Without `gateway.auth.token` and `sessions_spawn` in `gateway.tools.allow`, the canvas server's `/api/agent` proxy will receive an authentication failure or 404 from the gateway.
 
 ### Disabling the built-in canvas tool
 
