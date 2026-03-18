@@ -55,7 +55,7 @@ export default defineComponent({
         }).then(flashSent).catch(() => {})
       }
     }
-    return { displayLabel, onClick, btnRef }
+    return { displayLabel, onClick, btnRef, sentFlash }
   },
 })
 </script>
