@@ -188,16 +188,36 @@ Displays an image. Supports `openclaw-canvas://` URLs for canvas-relative paths.
 
 ### ProgressBar
 
-Static progress bar. Commonly used inside Repeat templates for dynamic per-row rendering.
+Progress bar with optional reactive data binding. Commonly used inside Repeat templates for dynamic per-row rendering.
+
+**Static mode:**
 
 ```json
 {"ProgressBar": {"label": "Upload progress", "value": 75}}
 ```
 
+**Data source mode (template interpolation):**
+
+```json
+{"ProgressBar": {"label": "{{progress_label}}", "value": "{{progress_value}}", "dataSource": {"source": "content"}}}
+```
+
+**Data source mode (aggregate in label):**
+
+```json
+{"ProgressBar": {"label": "{{$count}} tasks done", "value": "{{$value}}", "dataSource": {"source": "tasks", "aggregate": {"fn": "avg", "field": "completion"}, "aggregates": {"$count": {"fn": "count"}}}}}
+```
+
 | Prop | Type | Description |
 |------|------|-------------|
-| `value` | `number` | Progress percentage (clamped 0–100) |
-| `label` | `string` | Optional label above the bar |
+| `value` | `number \| string` | Progress percentage (clamped 0–100). Supports `{{field}}` placeholders when `dataSource` is set — resolved value is parsed as a number. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
+| `label` | `string` | Optional label above the bar. Supports `{{field}}`, `{{$value}}`, and `{{$key}}` placeholders when `dataSource` is set. |
+| `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
+
+Template placeholders in both `label` and `value` are resolved reactively — when the data source changes (new data pushed, filters applied), the progress bar updates automatically. Placeholders resolve against:
+- `{{$value}}` — single aggregate result
+- `{{$key}}` — compound aggregate keys (e.g. `{{$count}}`, `{{$total}}`)
+- `{{field}}` — field from the first row of the filtered data source
 
 Inside a Repeat template with transforms:
 

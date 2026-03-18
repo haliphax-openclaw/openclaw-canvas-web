@@ -1,6 +1,6 @@
 <template>
   <div class="a2ui-progress">
-    <span v-if="label" class="a2ui-progress-label">{{ label }}</span>
+    <span v-if="resolvedLabel" class="a2ui-progress-label">{{ resolvedLabel }}</span>
     <div class="a2ui-progress-track">
       <div class="a2ui-progress-fill" :style="`--progress: ${clampedValue}%`" />
     </div>
@@ -9,6 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
+import { useDataSource } from '../composables/useDataSource'
 
 export default defineComponent({
   name: 'A2UIProgressBar',
@@ -18,9 +19,31 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const clampedValue = computed(() => Math.min(100, Math.max(0, Number((props.def as any).value) || 0)))
-    const label = computed(() => (props.def as any).label ?? '')
-    return { clampedValue, label }
+    const { aggregatedValue, compoundAggregates, filteredRows, binding } = useDataSource(props as any)
+
+    function resolveTemplate(raw: unknown): string {
+      const str = typeof raw === 'string' ? raw : String(raw ?? '')
+      if (!binding.value || !str.includes('{{')) return str
+      const aggs = compoundAggregates.value
+      const allKeys: Record<string, string | number> = { ...aggs }
+      if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
+      const row = filteredRows.value && filteredRows.value.length > 0 ? filteredRows.value[0] : null
+      return str.replace(/\{\{(\$?\w+)\}\}/g, (_: string, k: string) => {
+        if (k in allKeys) return String(allKeys[k] ?? '')
+        if (row && k in row) return String(row[k] ?? '')
+        return ''
+      })
+    }
+
+    const resolvedLabel = computed(() => resolveTemplate((props.def as any).label ?? ''))
+
+    const clampedValue = computed(() => {
+      const raw = (props.def as any).value
+      const resolved = binding.value && typeof raw === 'string' && raw.includes('{{') ? resolveTemplate(raw) : raw
+      return Math.min(100, Math.max(0, Number(resolved) || 0))
+    })
+
+    return { clampedValue, resolvedLabel }
   },
 })
 </script>
