@@ -1,6 +1,6 @@
 # A2UI v0.9 Upgrade — Implementation Plan
 
-**Spec:** [docs/a2ui-v09-upgrade-spec.md](a2ui-v09-upgrade-spec.md)
+**Spec:** [a2ui-v09-upgrade-spec.md](a2ui-v09-upgrade-spec.md)
 **Date:** 2026-03-18
 
 ---
