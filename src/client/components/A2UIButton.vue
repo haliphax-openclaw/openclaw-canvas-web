@@ -1,9 +1,9 @@
 <template>
-  <button @click="onClick">{{ label }}</button>
+  <button ref="btnRef" @click="onClick">{{ displayLabel }}</button>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, ref } from 'vue'
 import { wsClient } from '../services/ws-client'
 import { parseOpenClawUrl } from '../utils/url-schemes'
 
@@ -21,6 +21,21 @@ export default defineComponent({
     })
     const href = computed(() => (props.def as any).href as string | undefined)
     const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
+    const sentFlash = ref(false)
+    const btnRef = ref<HTMLButtonElement | null>(null)
+    const displayLabel = computed(() => sentFlash.value ? 'Sent!' : label.value)
+
+    let flashTimer: ReturnType<typeof setTimeout> | null = null
+
+    const flashSent = () => {
+      if (flashTimer) clearTimeout(flashTimer)
+      sentFlash.value = true
+      btnRef.value?.blur()
+      flashTimer = setTimeout(() => {
+        sentFlash.value = false
+        btnRef.value?.blur()
+      }, 3000)
+    }
 
     const onClick = () => {
       wsClient.send({ type: 'a2ui.buttonClick', componentId: props.componentId })
@@ -32,16 +47,16 @@ export default defineComponent({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(parsed.params),
-        }).catch(() => {})
+        }).then(flashSent).catch(() => {})
       } else if (parsed.type === 'cron') {
         fetch(`${base}/api/cron-trigger`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(parsed.params),
-        }).catch(() => {})
+        }).then(flashSent).catch(() => {})
       }
     }
-    return { label, onClick }
+    return { displayLabel, onClick, btnRef }
   },
 })
 </script>
