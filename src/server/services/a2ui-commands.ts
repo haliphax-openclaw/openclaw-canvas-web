@@ -13,6 +13,8 @@ function normalizeSources(sources: Record<string, any>): Record<string, any> {
       continue
     }
     const fields: string[] = src.fields
+    const hasArrayRows = src.rows.some((r: any) => Array.isArray(r))
+    if (hasArrayRows) console.log(`[a2ui-commands] Normalizing ${src.rows.length} array rows for source "${name}"`)
     const rows = src.rows.map((r: any) =>
       Array.isArray(r) ? Object.fromEntries(fields.map((f, i) => [f, r[i]])) : r
     )

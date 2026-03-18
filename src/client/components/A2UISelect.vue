@@ -1,9 +1,9 @@
 <template>
   <select v-if="isMulti" multiple :value="selectedMulti" @change="onChangeMulti">
-    <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+    <option v-for="opt in resolvedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
   </select>
   <select v-else :value="selected" @change="onChange">
-    <option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+    <option v-for="opt in resolvedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
   </select>
 </template>
 
@@ -11,6 +11,7 @@
 import { defineComponent, computed } from 'vue'
 import { wsClient } from '../services/ws-client'
 import { useFilterBind } from '../composables/useFilterBind'
+import { useOptionsFrom } from '../composables/useOptionsFrom'
 
 export default defineComponent({
   name: 'A2UISelect',
@@ -21,15 +22,16 @@ export default defineComponent({
   },
   setup(props) {
     const isMulti = computed(() => !!(props.def as any).multi)
-    const options = computed(() => (props.def as any).options ?? [])
+    const staticOptions = computed(() => (props.def as any).options ?? [])
+    const { derivedOptions } = useOptionsFrom(props as any)
 
-    // Single-select: string
+    const resolvedOptions = computed(() => derivedOptions.value ?? staticOptions.value)
+
     const selected = computed(() => {
       const s = (props.def as any).selected
       return typeof s === 'string' ? s : ''
     })
 
-    // Multi-select: string[]
     const selectedMulti = computed(() => {
       const s = (props.def as any).selected
       if (Array.isArray(s)) return s
@@ -39,7 +41,6 @@ export default defineComponent({
 
     const { updateFilter, maybeEmit } = useFilterBind(props as any)
 
-    // Single-select handler (unchanged behavior)
     const onChange = (e: Event) => {
       const value = (e.target as HTMLSelectElement).value
       wsClient.send({ type: 'a2ui.selectChange', componentId: props.componentId, value })
@@ -47,7 +48,6 @@ export default defineComponent({
       maybeEmit(value)
     }
 
-    // Multi-select handler
     const onChangeMulti = (e: Event) => {
       const sel = e.target as HTMLSelectElement
       const values = Array.from(sel.selectedOptions, (o) => o.value)
@@ -56,7 +56,7 @@ export default defineComponent({
       maybeEmit(values)
     }
 
-    return { isMulti, options, selected, selectedMulti, onChange, onChangeMulti }
+    return { isMulti, resolvedOptions, selected, selectedMulti, onChange, onChangeMulti }
   },
 })
 </script>
