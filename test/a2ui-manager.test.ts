@@ -103,4 +103,38 @@ describe('A2UIManager', () => {
     expect(result).toHaveLength(2)
     expect(result.map(s => s.surfaceId).sort()).toEqual(['s1', 's2'])
   })
+
+  it('updateDataModel normalizes $sources array rows to keyed objects', () => {
+    mgr.upsertSurface('main', 's1', [])
+    mgr.updateDataModel('main', 's1', {
+      $sources: { items: { fields: ['id', 'name', 'value'], rows: [[1, 'Alice', 42], [2, 'Bob', 99]] } },
+    })
+    const dm = mgr.getSurface('main', 's1')!.dataModel
+    const sources = dm.$sources as Record<string, any>
+    expect(sources.items.rows).toEqual([
+      { id: 1, name: 'Alice', value: 42 },
+      { id: 2, name: 'Bob', value: 99 },
+    ])
+  })
+
+  it('updateDataModel preserves $sources rows that are already keyed objects', () => {
+    mgr.upsertSurface('main', 's1', [])
+    mgr.updateDataModel('main', 's1', {
+      $sources: { items: { fields: ['name'], rows: [{ name: 'Alice' }] } },
+    })
+    const sources = mgr.getSurface('main', 's1')!.dataModel.$sources as Record<string, any>
+    expect(sources.items.rows).toEqual([{ name: 'Alice' }])
+  })
+
+  it('updateDataModel normalizes mixed array and object rows in $sources', () => {
+    mgr.upsertSurface('main', 's1', [])
+    mgr.updateDataModel('main', 's1', {
+      $sources: { items: { fields: ['id', 'name'], rows: [[1, 'Alice'], { id: 2, name: 'Bob' }] } },
+    })
+    const sources = mgr.getSurface('main', 's1')!.dataModel.$sources as Record<string, any>
+    expect(sources.items.rows).toEqual([
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ])
+  })
 })

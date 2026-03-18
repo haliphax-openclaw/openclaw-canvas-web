@@ -2,28 +2,6 @@ import type { Gateway } from './gateway.js'
 import type { A2UIManager } from './a2ui-manager.js'
 
 /**
- * Normalize data source rows from positional arrays to keyed objects.
- * Rows can arrive as either [{name: "Alice"}] or [["Alice"]] with a fields array.
- */
-function normalizeSources(sources: Record<string, any>): Record<string, any> {
-  const out: Record<string, any> = {}
-  for (const [name, src] of Object.entries(sources)) {
-    if (!src || !Array.isArray(src.rows) || !Array.isArray(src.fields)) {
-      out[name] = src
-      continue
-    }
-    const fields: string[] = src.fields
-    const hasArrayRows = src.rows.some((r: any) => Array.isArray(r))
-    if (hasArrayRows) console.log(`[a2ui-commands] Normalizing ${src.rows.length} array rows for source "${name}"`)
-    const rows = src.rows.map((r: any) =>
-      Array.isArray(r) ? Object.fromEntries(fields.map((f, i) => [f, r[i]])) : r
-    )
-    out[name] = { ...src, rows }
-  }
-  return out
-}
-
-/**
  * Process a single parsed JSONL command and push it to the A2UI surface.
  * Shared by both the node-client (mcporter) and the JSONL file watcher.
  */
@@ -54,8 +32,7 @@ export function processA2UICommand(
   } else if (parsed.dataSourcePush) {
     const dp = parsed.dataSourcePush as { surfaceId: string; sources: Record<string, unknown> }
     if (!dp.surfaceId) return false
-    const normalized = normalizeSources(dp.sources ?? {})
-    const data = { $sources: normalized }
+    const data = { $sources: dp.sources ?? {} }
     a2uiManager.updateDataModel(session, dp.surfaceId, data)
     gateway.broadcastSpaSession(session, { type: 'a2ui.dataModelUpdate', surfaceId: dp.surfaceId, data })
     return true

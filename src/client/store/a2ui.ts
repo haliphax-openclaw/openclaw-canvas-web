@@ -56,16 +56,12 @@ export const a2uiModule: Module<A2UIState, RootState> = {
       const s = state.surfaces[payload.surfaceId]
       if (!s) return
 
-      // Normalize array rows to object rows using fields
-      const normalizeRows = (fields: string[], rows: unknown[]): Record<string, unknown>[] =>
-        rows.map(r => Array.isArray(r) ? Object.fromEntries(fields.map((f, i) => [f, r[i]])) : r as Record<string, unknown>)
-
       // Extract $sources if present
       const data = { ...payload.data }
       if (data.$sources) {
-        const raw = data.$sources as Record<string, { fields: string[]; rows: unknown[]; primaryKey?: string }>
+        const raw = data.$sources as Record<string, { fields: string[]; rows: Record<string, unknown>[]; primaryKey?: string }>
         for (const [name, src] of Object.entries(raw)) {
-          const rows = normalizeRows(src.fields || [], src.rows || [])
+          const rows = (src.rows || []) as Record<string, unknown>[]
           const existing = s.sources[name]
           if (payload.merge && existing?.primaryKey) {
             const pk = existing.primaryKey
