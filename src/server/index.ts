@@ -68,9 +68,12 @@ app.use(canvasRoute(fileResolver, BASE_PATH))
 app.use(scaffoldRoute())
 app.use(canvasConfigRoute())
 
-// Deep link proxy: openclaw://agent?... or openclaw://<host>/agent?... → POST /api/agent → gateway /hooks/agent
+// Deep link proxy: openclaw://agent?... → POST /api/agent → gateway /tools/invoke (sessions_spawn)
+if (GATEWAY_TOKEN) {
+  app.use(agentProxyRoute(GATEWAY_WS_URL, GATEWAY_TOKEN))
+}
+// Cron trigger proxy: openclaw-cron://... → POST /api/cron-trigger → gateway /hooks/cron/run
 if (HOOKS_TOKEN) {
-  app.use(agentProxyRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
   app.use(cronTriggerRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
 }
 
