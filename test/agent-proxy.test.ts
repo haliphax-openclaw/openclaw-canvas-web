@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import express from 'express'
 import http from 'node:http'
 import { agentProxyRoute } from '../src/server/routes/agent-proxy.js'
@@ -47,11 +47,11 @@ function startProxy(gatewayUrl: string, token: string): Promise<void> {
 }
 
 describe('agentProxyRoute', () => {
-  it('proxies valid request to gateway with auth header', async () => {
-    let receivedHeaders: http.IncomingHttpHeaders = {}
+  it('proxies to /tools/invoke with sessions_spawn payload', async () => {
+    let receivedPath = ''
     let receivedBody = ''
     await startTarget((req, res) => {
-      receivedHeaders = req.headers
+      receivedPath = req.url ?? ''
       let body = ''
       req.on('data', (c) => (body += c))
       req.on('end', () => {
@@ -64,9 +64,118 @@ describe('agentProxyRoute', () => {
 
     const res = await post(proxyPort, '/api/agent', JSON.stringify({ message: 'hello' }))
     expect(res.status).toBe(200)
-    expect(JSON.parse(res.body)).toEqual({ ok: true })
+    expect(receivedPath).toBe('/tools/invoke')
+    const parsed = JSON.parse(receivedBody)
+    expect(parsed.tool).toBe('sessions_spawn')
+    expect(parsed.sessionKey).toBe('devnull')
+    expect(parsed.args.task).toBe('hello')
+    expect(parsed.args.mode).toBe('run')
+  })
+
+  it('sends auth header', async () => {
+    let receivedHeaders: http.IncomingHttpHeaders = {}
+    await startTarget((req, res) => {
+      receivedHeaders = req.headers
+      let body = ''
+      req.on('data', (c) => (body += c))
+      req.on('end', () => {
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end('{"ok":true}')
+      })
+    })
+    await startProxy(`http://127.0.0.1:${targetPort}`, 'secret-token')
+
+    await post(proxyPort, '/api/agent', JSON.stringify({ message: 'hi' }))
     expect(receivedHeaders.authorization).toBe('Bearer secret-token')
-    expect(JSON.parse(receivedBody).message).toBe('hello')
+  })
+
+  it('maps agentId, model, thinking, and timeoutSeconds', async () => {
+    let receivedBody = ''
+    await startTarget((req, res) => {
+      let body = ''
+      req.on('data', (c) => (body += c))
+      req.on('end', () => {
+        receivedBody = body
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end('{"ok":true}')
+      })
+    })
+    await startProxy(`http://127.0.0.1:${targetPort}`, 'tok')
+
+    await post(proxyPort, '/api/agent', JSON.stringify({
+      message: 'do stuff',
+      agentId: 'developer',
+      model: 'claude-sonnet-4',
+      thinking: 'medium',
+      timeoutSeconds: 60,
+    }))
+
+    const parsed = JSON.parse(receivedBody)
+    expect(parsed.args.task).toBe('do stuff')
+    expect(parsed.args.agentId).toBe('developer')
+    expect(parsed.args.model).toBe('claude-sonnet-4')
+    expect(parsed.args.thinking).toBe('medium')
+    expect(parsed.args.runTimeoutSeconds).toBe(60)
+  })
+
+  it('uses custom sessionKey when provided', async () => {
+    let receivedBody = ''
+    await startTarget((req, res) => {
+      let body = ''
+      req.on('data', (c) => (body += c))
+      req.on('end', () => {
+        receivedBody = body
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end('{"ok":true}')
+      })
+    })
+    await startProxy(`http://127.0.0.1:${targetPort}`, 'tok')
+
+    await post(proxyPort, '/api/agent', JSON.stringify({
+      message: 'test',
+      sessionKey: 'agent:developer:discord:channel:123',
+    }))
+
+    const parsed = JSON.parse(receivedBody)
+    expect(parsed.sessionKey).toBe('agent:developer:discord:channel:123')
+  })
+
+  it('defaults sessionKey to devnull when omitted', async () => {
+    let receivedBody = ''
+    await startTarget((req, res) => {
+      let body = ''
+      req.on('data', (c) => (body += c))
+      req.on('end', () => {
+        receivedBody = body
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end('{"ok":true}')
+      })
+    })
+    await startProxy(`http://127.0.0.1:${targetPort}`, 'tok')
+
+    await post(proxyPort, '/api/agent', JSON.stringify({ message: 'test' }))
+
+    const parsed = JSON.parse(receivedBody)
+    expect(parsed.sessionKey).toBe('devnull')
+  })
+
+  it('omits optional args when not provided', async () => {
+    let receivedBody = ''
+    await startTarget((req, res) => {
+      let body = ''
+      req.on('data', (c) => (body += c))
+      req.on('end', () => {
+        receivedBody = body
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end('{"ok":true}')
+      })
+    })
+    await startProxy(`http://127.0.0.1:${targetPort}`, 'tok')
+
+    await post(proxyPort, '/api/agent', JSON.stringify({ message: 'minimal' }))
+
+    const parsed = JSON.parse(receivedBody)
+    expect(parsed.args).toEqual({ task: 'minimal', mode: 'run' })
   })
 
   it('rejects invalid JSON', async () => {
