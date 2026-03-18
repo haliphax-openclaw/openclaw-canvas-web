@@ -37,7 +37,7 @@ export function agentProxyRoute(gatewayUrl: string, hooksToken: string): Router 
       if (parsed.timeoutSeconds) args.runTimeoutSeconds = parsed.timeoutSeconds
 
       const url = new URL('/tools/invoke', gatewayUrl.replace('ws://', 'http://').replace('wss://', 'https://'))
-      const payload = JSON.stringify({ tool: 'sessions_spawn', args })
+      const payload = JSON.stringify({ tool: 'sessions_spawn', sessionKey: 'devnull', args })
 
       const proxyReq = http.request(url, {
         method: 'POST',
