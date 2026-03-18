@@ -70,6 +70,22 @@ export class A2UIManager {
   updateDataModel(session: string, surfaceId: string, data: Record<string, unknown>) {
     const surface = this.surfaces.get(key(session, surfaceId))
     if (surface) {
+      // Normalize array rows to object rows in $sources
+      if (data.$sources && typeof data.$sources === 'object') {
+        const sources = data.$sources as Record<string, any>
+        for (const [name, src] of Object.entries(sources)) {
+          if (src?.rows && Array.isArray(src.rows) && Array.isArray(src.fields)) {
+            const fields: string[] = src.fields
+            const hasArrayRows = src.rows.some((r: any) => Array.isArray(r))
+            if (hasArrayRows) {
+              console.log(`[a2ui-manager] Normalizing array rows for source "${name}" in ${surfaceId}`)
+              src.rows = src.rows.map((r: any) =>
+                Array.isArray(r) ? Object.fromEntries(fields.map((f: string, i: number) => [f, r[i]])) : r
+              )
+            }
+          }
+        }
+      }
       Object.assign(surface.dataModel, data)
       this.store?.save(session, surface)
     }
