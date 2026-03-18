@@ -16,12 +16,25 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const { aggregatedValue, mappedProps, binding } = useDataSource(props as any)
+    const { aggregatedValue, compoundAggregates, filteredRows, mappedProps, binding } = useDataSource(props as any)
     const tag = computed(() => hintMap[(props.def as any).usageHint] ?? 'p')
     const strokeWidth = computed(() => (props.def as any).strokeWidth ?? null)
     const displayText = computed(() => {
       if (binding.value) {
         if (mappedProps.value.text != null) return mappedProps.value.text
+        const t = (props.def as any).text
+        const raw = t?.literalString ?? t ?? ''
+        if (typeof raw === 'string' && raw.includes('{{')) {
+          const aggs = compoundAggregates.value
+          const allKeys: Record<string, string | number> = { ...aggs }
+          if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
+          const row = filteredRows.value && filteredRows.value.length > 0 ? filteredRows.value[0] : null
+          return raw.replace(/\{\{(\$?\w+)\}\}/g, (_: string, k: string) => {
+            if (k in allKeys) return String(allKeys[k] ?? '')
+            if (row && k in row) return String(row[k] ?? '')
+            return ''
+          })
+        }
         if (aggregatedValue.value != null) return aggregatedValue.value
       }
       const t = (props.def as any).text

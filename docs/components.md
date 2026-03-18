@@ -101,7 +101,7 @@ The `active` prop reacts to surface updates, allowing agents to switch tabs prog
 
 ### Text
 
-Text display component. Renders as `<p>` by default, or as heading/span based on `usageHint`.
+Text display component. Renders as `<p>` by default, or as heading/span based on `usageHint`. Supports reactive data binding with template interpolation.
 
 **Static mode:**
 
@@ -109,20 +109,39 @@ Text display component. Renders as `<p>` by default, or as heading/span based on
 {"Text": {"text": "Hello world", "usageHint": "h2"}}
 ```
 
-**Data source mode:**
+**Data source mode (aggregate with map):**
 
 ```json
 {"Text": {"dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total", "format": "compact"}, "map": {"text": "$value"}}, "usageHint": "h1"}}
 ```
 
+**Data source mode (template interpolation in text):**
+
+```json
+{"Text": {"text": "Total: {{$value}} across {{$count}} orders", "usageHint": "h2", "dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total"}, "aggregates": {"$count": {"fn": "count"}}}}}
+```
+
+**Data source mode (row field interpolation):**
+
+```json
+{"Text": {"text": "Top customer: {{name}} ({{revenue}})", "dataSource": {"source": "customers"}}}
+```
+
 | Prop | Type | Description |
 |------|------|-------------|
-| `text` | `string \| { literalString: string }` | Static text content |
+| `text` | `string \| { literalString: string }` | Static text content. Supports `{{field}}` placeholders when `dataSource` is set — resolves against the first filtered row. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
 | `usageHint` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
 | `strokeWidth` | `string` | CSS text stroke width (e.g. `"1px"`). Renders a black outline for readability over images. |
-| `dataSource` | `DataSourceBinding` | Bind to a data source |
+| `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
 
-Display priority: `mappedProps.text` > `aggregatedValue` > static `text`.
+Display priority: `mappedProps.text` > text with `{{}}` template interpolation > `aggregatedValue` > static `text`.
+
+Template placeholders in `text` are resolved reactively — when the data source changes (new data pushed, filters applied), the text updates automatically. Placeholders resolve against:
+- `{{$value}}` — single aggregate result
+- `{{$key}}` — compound aggregate keys (e.g. `{{$count}}`, `{{$total}}`)
+- `{{field}}` — field from the first row of the filtered data source
+
+Map templates (`dataSource.map`) also support `{{field}}` placeholders resolved against the first row, in addition to `{{$key}}` aggregate keys.
 
 ### Badge
 
