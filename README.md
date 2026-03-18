@@ -58,6 +58,8 @@ src/
 │   │   └── a2ui.ts           # push (JSONL), reset
 │   └── routes/
 │       ├── canvas.ts         # GET /:session/:path
+│       ├── agent-proxy.ts    # POST /api/agent → gateway /hooks/agent
+│       ├── cron-trigger.ts   # POST /api/cron-trigger → gateway /hooks/cron/run
 │       └── scaffold.ts       # GET /scaffold
 ├── client/
 │   ├── main.ts               # Vue app entry
@@ -69,6 +71,8 @@ src/
 │   └── services/
 │       ├── ws-client.ts      # Browser WebSocket client
 │       └── url-rewriter.ts   # openclaw-canvas:// URL rewriter
+├── utils/
+│   └── url-schemes.ts        # Shared URL scheme parser (openclaw://, openclaw-cron://, openclaw-canvas://)
 test/                          # vitest tests
 ```
 
@@ -138,6 +142,14 @@ Trigger agent runs from links inside canvas HTML. When a user clicks an `opencla
 <a href="openclaw://agent?message=run+my+task">Run Task</a>
 ```
 
+### `openclaw-cron://` — Cron Job Triggers
+
+Trigger cron job runs from canvas content. The request is proxied to the gateway's `/hooks/cron/run` endpoint.
+
+```html
+<a href="openclaw-cron://run?jobId=daily-backup&runMode=force">Run Backup</a>
+```
+
 See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parameters, confirmation dialog, script injection details, and security considerations.
 
 ### `openclaw-canvas://` — Canvas File References
@@ -159,6 +171,7 @@ These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` base
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/agent` | POST | Proxies deep link requests to the gateway's `/hooks/agent` endpoint |
+| `/api/cron-trigger` | POST | Proxies cron trigger requests to the gateway's `/hooks/cron/run` endpoint |
 | `/api/canvas-config` | GET | Returns canvas configuration for the SPA |
 
 ### GET /api/canvas-config

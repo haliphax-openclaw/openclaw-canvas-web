@@ -10,13 +10,25 @@ The canvas web server supports `openclaw://` deep links that allow rendered canv
 4. On confirmation, the request is proxied to the gateway's hooks endpoint
 5. The gateway triggers an agent run with the specified message
 
-## URL Format
+## URL Schemes
+
+Three custom URL schemes are supported:
+
+| Scheme | Purpose | Example |
+|--------|---------|---------|
+| `openclaw://` | Agent deep links | `openclaw://agent?message=Run+the+tests` |
+| `openclaw-cron://` | Cron job triggers | `openclaw-cron://run?jobId=daily-backup` |
+| `openclaw-canvas://` | Session file references | `openclaw-canvas://my-project/logo.png` |
+
+A shared utility (`src/client/utils/url-schemes.ts`) provides `parseOpenClawUrl()` for parsing all three schemes.
+
+### `openclaw://` — Agent Deep Links
 
 ```
 openclaw://agent?message=<text>&sessionKey=<key>&agentId=<id>&model=<model>&thinking=<mode>
 ```
 
-The `agent` action is currently the only supported action. The authority position can be either `agent` directly or a container hostname:
+The authority position can be either `agent` directly or a container hostname:
 
 ```
 openclaw://agent?message=Run+the+tests
@@ -86,14 +98,41 @@ An agent can build a dashboard with actionable links:
 
 When the user clicks "Fix this", the confirmation dialog appears, and on approval, the agent receives the message and can act on it.
 
+## Cron Trigger — `openclaw-cron://` URLs
+
+The `openclaw-cron://` scheme triggers cron job runs via the canvas server's `/api/cron-trigger` endpoint, which proxies to the gateway's `/hooks/cron/run` endpoint.
+
+### URL Format
+
+```
+openclaw-cron://<action>?jobId=<id>&runMode=<mode>
+```
+
+### Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `jobId` | Yes | The cron job ID to trigger |
+| `runMode` | No | Run mode (default: `force`) |
+
+### Example
+
+```html
+<a href="openclaw-cron://run?jobId=daily-backup">Run Backup Now</a>
+```
+
 ## API Proxy
 
-Deep link execution is proxied through the canvas server's `/api/agent` endpoint, which forwards the request to the OpenClaw gateway's hooks endpoint. The proxy handles authentication and routing transparently.
+Deep link execution is proxied through the canvas server, which forwards requests to the OpenClaw gateway's hooks endpoints. The proxy handles authentication and routing transparently.
 
 ```
 Client → POST /api/agent { message, agentId, ... }
-       → Gateway hooks endpoint
+       → Gateway /hooks/agent
        → Agent run triggered
+
+Client → POST /api/cron-trigger { jobId, runMode }
+       → Gateway /hooks/cron/run
+       → Cron job triggered
 ```
 
 ## Canvas Config Endpoint
@@ -114,10 +153,16 @@ The `/api/canvas-config` endpoint provides client-side configuration:
 
 ## A2UI Button Deep Links
 
-A2UI Button components support deep links via the `href` prop. Unlike iframe-based deep links, A2UI buttons POST directly to the `/api/agent` endpoint without showing a confirmation dialog. This is appropriate for trusted A2UI content where the agent controls the button labels and URLs.
+A2UI Button components support deep links via the `href` prop. Unlike iframe-based deep links, A2UI buttons POST directly to the appropriate API endpoint without showing a confirmation dialog. This is appropriate for trusted A2UI content where the agent controls the button labels and URLs.
 
+Agent trigger:
 ```json
 {"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+data&agentId=developer"}}
+```
+
+Cron trigger:
+```json
+{"Button": {"label": "Run Backup", "href": "openclaw-cron://run?jobId=daily-backup&runMode=force"}}
 ```
 
 ## Gateway Configuration

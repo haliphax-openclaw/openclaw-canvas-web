@@ -1,0 +1,54 @@
+import { describe, it, expect } from 'vitest'
+import { parseOpenClawUrl } from '../src/client/utils/url-schemes'
+
+describe('parseOpenClawUrl', () => {
+  describe('openclaw-canvas://', () => {
+    it('parses session and path', () => {
+      const r = parseOpenClawUrl('openclaw-canvas://my-project/images/logo.png')
+      expect(r).toEqual({ type: 'canvas', params: {}, session: 'my-project', path: 'images/logo.png' })
+    })
+
+    it('handles session-only (no path)', () => {
+      const r = parseOpenClawUrl('openclaw-canvas://dash')
+      expect(r).toEqual({ type: 'canvas', params: {}, session: 'dash', path: '' })
+    })
+  })
+
+  describe('openclaw://', () => {
+    it('parses agent URL with params', () => {
+      const r = parseOpenClawUrl('openclaw://agent?message=hello&sessionKey=sk1')
+      expect(r).toEqual({ type: 'agent', params: { message: 'hello', sessionKey: 'sk1' } })
+    })
+
+    it('parses agent URL with no params', () => {
+      const r = parseOpenClawUrl('openclaw://agent')
+      expect(r).toEqual({ type: 'agent', params: {} })
+    })
+  })
+
+  describe('openclaw-cron://', () => {
+    it('parses cron URL with params', () => {
+      const r = parseOpenClawUrl('openclaw-cron://run?jobId=daily-backup&runMode=force')
+      expect(r).toEqual({ type: 'cron', params: { jobId: 'daily-backup', runMode: 'force' } })
+    })
+
+    it('parses cron URL with jobId only', () => {
+      const r = parseOpenClawUrl('openclaw-cron://trigger?jobId=cleanup')
+      expect(r).toEqual({ type: 'cron', params: { jobId: 'cleanup' } })
+    })
+  })
+
+  describe('non-matching URLs', () => {
+    it('returns null for https URLs', () => {
+      expect(parseOpenClawUrl('https://example.com')).toBeNull()
+    })
+
+    it('returns null for empty string', () => {
+      expect(parseOpenClawUrl('')).toBeNull()
+    })
+
+    it('returns null for plain text', () => {
+      expect(parseOpenClawUrl('not a url')).toBeNull()
+    })
+  })
+})
