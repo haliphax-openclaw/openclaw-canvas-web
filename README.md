@@ -2,6 +2,23 @@
 
 A cross-platform canvas server for OpenClaw. Serves HTML content, renders A2UI v0.8 surfaces, and provides a WebSocket gateway for agent-driven UI control.
 
+## MCP Server
+
+The canvas server registers as an OpenClaw gateway node, exposing an MCP-compatible tool interface that agents can invoke via `mcporter`. On startup, it connects to the gateway WebSocket, authenticates with Ed25519 signatures, and advertises the following commands:
+
+| Command | Description |
+|---------|-------------|
+| `canvas.present` | Show/present canvas content |
+| `canvas.hide` | Hide the canvas panel |
+| `canvas.navigate` | Navigate to a canvas session/path or external URL |
+| `canvas.eval` | Execute JavaScript in the canvas context |
+| `canvas.snapshot` | Capture the current canvas as a base64 PNG |
+| `canvas.a2ui.push` | Push A2UI surface commands (structured) |
+| `canvas.a2ui.pushJSONL` | Push A2UI JSONL payload (string) |
+| `canvas.a2ui.reset` | Clear A2UI surface state |
+
+Node identity (Ed25519 keypair and device ID) is generated on first run and stored at `~/.openclaw-canvas/node-identity.json`. The gateway URL and auth token are read from environment variables or `openclaw.json`.
+
 ## Agent Skill
 
 A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server.
