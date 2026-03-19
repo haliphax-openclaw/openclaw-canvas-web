@@ -1,9 +1,7 @@
 <template>
   <div class="a2ui-progress">
     <span v-if="resolvedLabel" class="a2ui-progress-label">{{ resolvedLabel }}</span>
-    <div class="a2ui-progress-track">
-      <div class="a2ui-progress-fill" :style="`--progress: ${clampedValue}%`" />
-    </div>
+    <progress class="progress progress-primary w-full" :value="clampedValue" max="100"></progress>
   </div>
 </template>
 
@@ -46,8 +44,5 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-progress { color: #e0e0e0; }
 .a2ui-progress-label { display: block; margin-bottom: 4px; font-size: 0.85em; }
-.a2ui-progress-track { background: #333; border-radius: 4px; height: 12px; overflow: hidden; }
-.a2ui-progress-fill { background: #4a6cf7; height: 100%; transition: width 0.3s; width: var(--progress, 0%); }
 </style>

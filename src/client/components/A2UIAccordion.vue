@@ -1,12 +1,15 @@
 <template>
-  <div class="a2ui-accordion">
-    <div v-for="(panel, i) in panels" :key="i" class="a2ui-accordion-panel">
-      <div class="a2ui-accordion-header" @click="toggle(i)">
-        <span class="a2ui-accordion-indicator">{{ isOpen(i) ? '▼' : '▶' }}</span>
-        {{ panel.title }}
-      </div>
-      <div class="a2ui-accordion-content" :class="{ collapsed: !isOpen(i) }">
-        <A2UINode :component-id="panel.child" :surface-id="surfaceId" />
+  <div class="flex flex-col gap-1 w-full min-w-[200px]">
+    <div v-for="(panel, i) in panels" :key="i" class="collapse collapse-arrow border border-base-300 bg-base-200">
+      <input type="checkbox" :checked="isOpen(i)" @change="toggle(i)" />
+      <div class="collapse-title font-medium">{{ panel.title }}</div>
+      <div class="collapse-content">
+        <template v-if="panel.child">
+          <A2UINode :component-id="panel.child" :surface-id="surfaceId" />
+        </template>
+        <template v-else>
+          <p>{{ panel.content }}</p>
+        </template>
       </div>
     </div>
   </div>
@@ -23,7 +26,16 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const panels = computed(() => (props.def as any).panels ?? [])
+    const panels = computed(() => {
+      const def = props.def as any
+      // Support both "panels" (with child component IDs) and "sections" (with inline content)
+      const raw = def.panels ?? def.sections ?? []
+      return raw.map((p: any) => ({
+        title: p.title ?? '',
+        child: p.child ?? null,
+        content: p.content ?? '',
+      }))
+    })
     const mode = computed(() => (props.def as any).mode ?? 'single')
     const openSet = ref<Set<number>>(new Set((props.def as any).expanded ?? []))
 
@@ -44,13 +56,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style scoped>
-.a2ui-accordion { display: flex; flex-direction: column; gap: 2px; width: fit-content; min-width: 200px; }
-.a2ui-accordion-panel { border: 1px solid #444; border-radius: 4px; overflow: hidden; }
-.a2ui-accordion-header { padding: 8px 12px; cursor: pointer; user-select: none; background: #2a2a2a; color: #e0e0e0; }
-.a2ui-accordion-header:hover { background: #3a3a3a; }
-.a2ui-accordion-indicator { margin-right: 8px; font-size: 0.75em; }
-.a2ui-accordion-content { padding: 8px 12px; background: #1e1e1e; }
-.a2ui-accordion-content.collapsed { height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
-</style>

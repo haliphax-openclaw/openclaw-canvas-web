@@ -1,6 +1,9 @@
 import type { Gateway } from './gateway.js'
 import type { A2UIManager } from './a2ui-manager.js'
 
+/** Default catalog URI when none is provided by createSurface */
+const DEFAULT_CATALOG_ID = 'https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all'
+
 /** v0.8 → v0.9 command name aliases */
 const COMMAND_ALIASES: Record<string, string> = {
   surfaceUpdate: 'updateComponents',
@@ -134,10 +137,11 @@ export function processPipelineCommand(
     case 'createSurface': {
       error = validateCreateSurface(parsed[command])
       if (error) break
-      const br = parsed[command] as { surfaceId: string; root?: string; catalogId?: string; theme?: Record<string, unknown>; sendDataModel?: boolean }
+      const br = parsed[command] as { surfaceId: string; root?: string; catalogId?: string; theme?: string; sendDataModel?: boolean }
       const root = br.root ?? 'root'
-      a2uiManager.setRoot(session, br.surfaceId, root, { catalogId: br.catalogId, theme: br.theme })
-      gateway.broadcastSpaSession(session, { type: 'a2ui.createSurface', surfaceId: br.surfaceId, root, catalogId: br.catalogId, theme: br.theme, sendDataModel: br.sendDataModel })
+      const catalogId = br.catalogId ?? DEFAULT_CATALOG_ID
+      a2uiManager.setRoot(session, br.surfaceId, root, { catalogId, theme: br.theme })
+      gateway.broadcastSpaSession(session, { type: 'a2ui.createSurface', surfaceId: br.surfaceId, root, catalogId, theme: br.theme, sendDataModel: br.sendDataModel })
       break
     }
     case 'updateDataModel': {

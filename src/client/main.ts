@@ -4,7 +4,7 @@ import { router } from './router'
 import { store } from './store'
 import { wsClient } from './services/ws-client'
 import A2UINode from './components/A2UINode.vue'
-import './styles/mobile.css'
+import './styles/tailwind.css'
 
 // Extract session from URL path (first segment after base path) so initial WS connect uses the correct session
 const base = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''

@@ -1,11 +1,17 @@
 <template>
-  <button :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
+  <button class="btn" :class="variantClass" :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref } from 'vue'
 import { wsClient } from '../services/ws-client'
 import { parseOpenClawUrl } from '../utils/url-schemes'
+
+const variantClassMap: Record<string, string> = {
+  default: 'btn-soft',
+  primary: 'btn-primary',
+  borderless: 'btn-ghost',
+}
 
 export default defineComponent({
   name: 'A2UIButton',
@@ -19,6 +25,8 @@ export default defineComponent({
       const t = (props.def as any).label ?? (props.def as any).text
       return t?.literalString ?? t ?? 'Button'
     })
+    const variant = computed(() => (props.def as any).variant ?? 'default')
+    const variantClass = computed(() => variantClassMap[variant.value] ?? '')
     const href = computed(() => (props.def as any).href as string | undefined)
     const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
     const sentFlash = ref(false)
@@ -53,7 +61,7 @@ export default defineComponent({
         }).then(flashSent).catch(() => {})
       }
     }
-    return { displayLabel, onClick, sentFlash }
+    return { displayLabel, variantClass, onClick, sentFlash }
   },
 })
 </script>

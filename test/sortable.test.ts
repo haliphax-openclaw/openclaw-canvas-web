@@ -176,8 +176,8 @@ describe('A2UIRepeat sorting', () => {
       def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
-    expect(w.find('.a2ui-repeat-sort-select').exists()).toBe(true)
-    const options = w.findAll('.a2ui-repeat-sort-select option')
+    expect(w.find('.a2ui-repeat-sort select').exists()).toBe(true)
+    const options = w.findAll('.a2ui-repeat-sort select option')
     expect(options.map(o => o.text())).toEqual(['Unsorted', 'Ascending', 'Descending'])
   })
 
@@ -192,7 +192,7 @@ describe('A2UIRepeat sorting', () => {
     expect(texts.map(t => t.text())).toEqual(['Charlie', 'Alice', 'Bob'])
 
     // Select ascending
-    await w.find('.a2ui-repeat-sort-select').setValue('asc')
+    await w.find('.a2ui-repeat-sort select').setValue('asc')
     texts = w.findAllComponents(A2UIText)
     expect(texts.map(t => t.text())).toEqual(['Bob', 'Charlie', 'Alice'])
   })
@@ -203,7 +203,7 @@ describe('A2UIRepeat sorting', () => {
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
 
-    await w.find('.a2ui-repeat-sort-select').setValue('desc')
+    await w.find('.a2ui-repeat-sort select').setValue('desc')
     const texts = w.findAllComponents(A2UIText)
     expect(texts.map(t => t.text())).toEqual(['Alice', 'Charlie', 'Bob'])
   })
@@ -214,8 +214,8 @@ describe('A2UIRepeat sorting', () => {
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
 
-    await w.find('.a2ui-repeat-sort-select').setValue('asc')
-    await w.find('.a2ui-repeat-sort-select').setValue('')
+    await w.find('.a2ui-repeat-sort select').setValue('asc')
+    await w.find('.a2ui-repeat-sort select').setValue('')
     const texts = w.findAllComponents(A2UIText)
     expect(texts.map(t => t.text())).toEqual(['Charlie', 'Alice', 'Bob'])
   })

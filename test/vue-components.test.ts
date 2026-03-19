@@ -58,7 +58,7 @@ beforeEach(() => { vi.mocked(wsClient.send).mockClear() })
 describe('A2UIDivider', () => {
   it('renders an hr element', () => {
     const w = mount(A2UIDivider)
-    expect(w.find('hr').exists()).toBe(true)
+    expect(w.find('.divider').exists()).toBe(true)
   })
 })
 
@@ -127,12 +127,12 @@ describe('A2UIBadge', () => {
   it('renders text with variant class', () => {
     const w = mountWith(A2UIBadge, { def: { text: 'OK', variant: 'success' }, surfaceId: 's1', componentId: 'c1' })
     expect(w.find('span').text()).toBe('OK')
-    expect(w.find('span').classes()).toContain('a2ui-badge--success')
+    expect(w.find('span').classes()).toContain('badge-success')
   })
 
   it('defaults to info variant', () => {
     const w = mountWith(A2UIBadge, { def: { text: 'X', variant: 'bogus' }, surfaceId: 's1', componentId: 'c1' })
-    expect(w.find('span').classes()).toContain('a2ui-badge--info')
+    expect(w.find('span').classes()).toContain('badge-info')
   })
 })
 
@@ -189,13 +189,13 @@ describe('A2UISelect', () => {
 describe('A2UIProgressBar', () => {
   it('renders with clamped width', () => {
     const w = mountWith(A2UIProgressBar, { def: { value: 75, label: 'Loading' }, surfaceId: 's1', componentId: 'pb1' })
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 75%')
+    expect(w.find('progress').attributes('value')).toBe('75')
     expect(w.find('.a2ui-progress-label').text()).toBe('Loading')
   })
 
   it('clamps value to 0-100', () => {
     const w = mountWith(A2UIProgressBar, { def: { value: 150 }, surfaceId: 's1', componentId: 'pb1' })
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 100%')
+    expect(w.find('progress').attributes('value')).toBe('100')
   })
 })
 
@@ -255,7 +255,7 @@ describe('A2UIColumn / A2UIRow / A2UIStack (layout)', () => {
 
   it('A2UIStack renders children', () => {
     const w = mountLayout(A2UIStack, { def: { children: ['t1'] }, surfaceId: 's1' })
-    expect(w.find('.a2ui-stack').exists()).toBe(true)
+    expect(w.find('.stack').exists()).toBe(true)
     expect(w.findAll('p')).toHaveLength(1)
   })
 })

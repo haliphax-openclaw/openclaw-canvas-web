@@ -1,5 +1,5 @@
 <template>
-  <div class="a2ui-stack">
+  <div class="stack">
     <A2UINode v-for="childId in children" :key="childId" :component-id="childId" :surface-id="surfaceId" />
   </div>
 </template>
@@ -22,9 +22,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style scoped>
-.a2ui-stack { position: relative; display: inline-block; }
-.a2ui-stack > * { position: absolute; top: 0; left: 0; }
-.a2ui-stack > :first-child { position: relative; display: block; }
-</style>

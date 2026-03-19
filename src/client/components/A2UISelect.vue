@@ -1,8 +1,8 @@
 <template>
-  <select v-if="isMulti" multiple :value="selectedMulti" @change="onChangeMulti">
+  <select v-if="isMulti" class="select" multiple :value="selectedMulti" @change="onChangeMulti">
     <option v-for="opt in resolvedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
   </select>
-  <select v-else :value="selected" @change="onChange">
+  <select v-else class="select" :value="selected" @change="onChange">
     <option v-for="opt in resolvedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
   </select>
 </template>
@@ -62,7 +62,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
 select[multiple] { min-height: 5em; }
 select[multiple] option { padding: 1px 4px; line-height: 1; margin: 0; }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="a2ui-repeat">
     <div v-if="sortable" class="a2ui-repeat-sort">
-      <select v-model="sortDir" class="a2ui-repeat-sort-select">
+      <select v-model="sortDir" class="select select-sm">
         <option value="">Unsorted</option>
         <option value="asc">Ascending</option>
         <option value="desc">Descending</option>
@@ -90,6 +90,6 @@ export default defineComponent({
 <style scoped>
 .a2ui-repeat { margin-bottom: 16px; }
 .a2ui-repeat-sort { margin-bottom: 8px; }
-.a2ui-repeat-sort-select { background: #1a1a2e; color: #e0e0e0; border: 1px solid #444; padding: 4px 8px; border-radius: 4px; }
+.a2ui-repeat-sort-select { background: var(--a2ui-bg-surface); color: var(--a2ui-text); border: 1px solid var(--a2ui-border); padding: 4px 8px; border-radius: 4px; }
 .a2ui-repeat-items { display: flex; flex-direction: column; gap: 12px; }
 </style>

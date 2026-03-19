@@ -44,7 +44,7 @@ describe('A2UIProgressBar data binding', () => {
   it('renders static label and value without dataSource', () => {
     const w = mountBar({ label: 'Upload', value: 75 })
     expect(w.find('.a2ui-progress-label').text()).toBe('Upload')
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 75%')
+    expect(w.find('progress').attributes('value')).toBe('75')
   })
 
   it('interpolates ${field} in label from first row', () => {
@@ -62,7 +62,7 @@ describe('A2UIProgressBar data binding', () => {
       { label: 'Progress', value: '${progress_value}', dataSource: { source: 'content' } },
       baseSurface(rows),
     )
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 63%')
+    expect(w.find('progress').attributes('value')).toBe('63')
   })
 
   it('interpolates both label and value together', () => {
@@ -72,14 +72,14 @@ describe('A2UIProgressBar data binding', () => {
       baseSurface(rows),
     )
     expect(w.find('.a2ui-progress-label').text()).toBe('Op Permafrost')
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 42%')
+    expect(w.find('progress').attributes('value')).toBe('42')
   })
 
   it('clamps resolved value to 0-100', () => {
     const rows = [{ val: 150 }]
     const surfaces = { s1: { components: {}, root: null, dataModel: {}, sources: { s: { fields: ['val'], rows } }, filters: {} } }
     const w = mountBar({ label: 'X', value: '${val}', dataSource: { source: 's' } }, surfaces)
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 100%')
+    expect(w.find('progress').attributes('value')).toBe('100')
   })
 
   it('resolves aggregate ${$value} in value', () => {
@@ -89,7 +89,7 @@ describe('A2UIProgressBar data binding', () => {
       { label: 'Avg', value: '${$value}', dataSource: { source: 's', aggregate: { fn: 'avg', field: 'score' } } },
       surfaces,
     )
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 50%')
+    expect(w.find('progress').attributes('value')).toBe('50')
   })
 
   it('resolves compound aggregates in label', () => {
@@ -134,6 +134,6 @@ describe('A2UIProgressBar data binding', () => {
     })
     await w.vm.$nextTick()
     expect(w.find('.a2ui-progress-label').text()).toBe('Phase 2')
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 80%')
+    expect(w.find('progress').attributes('value')).toBe('80')
   })
 })

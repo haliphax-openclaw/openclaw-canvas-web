@@ -178,7 +178,7 @@ export default defineComponent({
     }
     const onBeginRendering = (d: Record<string, unknown>) => {
       if (d.session && d.session !== sessionId.value) return
-      store.commit('a2ui/setRoot', { surfaceId: d.surfaceId, root: d.root })
+      store.commit('a2ui/setRoot', { surfaceId: d.surfaceId, root: d.root, theme: d.theme, catalogId: d.catalogId })
       store.commit('setVisible', true)
       activeSurfaceId.value = d.surfaceId as string
     }
