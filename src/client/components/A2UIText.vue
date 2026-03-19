@@ -5,6 +5,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
+import { formatString } from '../utils/format-string'
 
 const hintMap: Record<string, string> = { h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4', h5: 'h5', h6: 'h6', body: 'p', label: 'span' }
 
@@ -24,16 +25,12 @@ export default defineComponent({
         if (mappedProps.value.text != null) return mappedProps.value.text
         const t = (props.def as any).text
         const raw = t?.literalString ?? t ?? ''
-        if (typeof raw === 'string' && raw.includes('{{')) {
+        if (typeof raw === 'string' && raw.includes('${')) {
           const aggs = compoundAggregates.value
-          const allKeys: Record<string, string | number> = { ...aggs }
+          const allKeys: Record<string, unknown> = { ...aggs }
           if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
           const row = filteredRows.value && filteredRows.value.length > 0 ? filteredRows.value[0] : null
-          return raw.replace(/\{\{(\$?\w+)\}\}/g, (_: string, k: string) => {
-            if (k in allKeys) return String(allKeys[k] ?? '')
-            if (row && k in row) return String(row[k] ?? '')
-            return ''
-          })
+          return formatString(raw, { ...allKeys, ...(row ?? {}) })
         }
         if (aggregatedValue.value != null) return aggregatedValue.value
       }

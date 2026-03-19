@@ -165,7 +165,7 @@ describe('A2UIRepeat sorting', () => {
 
   it('does not show sort dropdown when sortable is false', () => {
     const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '{{name}}' } } },
+      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } } },
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
     expect(w.find('.a2ui-repeat-sort').exists()).toBe(false)
@@ -173,7 +173,7 @@ describe('A2UIRepeat sorting', () => {
 
   it('shows sort dropdown when sortable is true', () => {
     const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '{{name}}' } }, sortable: true, sortField: 'score' },
+      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
     expect(w.find('.a2ui-repeat-sort-select').exists()).toBe(true)
@@ -183,7 +183,7 @@ describe('A2UIRepeat sorting', () => {
 
   it('sorts items ascending by sortField', async () => {
     const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '{{name}}' } }, sortable: true, sortField: 'score' },
+      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
 
@@ -199,7 +199,7 @@ describe('A2UIRepeat sorting', () => {
 
   it('sorts items descending by sortField', async () => {
     const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '{{name}}' } }, sortable: true, sortField: 'score' },
+      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
 
@@ -210,7 +210,7 @@ describe('A2UIRepeat sorting', () => {
 
   it('returns to unsorted when selecting Unsorted', async () => {
     const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '{{name}}' } }, sortable: true, sortField: 'score' },
+      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
       surfaceId: 's1', componentId: 'r1',
     }, repeatSurfaces)
 

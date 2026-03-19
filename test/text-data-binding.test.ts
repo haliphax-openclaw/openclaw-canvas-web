@@ -41,19 +41,19 @@ const baseSurface = (rows: Record<string, unknown>[]) => ({
 })
 
 describe('A2UIText data binding', () => {
-  it('interpolates {{field}} placeholders from first row', () => {
+  it('interpolates ${field} placeholders from first row', () => {
     const rows = [{ name: 'Alice', amount: 100 }, { name: 'Bob', amount: 200 }]
     const w = mountText(
-      { text: 'User: {{name}}, Amount: {{amount}}', dataSource: { source: 'items' } },
+      { text: 'User: ${name}, Amount: ${amount}', dataSource: { source: 'items' } },
       baseSurface(rows),
     )
     expect(w.text()).toBe('User: Alice, Amount: 100')
   })
 
-  it('interpolates aggregate {{$value}} in text prop', () => {
+  it('interpolates aggregate ${$value} in text prop', () => {
     const rows = [{ name: 'A', amount: 10 }, { name: 'B', amount: 20 }]
     const w = mountText(
-      { text: 'Total: {{$value}}', dataSource: { source: 'items', aggregate: { fn: 'sum', field: 'amount' } } },
+      { text: 'Total: ${$value}', dataSource: { source: 'items', aggregate: { fn: 'sum', field: 'amount' } } },
       baseSurface(rows),
     )
     expect(w.text()).toBe('Total: 30')
@@ -63,7 +63,7 @@ describe('A2UIText data binding', () => {
     const rows = [{ name: 'A', amount: 10 }, { name: 'B', amount: 20 }]
     const w = mountText(
       {
-        text: '{{$count}} items, total {{$total}}',
+        text: '${$count} items, total ${$total}',
         dataSource: {
           source: 'items',
           aggregates: {
@@ -82,44 +82,44 @@ describe('A2UIText data binding', () => {
     const w = mountText(
       {
         text: 'fallback',
-        dataSource: { source: 'items', aggregate: { fn: 'count' }, map: { text: '{{$value}} records' } },
+        dataSource: { source: 'items', aggregate: { fn: 'count' }, map: { text: '${$value} records' } },
       },
       baseSurface(rows),
     )
     expect(w.text()).toBe('1 records')
   })
 
-  it('resolves {{field}} in map templates against first row', () => {
+  it('resolves ${field} in map templates against first row', () => {
     const rows = [{ name: 'Alice', amount: 42 }]
     const w = mountText(
       {
         text: 'fallback',
-        dataSource: { source: 'items', map: { text: 'Name: {{name}}' } },
+        dataSource: { source: 'items', map: { text: 'Name: ${name}' } },
       },
       baseSurface(rows),
     )
     expect(w.text()).toBe('Name: Alice')
   })
 
-  it('returns empty string for unknown placeholders', () => {
+  it('returns original token for unknown placeholders', () => {
     const rows = [{ name: 'Alice' }]
     const w = mountText(
-      { text: 'Hi {{unknown}}!', dataSource: { source: 'items' } },
+      { text: 'Hi ${unknown}!', dataSource: { source: 'items' } },
       baseSurface(rows),
     )
-    expect(w.text()).toBe('Hi !')
+    expect(w.text()).toBe('Hi ${unknown}!')
   })
 
   it('falls back to static text when no dataSource', () => {
-    const w = mountText({ text: 'Hello {{name}}' })
-    expect(w.text()).toBe('Hello {{name}}')
+    const w = mountText({ text: 'Hello ${name}' })
+    expect(w.text()).toBe('Hello ${name}')
   })
 
   it('reacts to data source changes', async () => {
     const surfaces = baseSurface([{ name: 'Alice', amount: 10 }])
     const store = makeStore(surfaces)
     const w = mount(A2UIText, {
-      props: { def: { text: 'User: {{name}}', dataSource: { source: 'items' } }, surfaceId: 's1', componentId: 'c1' },
+      props: { def: { text: 'User: ${name}', dataSource: { source: 'items' } }, surfaceId: 's1', componentId: 'c1' },
       global: { plugins: [store] },
     })
     expect(w.text()).toBe('User: Alice')
@@ -135,7 +135,7 @@ describe('A2UIText data binding', () => {
     const rows = [{ name: 'Alice', amount: 10 }, { name: 'Bob', amount: 20 }]
     const store = makeStore(baseSurface(rows))
     const w = mount(A2UIText, {
-      props: { def: { text: 'First: {{name}}', dataSource: { source: 'items' } }, surfaceId: 's1', componentId: 'c1' },
+      props: { def: { text: 'First: ${name}', dataSource: { source: 'items' } }, surfaceId: 's1', componentId: 'c1' },
       global: { plugins: [store] },
     })
     expect(w.text()).toBe('First: Alice')
@@ -150,7 +150,7 @@ describe('A2UIText data binding', () => {
     const rows = Array.from({ length: 1500 }, (_, i) => ({ name: `u${i}`, amount: 1 }))
     const w = mountText(
       {
-        text: '{{$total}} items',
+        text: '${$total} items',
         dataSource: { source: 'items', aggregates: { $total: { fn: 'count', format: 'compact' } } },
       },
       baseSurface(rows),

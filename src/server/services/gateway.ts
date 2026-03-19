@@ -55,7 +55,7 @@ export class Gateway {
               } else if (data.type === 'session.switch' && data.session) {
                 this.spaSessionMap.set(ws, data.session as string)
               }
-            } catch { /* ignore malformed */ }
+            } catch (err) { console.error('[gateway] SPA message parse error:', err) }
           })
           for (const listener of this.spaConnectListeners) listener(ws)
         })
@@ -71,7 +71,8 @@ export class Gateway {
         let msg: GatewayMessage
         try {
           msg = JSON.parse(raw.toString())
-        } catch {
+        } catch (err) {
+          console.error('[gateway] Gateway message parse error:', err)
           ws.send(JSON.stringify({ error: 'Invalid JSON' }))
           return
         }
