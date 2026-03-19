@@ -185,6 +185,25 @@ Completed — committed to `a2ui-v0.9` branch, merged to main.
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/5
 Spec: [a2ui-v09-upgrade-spec.md §5.4](2026-03-18-a2ui-v09-upgrade-spec.md)
 
+#### Approach: streaming core with batch adapter
+
+Build a single streaming pipeline as the core command processing path. All A2UI commands flow through this pipeline, which validates each command as it arrives and emits per-command validation results (success or `ValidationFailed` errors).
+
+Two interfaces expose this pipeline:
+
+1. **Streaming interface** (WebSocket or SSE) — scripts, orchestration tools, and non-LLM agents connect directly and receive per-command validation feedback in real-time as each command is processed. Consumers can react and self-correct mid-stream.
+
+2. **Batch interface** (node invoke / tool call) — a thin adapter that feeds a batch of commands into the same streaming pipeline, collects all validation responses, and returns the aggregated result as a single synchronous response. LLM agents see a normal request-response with full validation feedback for every command in the batch.
+
+The existing `canvas.a2ui.push` handler becomes a batch adapter over the streaming core. The streaming pipeline is the single source of truth for command processing and validation — no duplicated logic between the two interfaces.
+
+#### Key design points
+
+- The streaming pipeline validates per-command (component type checks, required props, data source references, root component existence, etc.)
+- The batch adapter gathers all validation results before returning, so the agent can self-correct in its next tool call
+- The streaming interface complements (does not replace) the batch path — both remain available
+- The JSONL file watcher can also be wired through the same pipeline for consistent validation
+
 ### ~~formatString interpolation engine~~ ✅
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/8
