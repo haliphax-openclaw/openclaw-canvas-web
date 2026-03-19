@@ -6,8 +6,10 @@ import { wsClient } from './services/ws-client'
 import A2UINode from './components/A2UINode.vue'
 import './styles/mobile.css'
 
-// Extract session from URL path so initial WS connect uses the correct session
-const sessionMatch = window.location.pathname.match(/\/session\/([^/]+)/)
+// Extract session from URL path (first segment after base path) so initial WS connect uses the correct session
+const base = import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''
+const pathAfterBase = window.location.pathname.startsWith(base) ? window.location.pathname.slice(base.length) : window.location.pathname
+const sessionMatch = pathAfterBase.match(/^\/([^/]+)/)
 wsClient.connect(sessionMatch?.[1] ?? undefined)
 
 // Save panel state on server shutdown
