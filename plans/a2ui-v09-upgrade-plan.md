@@ -42,11 +42,12 @@ Remove duplicated JSONL processing logic from `src/server/commands/a2ui.ts`. The
 
 Change the in-memory component representation from v0.8 wrapped to v0.9 flat.
 
+**Prerequisite:** Wipe the SQLite state cache database before deploying. v0.8 stored surfaces are not migrated — surfaces will be rebuilt on next agent push. This avoids the complexity of a migration script for cached state that is easily regenerated.
+
 **Tasks:**
 1. Update `upsertSurface()` to accept and store v0.9 flat components (`{ component: "Text", text: "..." }`)
 2. Update `serialize()` to emit v0.9 flat format
-3. Add one-time SQLite migration in the constructor: after loading from store, detect v0.8 wrapped components, normalize to v0.9, and write back
-4. Update the `A2UISurface` interface to reflect the new component shape
+3. Update the `A2UISurface` interface to reflect the new component shape
 
 **Files:** `src/server/services/a2ui-manager.ts`
 
@@ -149,7 +150,7 @@ Update all test fixtures from v0.8 to v0.9 format. Add backward-compat normaliza
    - `usageHint` normalized to `variant`
    - `createSurface` with and without explicit `root`
    - `createSurface` with `theme`, `catalogId`, `sendDataModel`
-3. Add SQLite migration test: load v0.8 format from store, verify normalized on read
+3. Add test verifying that a fresh A2UIManager with an empty/wiped store initializes cleanly
 4. Run full test suite, fix any remaining breakage
 
 **Files:** `test/*.test.ts`
@@ -201,9 +202,8 @@ Update README and internal docs to reflect v0.9 terminology.
 1. Remove command name aliasing from `processA2UICommand()` — v0.8 names become errors
 2. Remove wrapped component shape detection from `normalizeComponent()` — only v0.9 flat accepted
 3. Remove `usageHint` → `variant` normalization — only `variant` accepted
-4. Remove SQLite migration code (one-time migration already ran)
-5. Update tests to remove backward-compat test cases
-6. Log errors (not warnings) for any remaining v0.8 payloads
+4. Update tests to remove backward-compat test cases
+5. Log errors (not warnings) for any remaining v0.8 payloads
 
 ---
 
