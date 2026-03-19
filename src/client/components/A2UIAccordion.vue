@@ -1,10 +1,15 @@
 <template>
-  <div class="flex flex-col gap-1 w-fit min-w-[200px]">
+  <div class="flex flex-col gap-1 w-full min-w-[200px]">
     <div v-for="(panel, i) in panels" :key="i" class="collapse collapse-arrow border border-base-300 bg-base-200">
       <input type="checkbox" :checked="isOpen(i)" @change="toggle(i)" />
       <div class="collapse-title font-medium">{{ panel.title }}</div>
       <div class="collapse-content">
-        <A2UINode :component-id="panel.child" :surface-id="surfaceId" />
+        <template v-if="panel.child">
+          <A2UINode :component-id="panel.child" :surface-id="surfaceId" />
+        </template>
+        <template v-else>
+          <p>{{ panel.content }}</p>
+        </template>
       </div>
     </div>
   </div>
@@ -21,7 +26,16 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const panels = computed(() => (props.def as any).panels ?? [])
+    const panels = computed(() => {
+      const def = props.def as any
+      // Support both "panels" (with child component IDs) and "sections" (with inline content)
+      const raw = def.panels ?? def.sections ?? []
+      return raw.map((p: any) => ({
+        title: p.title ?? '',
+        child: p.child ?? null,
+        content: p.content ?? '',
+      }))
+    })
     const mode = computed(() => (props.def as any).mode ?? 'single')
     const openSet = ref<Set<number>>(new Set((props.def as any).expanded ?? []))
 

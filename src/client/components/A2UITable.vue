@@ -81,4 +81,6 @@ export default defineComponent({
 .a2ui-table-wrapper { overflow-x: auto; width: 100%; }
 .a2ui-table-wrapper .table { width: max-content; min-width: 100%; }
 .sortable th { cursor: pointer; }
+.a2ui-table-wrapper .table tbody tr:nth-child(even) { background-color: oklch(0.25 0 0); }
+.a2ui-table-wrapper .table tbody tr:nth-child(odd) { background-color: oklch(0.2 0 0); }
 </style>
