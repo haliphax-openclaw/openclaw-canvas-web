@@ -48,13 +48,11 @@ Open `http://localhost:9999` in a browser.
 |----------|---------|-------------|
 | `OPENCLAW_CANVAS_HOST` | `0.0.0.0` | Bind address |
 | `OPENCLAW_CANVAS_PORT` | `3456` | Listen port |
-| `OPENCLAW_CANVAS_ROOT` | `~/.openclaw-canvas` | Root directory for session files |
 | `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
 | `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
 | `OPENCLAW_CANVAS_A2UI_DB` | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence |
-| `OPENCLAW_GATEWAY_WS_URL` | `ws://127.0.0.1:18789` | Gateway WebSocket URL for deep link and cron trigger proxying |
-| `OPENCLAW_GATEWAY_TOKEN` | *(from openclaw.json)* | Gateway auth token for agent deep links (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
-| `OPENCLAW_HOOKS_TOKEN` | *(from openclaw.json)* | Hooks token for cron trigger proxying (`/hooks/cron/run`). Falls back to `hooks.token` in `openclaw.json` |
+| `OPENCLAW_GATEWAY_WS_URL` | `ws://127.0.0.1:18789` | Gateway WebSocket URL for deep link and file-spawn proxying |
+| `OPENCLAW_GATEWAY_TOKEN` | *(from openclaw.json)* | Gateway auth token for agent deep links and file-spawn (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
 
 ## Architecture
 
@@ -79,7 +77,7 @@ src/
 │   └── routes/
 │       ├── canvas.ts         # GET /:session/:path
 │       ├── agent-proxy.ts    # POST /api/agent → gateway /tools/invoke (sessions_spawn)
-│       ├── cron-trigger.ts   # POST /api/cron-trigger → gateway /hooks/cron/run
+│       ├── file-spawn.ts    # POST /api/file-spawn → read prompt file → gateway /tools/invoke (sessions_spawn)
 │       └── scaffold.ts       # GET /scaffold
 ├── client/
 │   ├── main.ts               # Vue app entry
@@ -92,7 +90,7 @@ src/
 │       ├── ws-client.ts      # Browser WebSocket client
 │       └── url-rewriter.ts   # openclaw-canvas:// URL rewriter
 ├── utils/
-│   └── url-schemes.ts        # Shared URL scheme parser (openclaw://, openclaw-cron://, openclaw-canvas://)
+│   └── url-schemes.ts        # Shared URL scheme parser (openclaw://, openclaw-fileprompt://, openclaw-canvas://)
 test/                          # vitest tests
 ```
 
@@ -164,12 +162,12 @@ Trigger agent runs from links inside canvas HTML. When a user clicks an `opencla
 
 See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parameters, confirmation dialog, script injection details, and security considerations.
 
-### `openclaw-cron://` — Cron Job Triggers
+### `openclaw-fileprompt://` — File-Based Subagent Spawn
 
-Trigger cron job runs from canvas content. The request is proxied to the gateway's `/hooks/cron/run` endpoint.
+Spawn a subagent with its prompt loaded from a file in the canvas workspace. The server reads the file and passes its contents as the task to `sessions_spawn` via the gateway.
 
 ```html
-<a href="openclaw-cron://run?jobId=daily-backup&runMode=force">Run Backup</a>
+<a href="openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer">Deploy</a>
 ```
 
 ### `openclaw-canvas://` — Canvas File References
@@ -191,7 +189,7 @@ These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` base
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/agent` | POST | Proxies deep link requests to the gateway's `/tools/invoke` endpoint (`sessions_spawn`) |
-| `/api/cron-trigger` | POST | Proxies cron trigger requests to the gateway's `/hooks/cron/run` endpoint |
+| `/api/file-spawn` | POST | Reads a prompt file from the canvas workspace and spawns a subagent via `/tools/invoke` (`sessions_spawn`) |
 | `/api/canvas-config` | GET | Returns canvas configuration for the SPA |
 
 ### GET /api/canvas-config
@@ -222,7 +220,7 @@ The dialog includes a collapsible "Options" section with controls for:
 
 ## Session Files
 
-Place HTML/CSS/JS files in `$OPENCLAW_CANVAS_ROOT/<session>/`. The server serves them at `/<session>/<path>`. File changes trigger live reload in the browser.
+Place HTML/CSS/JS files in the agent's `canvas/` workspace directory. The server serves them at `/<session>/<path>`. File changes trigger live reload in the browser.
 
 ## Limitations vs macOS App
 

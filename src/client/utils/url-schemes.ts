@@ -1,4 +1,4 @@
-export type SchemeType = 'canvas' | 'agent' | 'cron' | null
+export type SchemeType = 'canvas' | 'agent' | 'fileprompt' | null
 
 export interface ParsedScheme {
   type: SchemeType
@@ -17,17 +17,17 @@ export function parseOpenClawUrl(url: string): ParsedScheme | null {
   }
 
   const isAgent = url.startsWith('openclaw://')
-  const isCron = url.startsWith('openclaw-cron://')
-  if (!isAgent && !isCron) return null
+  const isSpawn = url.startsWith('openclaw-fileprompt://')
+  if (!isAgent && !isSpawn) return null
 
   try {
     const asHttp = isAgent
       ? url.replace('openclaw://', 'http://')
-      : url.replace('openclaw-cron://', 'http://')
+      : url.replace('openclaw-fileprompt://', 'http://')
     const parsed = new URL(asHttp)
     const params: Record<string, string> = {}
     parsed.searchParams.forEach((v, k) => { params[k] = v })
-    return { type: isAgent ? 'agent' : 'cron', params }
+    return { type: isAgent ? 'agent' : 'fileprompt', params }
   } catch {
     return null
   }

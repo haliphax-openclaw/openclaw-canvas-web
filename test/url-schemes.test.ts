@@ -26,15 +26,15 @@ describe('parseOpenClawUrl', () => {
     })
   })
 
-  describe('openclaw-cron://', () => {
-    it('parses cron URL with params', () => {
-      const r = parseOpenClawUrl('openclaw-cron://run?jobId=daily-backup&runMode=force')
-      expect(r).toEqual({ type: 'cron', params: { jobId: 'daily-backup', runMode: 'force' } })
+  describe('openclaw-fileprompt://', () => {
+    it('parses fileprompt URL with params', () => {
+      const r = parseOpenClawUrl('openclaw-fileprompt://run?file=prompts/deploy.md&agentId=dev')
+      expect(r).toEqual({ type: 'fileprompt', params: { file: 'prompts/deploy.md', agentId: 'dev' } })
     })
 
-    it('parses cron URL with jobId only', () => {
-      const r = parseOpenClawUrl('openclaw-cron://trigger?jobId=cleanup')
-      expect(r).toEqual({ type: 'cron', params: { jobId: 'cleanup' } })
+    it('parses fileprompt URL with file only', () => {
+      const r = parseOpenClawUrl('openclaw-fileprompt://trigger?file=task.txt')
+      expect(r).toEqual({ type: 'fileprompt', params: { file: 'task.txt' } })
     })
   })
 

@@ -45,8 +45,8 @@ export default defineComponent({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(parsed.params),
         }).then(flashSent).catch(() => {})
-      } else if (parsed.type === 'cron') {
-        fetch(`${base}/api/cron-trigger`, {
+      } else if (parsed.type === 'fileprompt') {
+        fetch(`${base}/api/file-spawn`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(parsed.params),

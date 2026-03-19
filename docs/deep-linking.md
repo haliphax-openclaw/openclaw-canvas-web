@@ -17,7 +17,7 @@ Three custom URL schemes are supported:
 | Scheme | Purpose | Example |
 |--------|---------|---------|
 | `openclaw://` | Agent deep links | `openclaw://agent?message=Run+the+tests` |
-| `openclaw-cron://` | Cron job triggers | `openclaw-cron://run?jobId=daily-backup` |
+| `openclaw-fileprompt://` | File-based subagent spawn | `openclaw-fileprompt://run?file=prompts/deploy.md` |
 | `openclaw-canvas://` | Session file references | `openclaw-canvas://my-project/logo.png` |
 
 A shared utility (`src/client/utils/url-schemes.ts`) provides `parseOpenClawUrl()` for parsing all three schemes.
@@ -98,27 +98,28 @@ An agent can build a dashboard with actionable links:
 
 When the user clicks "Fix this", the confirmation dialog appears, and on approval, the agent receives the message and can act on it.
 
-## Cron Trigger — `openclaw-cron://` URLs
+## File-Based Subagent Spawn — `openclaw-fileprompt://` URLs
 
-The `openclaw-cron://` scheme triggers cron job runs via the canvas server's `/api/cron-trigger` endpoint, which proxies to the gateway's `/hooks/cron/run` endpoint.
+The `openclaw-fileprompt://` scheme spawns a subagent with its prompt loaded from a file in the canvas workspace. The canvas server's `/api/file-spawn` endpoint reads the file and passes its contents as the task to `sessions_spawn` via the gateway's `/tools/invoke` endpoint.
 
 ### URL Format
 
 ```
-openclaw-cron://<action>?jobId=<id>&runMode=<mode>
+openclaw-fileprompt://<action>?file=<path>&agentId=<id>&model=<model>
 ```
 
 ### Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `jobId` | Yes | The cron job ID to trigger |
-| `runMode` | No | Run mode (default: `force`) |
+| `file` | Yes | File path relative to the canvas workspace |
+| `agentId` | No | Target agent ID |
+| `model` | No | Model override |
 
 ### Example
 
 ```html
-<a href="openclaw-cron://run?jobId=daily-backup">Run Backup Now</a>
+<a href="openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer">Deploy</a>
 ```
 
 ## API Proxy
@@ -130,9 +131,10 @@ Client → POST /api/agent { message, agentId, ... }
        → Gateway /tools/invoke (sessions_spawn)
        → Isolated subagent run triggered
 
-Client → POST /api/cron-trigger { jobId, runMode }
-       → Gateway /hooks/cron/run
-       → Cron job triggered
+Client → POST /api/file-spawn { file, agentId, ... }
+       → Read file from canvas workspace
+       → Gateway /tools/invoke (sessions_spawn)
+       → Subagent run triggered with file contents as task
 ```
 
 ### Suppressing Completion Announcements
@@ -172,28 +174,21 @@ Agent trigger:
 {"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+data&agentId=developer"}}
 ```
 
-Cron trigger:
+File-spawn trigger:
 ```json
-{"Button": {"label": "Run Backup", "href": "openclaw-cron://run?jobId=daily-backup&runMode=force"}}
+{"Button": {"label": "Deploy", "href": "openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer"}}
 ```
 
 ## Gateway Configuration
 
-Agent deep links use the gateway's `/tools/invoke` endpoint with `sessions_spawn`, while cron deep links use the hooks system. The following settings control deep link behavior:
+Agent deep links and file-spawn both use the gateway's `/tools/invoke` endpoint with `sessions_spawn`. The following settings control deep link behavior:
 
-### Agent Deep Links (`/tools/invoke`)
+### Agent Deep Links & File Spawn (`/tools/invoke`)
 
 | Setting | Type | Description |
 |---------|------|-------------|
 | `gateway.auth.token` | `string` | Bearer token used by the canvas server to authenticate with the gateway. Must match the `OPENCLAW_GATEWAY_TOKEN` environment variable (or be readable from `openclaw.json`) |
-| `gateway.tools.allow` | `string[]` | Must include `"sessions_spawn"` to permit agent deep links via `/tools/invoke` |
-
-### Cron Deep Links (`/hooks/cron/run`)
-
-| Setting | Type | Description |
-|---------|------|-------------|
-| `hooks.enabled` | `boolean` | Must be `true` for the hooks endpoint to accept cron trigger requests |
-| `hooks.token` | `string` | Bearer token for cron trigger authentication. Must match the `OPENCLAW_HOOKS_TOKEN` environment variable (or be readable from `openclaw.json`) |
+| `gateway.tools.allow` | `string[]` | Must include `"sessions_spawn"` to permit agent deep links and file-spawn via `/tools/invoke` |
 
 Example configuration:
 
@@ -207,15 +202,11 @@ Example configuration:
     "tools": {
       "allow": ["sessions_spawn", "sessions_send", "sessions_list"]
     }
-  },
-  "hooks": {
-    "enabled": true,
-    "token": "your-hooks-token"
   }
 }
 ```
 
-Without `gateway.auth.token` and `sessions_spawn` in `gateway.tools.allow`, the canvas server's `/api/agent` proxy will receive an authentication failure or 404 from the gateway.
+Without `gateway.auth.token` and `sessions_spawn` in `gateway.tools.allow`, the canvas server's `/api/agent` and `/api/file-spawn` proxies will receive an authentication failure or 404 from the gateway.
 
 ### Disabling the built-in canvas tool
 

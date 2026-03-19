@@ -10,7 +10,7 @@ import { canvasRoute } from './routes/canvas.js'
 import { scaffoldRoute } from './routes/scaffold.js'
 import { canvasConfigRoute } from './routes/canvas-config.js'
 import { agentProxyRoute } from './routes/agent-proxy.js'
-import { cronTriggerRoute } from './routes/cron-trigger.js'
+import { fileSpawnRoute } from './routes/file-spawn.js'
 import { registerCanvasCommands } from './commands/canvas.js'
 import { registerA2UICommands } from './commands/a2ui.js'
 import { A2UIManager } from './services/a2ui-manager.js'
@@ -41,7 +41,6 @@ const openclawConfig: Record<string, any> = (() => {
 // Resolve gateway connection details early (needed for agent proxy route)
 const GATEWAY_WS_URL = process.env.OPENCLAW_GATEWAY_WS_URL ?? 'ws://127.0.0.1:18789'
 const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? openclawConfig?.gateway?.auth?.token ?? ''
-const HOOKS_TOKEN = process.env.OPENCLAW_HOOKS_TOKEN ?? openclawConfig?.hooks?.token ?? ''
 
 // Build agent workspace map: agentId → <workspace>/canvas/
 const defaultWorkspace = openclawConfig?.agents?.defaults?.workspace ?? WORKSPACE
@@ -73,9 +72,9 @@ app.use(canvasConfigRoute())
 if (GATEWAY_TOKEN) {
   app.use(agentProxyRoute(GATEWAY_WS_URL, GATEWAY_TOKEN))
 }
-// Cron trigger proxy: openclaw-cron://... → POST /api/cron-trigger → gateway /hooks/cron/run
-if (HOOKS_TOKEN) {
-  app.use(cronTriggerRoute(GATEWAY_WS_URL, HOOKS_TOKEN))
+// File spawn: openclaw-fileprompt://... → POST /api/file-spawn → read file → gateway /tools/invoke (sessions_spawn)
+if (GATEWAY_TOKEN) {
+  app.use(fileSpawnRoute(GATEWAY_WS_URL, GATEWAY_TOKEN, CANVAS_ROOT, agentWorkspaceMap))
 }
 
 app.get('/{*path}', (_req, res) => {
