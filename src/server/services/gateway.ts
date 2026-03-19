@@ -44,18 +44,7 @@ export class Gateway {
             this.spaSessionMap.delete(ws)
           })
           ws.on('message', (raw) => {
-            try {
-              const data = JSON.parse(raw.toString())
-              if (data.type === 'canvas.snapshotResult' && data.id) {
-                const resolve = this.pendingSnapshots.get(data.id)
-                if (resolve) {
-                  this.pendingSnapshots.delete(data.id)
-                  resolve(data.error ? { error: data.error } : { ok: true, image: data.image })
-                }
-              } else if (data.type === 'session.switch' && data.session) {
-                this.spaSessionMap.set(ws, data.session as string)
-              }
-            } catch (err) { console.error('[gateway] SPA message parse error:', err) }
+            this.handleSpaMessage(raw, ws)
           })
           for (const listener of this.spaConnectListeners) listener(ws)
         })
@@ -71,8 +60,7 @@ export class Gateway {
         let msg: GatewayMessage
         try {
           msg = JSON.parse(raw.toString())
-        } catch (err) {
-          console.error('[gateway] Gateway message parse error:', err)
+        } catch {
           ws.send(JSON.stringify({ error: 'Invalid JSON' }))
           return
         }
@@ -105,6 +93,25 @@ export class Gateway {
         ws.ping()
       }
     }, PING_INTERVAL)
+  }
+
+  /** Process an incoming SPA WebSocket message (snapshot results, session switches). */
+  private handleSpaMessage(raw: unknown, ws: WebSocket) {
+    let data: Record<string, unknown>
+    try {
+      data = JSON.parse(String(raw))
+    } catch {
+      return // ignore non-JSON
+    }
+    if (data.type === 'canvas.snapshotResult' && data.id) {
+      const resolve = this.pendingSnapshots.get(data.id as string)
+      if (resolve) {
+        this.pendingSnapshots.delete(data.id as string)
+        resolve(data.error ? { error: data.error } : { ok: true, image: data.image })
+      }
+    } else if (data.type === 'session.switch' && data.session) {
+      this.spaSessionMap.set(ws, data.session as string)
+    }
   }
 
   on(command: string, handler: CommandHandler) {
