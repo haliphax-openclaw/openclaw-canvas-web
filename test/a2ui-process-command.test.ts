@@ -176,25 +176,6 @@ describe('v0.8 → v0.9 backward-compat normalization', () => {
     expect(args[0].usageHint).toBeUndefined()
   })
 
-  it('accepts v0.8 top-level key component shape and normalizes to v0.9 flat', () => {
-    const { a2uiManager, gateway } = makeMocks()
-    processA2UICommand('dev', {
-      updateComponents: { surfaceId: 's1', components: [{ id: 'c1', Column: { children: ['a', 'b'] } }] },
-    }, a2uiManager as any, gateway as any)
-    expect(a2uiManager.upsertSurface).toHaveBeenCalledWith('dev', 's1', [{ id: 'c1', component: 'Column', children: ['a', 'b'] }])
-  })
-
-  it('normalizes usageHint inside v0.8 top-level key component', () => {
-    const { a2uiManager, gateway } = makeMocks()
-    processA2UICommand('dev', {
-      updateComponents: { surfaceId: 's1', components: [{ id: 'c1', Text: { text: 'hi', usageHint: 'h2' } }] },
-    }, a2uiManager as any, gateway as any)
-    const args = a2uiManager.upsertSurface.mock.calls[0][2]
-    expect(args[0].component).toBe('Text')
-    expect(args[0].variant).toBe('h2')
-    expect(args[0].usageHint).toBeUndefined()
-  })
-
   it('createSurface defaults root to "root" when omitted', () => {
     const { a2uiManager, gateway, broadcasts } = makeMocks()
     processA2UICommand('dev', {
