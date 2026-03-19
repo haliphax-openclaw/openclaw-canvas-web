@@ -209,10 +209,10 @@ The existing `canvas.a2ui.push` handler becomes a batch adapter over the streami
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/8
 Spec: [a2ui-v09-upgrade-spec.md §5.5](2026-03-18-a2ui-v09-upgrade-spec.md)
 
-### Theme support
+### ~~Theme support~~ ✅
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/6
-Plan: [theme-support-plan.md](2026-03-19-theme-support-plan.md)
+Plan: [theme-support-plan.md](done/2026-03-19-theme-support-plan.md)
 
 ### Catalog support
 
