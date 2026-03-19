@@ -168,18 +168,7 @@ Update all JSONL examples and command references in the canvas skill.
 
 **Files:** `~/.openclaw/skills/custom/canvas/SKILL.md`, `~/.openclaw/skills/custom/canvas/references/*.md`
 
-### Step 12: Migrate existing JSONL files
-
-Convert on-disk JSONL files to v0.9 format.
-
-**Tasks:**
-1. `~/.openclaw/workspaces/developer/canvas/jsonl/dashboard-demo.jsonl` — update command names, flatten component shapes, `usageHint` → `variant`
-2. `~/.openclaw/workspaces/developer/canvas/jsonl/dashboard-demo-data.jsonl` — update command names if applicable
-3. Search for any other `.jsonl` files across workspaces and update
-
-**Files:** `~/.openclaw/workspaces/*/canvas/jsonl/*.jsonl`
-
-### Step 13: Update project docs
+### Step 12: Update project docs
 
 Update README and internal docs to reflect v0.9 terminology.
 
