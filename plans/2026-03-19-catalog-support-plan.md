@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-19
 **Status:** Draft
-**Depends on:** a2ui-v09-upgrade (complete), theme-support-plan (in progress)
+**Depends on:** a2ui-v09-upgrade (complete), theme-support (complete)
 
 ---
 
@@ -12,21 +12,90 @@ Enable third-party Vue 3 components to be installed via npm and served alongside
 
 This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection of components identified by a `catalogId` URI. Packages advertise component IDs — the server owns catalog membership and bundles components into catalogs based on local configuration.
 
-Catalog namespace: `https://haliphax-openclaw.github.io/a2ui/`
+Catalog namespace: `https://haliphax-openclaw.github.io/a2ui/1.0/`
 
 ### Default catalogs
 
 | Catalog ID | Contents |
 |---|---|
-| `https://haliphax-openclaw.github.io/a2ui/1.0/basic` | The basic set of built-in components (maps to A2UI v0.9 basic catalog) |
-| `https://haliphax-openclaw.github.io/a2ui/1.0/built-in` | All built-in components, including those outside the basic set |
-| `https://haliphax-openclaw.github.io/a2ui/1.0/all` | Everything — all built-in + all installed third-party components |
+| `.../catalog/basic` | The basic set of built-in components (maps to A2UI v0.9 basic catalog) |
+| `.../catalog/extended` | All built-in components, including those outside the basic set |
+| `.../catalog/all` | Everything — all built-in + all installed third-party components (default) |
+
+### Component IDs
+
+Each component has a canonical URI identifier under the namespace:
+
+| Component ID | Component |
+|---|---|
+| `.../component/column` | Column layout |
+| `.../component/row` | Row layout |
+| `.../component/text` | Text display |
+| `.../component/button` | Button |
+| `.../component/image` | Image display |
+| `.../component/select` | Single-select picker |
+| `.../component/multi-select` | Multi-select picker |
+| `.../component/checkbox` | Checkbox |
+| `.../component/slider` | Slider |
+| `.../component/divider` | Divider |
+| `.../component/tabs` | Tabbed container |
+| `.../component/stack` | Stack/overlay layout |
+| `.../component/spacer` | Flex spacer |
+| `.../component/table` | Data table |
+| `.../component/progress-bar` | Progress bar |
+| `.../component/badge` | Status badge |
+| `.../component/repeat` | Data-driven repeater |
+| `.../component/accordion` | Collapsible panels |
+
+Third-party packages register component IDs under their own namespace (e.g., `https://example.com/a2ui/1.0/component/bar-chart`).
+
+### Catalog JSON files
+
+Each catalog URI should resolve to a JSON document describing the catalog's theme schema and component definitions. These files are hosted on GitHub Pages at the catalog namespace URLs.
+
+```json
+{
+  "$id": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/basic",
+  "$schema": "https://a2ui.org/specification/v0.9-a2ui/catalog.json",
+  "name": "Basic",
+  "description": "A2UI basic catalog components",
+  "$defs": {
+    "theme": {
+      "type": "object",
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "DaisyUI theme name (e.g. dark, cyberpunk, synthwave)"
+        }
+      }
+    }
+  },
+  "components": [
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/column",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/row",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/text",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/button",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/image",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/select",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/multi-select",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/checkbox",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/slider",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/divider",
+    "https://haliphax-openclaw.github.io/a2ui/1.0/component/tabs"
+  ]
+}
+```
+
+The `extended` and `all` catalogs follow the same structure with their respective component lists. These JSON files serve as the formal catalog definition referenced by `catalogId` in `createSurface`.
 
 ### Architecture overview
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │  npm install @example/a2ui-charts                   │
+│  — or —                                             │
+│  "dependencies": { "@example/a2ui-charts":          │
+│    "file:../packages/a2ui-charts" }                 │
 │                                                     │
 │  node_modules/@example/a2ui-charts/                 │
 │    package.json  ← declares openclaw-canvas-web field   │
@@ -164,7 +233,28 @@ Fields:
 
 Packages advertise component IDs only. Catalog membership is determined by the server's local configuration.
 
-### 3.2 Server-side discovery
+### 3.2 Local packages via `file:` protocol
+
+Catalog packages don't need to be published to npm. For local development and first-party extensions, use `file:` references in `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@openclaw-canvas-web/sdk": "file:./packages/sdk",
+    "@openclaw-canvas-web/extended": "file:./packages/extended"
+  }
+}
+```
+
+`npm install` resolves `file:` dependencies via symlink into `node_modules/`. The Vite build and Node module resolution treat them identically to registry packages. This enables:
+
+- **Monorepo development**: SDK and catalog packages live in `packages/` alongside the main app
+- **Third-party validation**: Split extended components into their own `file:` package to validate the SDK contract before external authors try it
+- **No registry required**: Everything works locally without publishing
+
+The server-side discovery (§3.3) scans `node_modules/` regardless of how packages were installed — `file:`, `npm install`, or `npm link` all work.
+
+### 3.3 Server-side discovery
 
 New file: `src/server/services/catalog-registry.ts`
 
@@ -195,7 +285,7 @@ export class CatalogRegistry {
 }
 ```
 
-### 3.3 API endpoint
+### 3.4 API endpoint
 
 New route: `GET /api/catalogs`
 
@@ -205,15 +295,15 @@ Returns the list of available catalogs and their component names. Used by agents
 {
   "catalogs": [
     {
-      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/basic",
+      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/basic",
       "components": ["Column", "Row", "Text", "Button", "Image", "Select", "MultiSelect", "Checkbox", "Slider", "Divider", "Tabs"]
     },
     {
-      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/built-in",
+      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/extended",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs"]
     },
     {
-      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/all",
+      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs", "BarChart", "LineChart", "PieChart"]
     }
   ]
@@ -281,9 +371,9 @@ const resolvedComponent = computed(() => {
 
 The `createSurface` command already stores `catalogId` on the surface (from the v0.9 upgrade plan §5.2). The resolution logic uses it:
 
-- `catalogId` omitted → defaults to `https://haliphax-openclaw.github.io/a2ui/1.0/built-in` (all built-in components)
-- `catalogId` set to a specific URI → built-in basic components + components assigned to that catalog by server config
-- `catalogId` set to `https://haliphax-openclaw.github.io/a2ui/1.0/all` → all installed components available (useful for development)
+- `catalogId` omitted → defaults to `https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all` (all installed components)
+- `catalogId` set to a specific URI → only components assigned to that catalog by server config
+- `catalogId` set to `https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all` → all installed components available (useful for development)
 
 This is stored in Vuex on `A2UISurfaceState`:
 
@@ -484,7 +574,7 @@ export interface A2UISurfaceState {
   sources: Record<string, DataSource>
   filters: Record<string, FieldFilter[]>
   catalogId?: string   // NEW
-  theme?: Record<string, unknown>  // from theme-support-plan
+  theme?: string  // DaisyUI theme name
 }
 ```
 
@@ -493,7 +583,7 @@ export interface A2UISurfaceState {
 The `upsertSurface` mutation (or a new `createSurface` mutation) stores `catalogId`:
 
 ```typescript
-createSurface(state, payload: { surfaceId: string; root?: string; catalogId?: string; theme?: Record<string, unknown> }) {
+createSurface(state, payload: { surfaceId: string; root?: string; catalogId?: string; theme?: string }) {
   if (!state.surfaces[payload.surfaceId]) {
     state.surfaces[payload.surfaceId] = makeSurface()
   }
