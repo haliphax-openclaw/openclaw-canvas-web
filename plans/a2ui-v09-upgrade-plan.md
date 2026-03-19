@@ -42,7 +42,7 @@ Remove duplicated JSONL processing logic from `src/server/commands/a2ui.ts`. The
 
 Change the in-memory component representation from v0.8 wrapped to v0.9 flat.
 
-**Prerequisite:** Wipe the SQLite state cache database before deploying. v0.8 stored surfaces are not migrated — surfaces will be rebuilt on next agent push. This avoids the complexity of a migration script for cached state that is easily regenerated.
+**Prerequisite:** Wipe the SQLite state cache database (`~/.openclaw-canvas/a2ui-cache.db`) before deploying. v0.8 stored surfaces are not migrated — surfaces will be rebuilt on next agent push. This avoids the complexity of a migration script for cached state that is easily regenerated.
 
 **Tasks:**
 1. Update `upsertSurface()` to accept and store v0.9 flat components (`{ component: "Text", text: "..." }`)
