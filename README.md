@@ -235,6 +235,7 @@ The canvas web server provides feature parity with the macOS OpenClaw app's canv
 Features available in the web server that are not present in the macOS app:
 
 - **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link and snapshot script injection.
+- **`openclaw-fileprompt://` deep links** — Spawn subagents with prompts loaded directly from workspace files. The server reads the file and passes its contents as the task, removing the indirection of telling an agent to load a file. See [Custom URL Protocols](#openclaw-fileprompt----file-based-subagent-spawn).
 - **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
 - **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
 - **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
