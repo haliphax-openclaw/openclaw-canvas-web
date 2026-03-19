@@ -8,7 +8,7 @@ export interface A2UISurface {
   root: string | null
   dataModel: Record<string, unknown>
   catalogId?: string
-  theme?: Record<string, unknown>
+  theme?: string
 }
 
 /** Composite key for session-scoped surfaces */
@@ -62,7 +62,7 @@ export class A2UIManager {
     this.store?.save(session, surface)
   }
 
-  setRoot(session: string, surfaceId: string, root: string, opts?: { catalogId?: string; theme?: Record<string, unknown> }) {
+  setRoot(session: string, surfaceId: string, root: string, opts?: { catalogId?: string; theme?: string }) {
     const surface = this.surfaces.get(key(session, surfaceId))
     if (surface) {
       surface.root = root

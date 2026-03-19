@@ -14,7 +14,7 @@ export interface A2UISurfaceState {
   dataModel: Record<string, unknown>
   sources: Record<string, DataSource>
   filters: Record<string, FieldFilter[]>
-  theme?: Record<string, unknown>
+  theme?: string
   catalogId?: string
   sendDataModel?: boolean
 }
@@ -51,7 +51,7 @@ export const a2uiModule: Module<A2UIState, RootState> = {
         s.components[id] = rest
       }
     },
-    setRoot(state, payload: { surfaceId: string; root: string; theme?: Record<string, unknown>; catalogId?: string; sendDataModel?: boolean }) {
+    setRoot(state, payload: { surfaceId: string; root: string; theme?: string; catalogId?: string; sendDataModel?: boolean }) {
       if (!state.surfaces[payload.surfaceId]) {
         state.surfaces[payload.surfaceId] = makeSurface()
       }

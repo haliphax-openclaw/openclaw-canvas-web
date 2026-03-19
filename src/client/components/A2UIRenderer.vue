@@ -1,9 +1,5 @@
 <template>
-  <div class="a2ui-renderer" v-if="root" :style="themeStyle" :data-theme="activeTheme">
-    <div v-if="attribution" class="a2ui-attribution">
-      <img v-if="attribution.iconUrl" :src="attribution.iconUrl" class="a2ui-attribution-icon" />
-      <span>{{ attribution.name }}</span>
-    </div>
+  <div class="a2ui-renderer" v-if="root" :data-theme="activeTheme">
     <A2UINode :component-id="root" :surface-id="surfaceId" />
   </div>
 </template>
@@ -12,7 +8,6 @@
 import { defineComponent, computed } from 'vue'
 import { useStore } from 'vuex'
 import A2UINode from './A2UINode.vue'
-import { lighten, darken } from '../utils/color-utils'
 
 export default defineComponent({
   name: 'A2UIRenderer',
@@ -24,42 +19,12 @@ export default defineComponent({
     const store = useStore()
     const surface = computed(() => store.state.a2ui?.surfaces?.[props.surfaceId])
     const root = computed(() => surface.value?.root ?? null)
-    const theme = computed(() => surface.value?.theme)
 
     const activeTheme = computed(() => {
-      const t = theme.value
-      return (t?.['--a2ui-theme'] as string) || 'dark'
+      return surface.value?.theme || 'dark'
     })
 
-    const themeStyle = computed(() => {
-      const t = theme.value
-      if (!t) return {}
-      const style: Record<string, string> = {}
-      // Apply primaryColor legacy support
-      if (t.primaryColor) {
-        const pc = t.primaryColor as string
-        style['--a2ui-primary'] = pc
-        style['--a2ui-primary-hover'] = lighten(pc, 15)
-        style['--a2ui-badge-info-bg'] = darken(pc, 40)
-        style['--a2ui-badge-info-fg'] = lighten(pc, 30)
-        style['--color-primary'] = pc
-      }
-      // Apply all CSS custom properties from theme object
-      for (const [key, value] of Object.entries(t)) {
-        if (key.startsWith('--')) {
-          style[key] = value as string
-        }
-      }
-      return style
-    })
-
-    const attribution = computed(() => {
-      const t = theme.value
-      if (!t?.agentDisplayName) return null
-      return { name: t.agentDisplayName as string, iconUrl: t.iconUrl as string | undefined }
-    })
-
-    return { root, themeStyle, activeTheme, attribution }
+    return { root, activeTheme }
   },
 })
 </script>
@@ -88,6 +53,4 @@ export default defineComponent({
   --a2ui-badge-error-bg: var(--color-error-content);
   --a2ui-badge-error-fg: var(--color-error);
 }
-.a2ui-attribution { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.85em; color: var(--a2ui-text-muted); }
-.a2ui-attribution-icon { width: 20px; height: 20px; border-radius: 50%; }
 </style>

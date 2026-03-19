@@ -34,7 +34,7 @@ describe('processA2UICommand', () => {
     }, a2uiManager as any, gateway as any)
 
     expect(result).toBe(true)
-    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: undefined, theme: undefined })
+    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: 'https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all', theme: undefined })
     expect(broadcasts[0].type).toBe('a2ui.createSurface')
   })
 
@@ -95,7 +95,7 @@ describe('processA2UICommand', () => {
     }, a2uiManager as any, gateway as any)
     // v0.9: root defaults to "root" when omitted, so this now succeeds
     expect(result).toBe(true)
-    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: undefined, theme: undefined })
+    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: 'https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all', theme: undefined })
   })
 
   it('returns false for dataSourcePush missing surfaceId', () => {
@@ -181,7 +181,7 @@ describe('v0.8 → v0.9 backward-compat normalization', () => {
     processA2UICommand('dev', {
       createSurface: { surfaceId: 's1' },
     }, a2uiManager as any, gateway as any)
-    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: undefined, theme: undefined })
+    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: 'https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all', theme: undefined })
     expect(broadcasts[0].root).toBe('root')
   })
 
@@ -190,17 +190,17 @@ describe('v0.8 → v0.9 backward-compat normalization', () => {
     processA2UICommand('dev', {
       createSurface: { surfaceId: 's1', root: 'myRoot' },
     }, a2uiManager as any, gateway as any)
-    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'myRoot', { catalogId: undefined, theme: undefined })
+    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'myRoot', { catalogId: 'https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all', theme: undefined })
     expect(broadcasts[0].root).toBe('myRoot')
   })
 
   it('createSurface passes theme, catalogId, and sendDataModel', () => {
     const { a2uiManager, gateway, broadcasts } = makeMocks()
     processA2UICommand('dev', {
-      createSurface: { surfaceId: 's1', theme: { primaryColor: '#ff0000' }, catalogId: 'urn:test', sendDataModel: true },
+      createSurface: { surfaceId: 's1', theme: 'cyberpunk', catalogId: 'urn:test', sendDataModel: true },
     }, a2uiManager as any, gateway as any)
-    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: 'urn:test', theme: { primaryColor: '#ff0000' } })
-    expect(broadcasts[0].theme).toEqual({ primaryColor: '#ff0000' })
+    expect(a2uiManager.setRoot).toHaveBeenCalledWith('dev', 's1', 'root', { catalogId: 'urn:test', theme: 'cyberpunk' })
+    expect(broadcasts[0].theme).toBe('cyberpunk')
     expect(broadcasts[0].catalogId).toBe('urn:test')
     expect(broadcasts[0].sendDataModel).toBe(true)
   })
