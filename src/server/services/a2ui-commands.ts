@@ -10,8 +10,12 @@ const COMMAND_ALIASES: Record<string, string> = {
 
 /**
  * Normalize a single component from v0.8 wrapped shape to v0.9 flat shape.
- * v0.8: { id: "x", component: { "Text": { "text": "..." } } }
- * v0.9: { id: "x", component: "Text", "text": "..." }
+ *
+ * Handles three input formats:
+ * - v0.9 flat:          { id: "x", component: "Text", text: "..." }           → pass through
+ * - v0.8 nested wrap:   { id: "x", component: { "Text": { text: "..." } } }  → unwrap
+ * - v0.8 top-level key: { id: "x", "Text": { text: "..." } }                 → unwrap
+ *
  * Also normalizes usageHint → variant.
  */
 function normalizeComponent(c: { id: string; component: unknown;[key: string]: unknown }): { id: string; component: string;[key: string]: unknown } {
@@ -21,7 +25,7 @@ function normalizeComponent(c: { id: string; component: unknown;[key: string]: u
     // Already v0.9 flat shape
     result = c as { id: string; component: string;[key: string]: unknown }
   } else if (typeof c.component === 'object' && c.component !== null) {
-    // v0.8 wrapped shape — unwrap
+    // v0.8 nested wrap: { id, component: { "Text": { ... } } }
     const keys = Object.keys(c.component as object)
     if (keys.length === 1) {
       const type = keys[0]
@@ -31,7 +35,15 @@ function normalizeComponent(c: { id: string; component: unknown;[key: string]: u
       return c as any
     }
   } else {
-    return c as any
+    // v0.8 top-level key: { id, "Column": { children: [...] } }
+    const topKeys = Object.keys(c).filter(k => k !== 'id')
+    if (topKeys.length === 1 && typeof c[topKeys[0]] === 'object' && c[topKeys[0]] !== null) {
+      const type = topKeys[0]
+      const props = c[type] as Record<string, unknown>
+      result = { id: c.id, component: type, ...props }
+    } else {
+      return c as any
+    }
   }
 
   // Normalize usageHint → variant
