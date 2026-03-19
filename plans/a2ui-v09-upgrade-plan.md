@@ -155,30 +155,13 @@ Update all test fixtures from v0.8 to v0.9 format. Add backward-compat normaliza
 
 **Files:** `test/*.test.ts`
 
-### Step 11: Update skill docs
+### ~~Step 11: Update skill docs~~ ✅ DONE
 
-Update all JSONL examples and command references in the canvas skill.
+Completed — PR opened: https://github.com/haliphax-openclaw/skills/pull/1
 
-**Tasks:**
-1. `SKILL.md` — update command names in the JSONL Commands section and all inline examples
-2. `references/surface-updates.md` — rename `surfaceUpdate` → `updateComponents`, `beginRendering` → `createSurface`, update component shape examples to v0.9 flat format
-3. `references/data-sources.md` — rename `dataModelUpdate` → `updateDataModel` in examples
-4. `references/components.md` — update all component JSONL examples to v0.9 flat shape, `usageHint` → `variant`
-5. `references/reactive.md` — update any JSONL examples
+### ~~Step 12: Update project docs~~ ✅ DONE
 
-**Files:** `~/.openclaw/skills/custom/canvas/SKILL.md`, `~/.openclaw/skills/custom/canvas/references/*.md`
-
-### Step 12: Update project docs
-
-Update README and internal docs to reflect v0.9 terminology.
-
-**Tasks:**
-1. `README.md` — update A2UI command references
-2. `docs/a2ui-reactive.md` — update command names in examples
-3. `docs/jsonl-watcher.md` — update command names in examples
-4. `docs/components.md` — update component shape examples
-
-**Files:** `README.md`, `docs/*.md`
+Completed — committed to `a2ui-v0.9` branch (fe389af).
 
 ---
 
