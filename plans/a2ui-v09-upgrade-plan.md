@@ -184,7 +184,7 @@ Update README and internal docs to reflect v0.9 terminology.
 
 ## Phase 2 — Remove backward-compat shim
 
-*Target: 2 weeks after Phase 1 ships and skill docs are live.*
+*Timeline: Indefinite. May align with OpenClaw's internal canvas server upgrade plans.*
 
 ### Step 14: Remove v0.8 acceptance
 
