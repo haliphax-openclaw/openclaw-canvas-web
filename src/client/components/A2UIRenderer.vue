@@ -1,5 +1,5 @@
 <template>
-  <div class="a2ui-renderer" v-if="root" :style="themeStyle">
+  <div class="a2ui-renderer" v-if="root" :style="themeStyle" data-theme="dark">
     <div v-if="attribution" class="a2ui-attribution">
       <img v-if="attribution.iconUrl" :src="attribution.iconUrl" class="a2ui-attribution-icon" />
       <span>{{ attribution.name }}</span>
@@ -35,6 +35,7 @@ export default defineComponent({
         '--a2ui-primary-hover': lighten(pc, 15),
         '--a2ui-badge-info-bg': darken(pc, 40),
         '--a2ui-badge-info-fg': lighten(pc, 30),
+        '--color-primary': pc,
       }
     })
 

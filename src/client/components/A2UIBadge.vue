@@ -1,5 +1,5 @@
 <template>
-  <span class="a2ui-badge" :class="'a2ui-badge--' + variant">{{ displayText }}</span>
+  <span class="badge" :class="badgeClass">{{ displayText }}</span>
 </template>
 
 <script lang="ts">
@@ -7,6 +7,12 @@ import { defineComponent, computed } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
 
 const validVariants = ['success', 'warning', 'error', 'info']
+const variantClassMap: Record<string, string> = {
+  info: 'badge-info',
+  success: 'badge-success',
+  warning: 'badge-warning',
+  error: 'badge-error',
+}
 
 export default defineComponent({
   name: 'A2UIBadge',
@@ -28,15 +34,8 @@ export default defineComponent({
       const v = (props.def as any).variant
       return validVariants.includes(v) ? v : 'info'
     })
-    return { displayText, variant }
+    const badgeClass = computed(() => variantClassMap[variant.value] ?? 'badge-info')
+    return { displayText, badgeClass }
   },
 })
 </script>
-
-<style scoped>
-.a2ui-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 600; }
-.a2ui-badge--info { background: var(--a2ui-badge-info-bg); color: var(--a2ui-badge-info-fg); }
-.a2ui-badge--success { background: var(--a2ui-badge-success-bg); color: var(--a2ui-badge-success-fg); }
-.a2ui-badge--warning { background: var(--a2ui-badge-warning-bg); color: var(--a2ui-badge-warning-fg); }
-.a2ui-badge--error { background: var(--a2ui-badge-error-bg); color: var(--a2ui-badge-error-fg); }
-</style>

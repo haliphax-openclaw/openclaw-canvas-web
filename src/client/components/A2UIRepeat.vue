@@ -1,7 +1,7 @@
 <template>
   <div class="a2ui-repeat">
     <div v-if="sortable" class="a2ui-repeat-sort">
-      <select v-model="sortDir" class="a2ui-repeat-sort-select">
+      <select v-model="sortDir" class="select select-sm">
         <option value="">Unsorted</option>
         <option value="asc">Ascending</option>
         <option value="desc">Descending</option>

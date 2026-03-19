@@ -1,8 +1,8 @@
 <template>
-  <select v-if="isMulti" multiple :value="selectedMulti" @change="onChangeMulti">
+  <select v-if="isMulti" class="select" multiple :value="selectedMulti" @change="onChangeMulti">
     <option v-for="opt in resolvedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
   </select>
-  <select v-else :value="selected" @change="onChange">
+  <select v-else class="select" :value="selected" @change="onChange">
     <option v-for="opt in resolvedOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
   </select>
 </template>

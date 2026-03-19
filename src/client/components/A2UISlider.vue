@@ -1,7 +1,7 @@
 <template>
   <div class="a2ui-slider">
     <span v-if="label" class="a2ui-slider-label">{{ label }}</span>
-    <input type="range" :min="min" :max="max" :value="value" @input="onInput" />
+    <input type="range" class="range" :min="min" :max="max" :value="value" @input="onInput" />
   </div>
 </template>
 

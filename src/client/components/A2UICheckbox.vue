@@ -33,5 +33,5 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-checkbox { display: inline-flex; align-items: center; gap: 6px; color: var(--a2ui-text); cursor: pointer; }
+.a2ui-checkbox { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 </style>

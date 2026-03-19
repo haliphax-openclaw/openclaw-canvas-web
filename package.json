@@ -13,11 +13,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.2.2",
     "better-sqlite3": "^12.8.0",
     "chokidar": "^4.0.0",
+    "daisyui": "^5.5.19",
     "dom-to-image-more": "^3.7.2",
     "express": "^5.1.0",
     "mime-types": "^2.1.35",
+    "tailwindcss": "^4.2.2",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0",
     "vuex": "^4.1.0",
