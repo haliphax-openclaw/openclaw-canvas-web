@@ -82,6 +82,7 @@ export default defineComponent({
     const onShow = (d: Record<string, unknown>) => {
       store.commit('setVisible', true)
       externalUrl.value = null
+      if (d.surface) activeSurfaceId.value = d.surface as string
       if (d.session) router.push(`/${d.session}/`)
     }
     const onHide = () => store.commit('setVisible', false)

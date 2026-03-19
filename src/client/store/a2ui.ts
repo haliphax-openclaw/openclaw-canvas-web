@@ -52,13 +52,14 @@ export const a2uiModule: Module<A2UIState, RootState> = {
       }
     },
     setRoot(state, payload: { surfaceId: string; root: string; theme?: Record<string, unknown>; catalogId?: string; sendDataModel?: boolean }) {
-      if (state.surfaces[payload.surfaceId]) {
-        const s = state.surfaces[payload.surfaceId]
-        s.root = payload.root
-        if (payload.theme !== undefined) s.theme = payload.theme
-        if (payload.catalogId !== undefined) s.catalogId = payload.catalogId
-        if (payload.sendDataModel !== undefined) s.sendDataModel = payload.sendDataModel
+      if (!state.surfaces[payload.surfaceId]) {
+        state.surfaces[payload.surfaceId] = makeSurface()
       }
+      const s = state.surfaces[payload.surfaceId]
+      s.root = payload.root
+      if (payload.theme !== undefined) s.theme = payload.theme
+      if (payload.catalogId !== undefined) s.catalogId = payload.catalogId
+      if (payload.sendDataModel !== undefined) s.sendDataModel = payload.sendDataModel
     },
     updateDataModel(state, payload: { surfaceId: string; data: Record<string, unknown>; merge?: boolean }) {
       const s = state.surfaces[payload.surfaceId]

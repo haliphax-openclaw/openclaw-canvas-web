@@ -229,11 +229,12 @@ export class NodeClient {
       case 'canvas.present': {
         const target = params.target ?? params.url ?? ''
         const session = params.session ?? this.sessionManager.getActive()
+        const surface = params.surface
         this.sessionManager.setActive(session)
         if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('data:'))
           this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectSnapshotIntoDataUrl(injectDeepLinkIntoDataUrl(target)) })
         else
-          this.gateway.broadcastSpaSession(session, { type: 'canvas.show', session })
+          this.gateway.broadcastSpaSession(session, { type: 'canvas.show', session, surface })
         return { ok: true }
       }
       case 'canvas.hide':
