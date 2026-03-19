@@ -34,7 +34,13 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const tabs = computed(() => (props.def as any).tabs ?? [])
+    const tabs = computed(() => {
+      const raw = (props.def as any).tabs ?? []
+      return raw.map((t: any) => ({
+        label: t.label ?? '',
+        child: t.child ?? (Array.isArray(t.children) ? t.children[0] : null),
+      }))
+    })
     const pos = computed(() => (props.def as any).position ?? 'top')
     const height = computed(() => (props.def as any).height ?? 'auto')
     const activeIndex = ref((props.def as any).active ?? 0)
