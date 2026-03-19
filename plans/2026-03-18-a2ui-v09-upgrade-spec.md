@@ -325,7 +325,7 @@ v0.9 introduces structured validation errors sent back to the LLM. This is for t
 
 **Future improvement:** A later version could add a streaming A2UI ingestion mode alongside the existing file-loading and content-pushing methods. In this mode, an agent would hold an open WebSocket (or SSE) connection to the canvas server and stream JSONL commands incrementally. The server would validate each command as it arrives and send `ValidationFailed` errors back over the same connection, giving the agent a chance to self-correct within the same turn. This would complement — not replace — the current fire-and-forget paths (`canvas.a2ui.push`, JSONL file watcher), which would remain available for batch/offline use cases.
 
-### 5.5 `formatString` interpolation — **Skip (future improvement)**
+### ~~5.5 `formatString` interpolation — **Skip (future improvement)**~~
 
 v0.9 introduces `${expression}` syntax within a `formatString` function for string interpolation with support for nested function calls (e.g. `${formatDate(value: ${/timestamp}, format: 'yyyy-MM-dd')}`). We already have our own `{{field}}` template interpolation that covers the common cases.
 
