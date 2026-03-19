@@ -164,7 +164,7 @@ See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parame
 
 ### `openclaw-fileprompt://` — File-Based Subagent Spawn
 
-Spawn a subagent with its prompt loaded from a file in the canvas workspace. The server reads the file and passes its contents as the task to `sessions_spawn` via the gateway.
+Spawn a subagent with its prompt loaded from a file in the workspace associated with the canvas session. The server reads the file and passes its contents as the task to `sessions_spawn` via the gateway.
 
 ```html
 <a href="openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer">Deploy</a>
@@ -189,7 +189,7 @@ These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` base
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/agent` | POST | Proxies deep link requests to the gateway's `/tools/invoke` endpoint (`sessions_spawn`) |
-| `/api/file-spawn` | POST | Reads a prompt file from the canvas workspace and spawns a subagent via `/tools/invoke` (`sessions_spawn`) |
+| `/api/file-spawn` | POST | Reads a prompt file from the workspace associated with the canvas session and spawns a subagent via `/tools/invoke` (`sessions_spawn`) |
 | `/api/canvas-config` | GET | Returns canvas configuration for the SPA |
 
 ### GET /api/canvas-config
