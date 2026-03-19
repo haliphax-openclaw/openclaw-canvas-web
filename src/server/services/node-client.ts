@@ -228,12 +228,12 @@ export class NodeClient {
     switch (command) {
       case 'canvas.present': {
         const target = params.target ?? params.url ?? ''
-        const session = 'main'
+        const session = params.session ?? this.sessionManager.getActive()
         this.sessionManager.setActive(session)
         if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('data:'))
           this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectSnapshotIntoDataUrl(injectDeepLinkIntoDataUrl(target)) })
         else
-          this.gateway.broadcastSpa({ type: 'canvas.show', session })
+          this.gateway.broadcastSpaSession(session, { type: 'canvas.show', session })
         return { ok: true }
       }
       case 'canvas.hide':
@@ -245,22 +245,22 @@ export class NodeClient {
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:'))
           this.gateway.broadcastSpa({ type: 'canvas.navigateExternal', url: injectSnapshotIntoDataUrl(injectDeepLinkIntoDataUrl(url)) })
         else {
-          let session = 'main'
-          let path = url
+          let session = params.session ?? this.sessionManager.getActive()
+          let navPath = url
           const canvasPrefix = 'openclaw-canvas://'
           if (url.startsWith(canvasPrefix)) {
             const rest = url.slice(canvasPrefix.length)
             const slashIdx = rest.indexOf('/')
             if (slashIdx >= 0) {
               session = rest.slice(0, slashIdx)
-              path = rest.slice(slashIdx + 1)
+              navPath = rest.slice(slashIdx + 1)
             } else {
               session = rest
-              path = ''
+              navPath = ''
             }
           }
           this.sessionManager.setActive(session)
-          this.gateway.broadcastSpa({ type: 'canvas.navigate', session, path })
+          this.gateway.broadcastSpaSession(session, { type: 'canvas.navigate', session, path: navPath })
         }
         return { ok: true }
       }

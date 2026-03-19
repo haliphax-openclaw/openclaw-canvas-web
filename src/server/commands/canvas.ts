@@ -9,7 +9,7 @@ export function registerCanvasCommands(gateway: Gateway, sessionManager: Session
   gateway.on('canvas.show', (msg, reply) => {
     const session = isNonEmptyString(msg.session) ? msg.session : sessionManager.getActive()
     sessionManager.setActive(session)
-    gateway.broadcastSpa({ type: 'canvas.show', session })
+    gateway.broadcastSpaSession(session, { type: 'canvas.show', session })
     reply({ ok: true, session })
   })
 
@@ -22,7 +22,7 @@ export function registerCanvasCommands(gateway: Gateway, sessionManager: Session
     const session = isNonEmptyString(msg.session) ? msg.session : sessionManager.getActive()
     const path = typeof msg.path === 'string' ? msg.path : ''
     sessionManager.setActive(session)
-    gateway.broadcastSpa({ type: 'canvas.navigate', session, path })
+    gateway.broadcastSpaSession(session, { type: 'canvas.navigate', session, path })
     reply({ ok: true, session, path })
   })
 
