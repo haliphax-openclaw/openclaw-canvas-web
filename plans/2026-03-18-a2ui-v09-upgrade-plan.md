@@ -180,7 +180,7 @@ Completed — committed to `a2ui-v0.9` branch, merged to main.
 
 ## Future improvements (separate efforts)
 
-### Streaming A2UI ingestion with ValidationFailed
+### ~~Streaming A2UI ingestion with ValidationFailed~~ ✅
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/5
 Spec: [a2ui-v09-upgrade-spec.md §5.4](2026-03-18-a2ui-v09-upgrade-spec.md)
