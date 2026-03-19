@@ -12,15 +12,15 @@ Enable third-party Vue 3 components to be installed via npm and served alongside
 
 This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection of components identified by a `catalogId` URI. Packages advertise component IDs — the server owns catalog membership and bundles components into catalogs based on local configuration.
 
-Catalog namespace: `https://haliphax-openclaw.github.io`
+Catalog namespace: `https://haliphax-openclaw.github.io/a2ui/`
 
 ### Default catalogs
 
 | Catalog ID | Contents |
 |---|---|
-| `https://haliphax-openclaw.github.io/1.0/basic` | The basic set of built-in components (maps to A2UI v0.9 basic catalog) |
-| `https://haliphax-openclaw.github.io/1.0/built-in` | All built-in components, including those outside the basic set |
-| `https://haliphax-openclaw.github.io/1.0/all` | Everything — all built-in + all installed third-party components |
+| `https://haliphax-openclaw.github.io/a2ui/1.0/basic` | The basic set of built-in components (maps to A2UI v0.9 basic catalog) |
+| `https://haliphax-openclaw.github.io/a2ui/1.0/built-in` | All built-in components, including those outside the basic set |
+| `https://haliphax-openclaw.github.io/a2ui/1.0/all` | Everything — all built-in + all installed third-party components |
 
 ### Architecture overview
 
@@ -205,15 +205,15 @@ Returns the list of available catalogs and their component names. Used by agents
 {
   "catalogs": [
     {
-      "catalogId": "https://haliphax-openclaw.github.io/1.0/basic",
+      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/basic",
       "components": ["Column", "Row", "Text", "Button", "Image", "Select", "MultiSelect", "Checkbox", "Slider", "Divider", "Tabs"]
     },
     {
-      "catalogId": "https://haliphax-openclaw.github.io/1.0/built-in",
+      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/built-in",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs"]
     },
     {
-      "catalogId": "https://haliphax-openclaw.github.io/1.0/all",
+      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/all",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs", "BarChart", "LineChart", "PieChart"]
     }
   ]
@@ -281,9 +281,9 @@ const resolvedComponent = computed(() => {
 
 The `createSurface` command already stores `catalogId` on the surface (from the v0.9 upgrade plan §5.2). The resolution logic uses it:
 
-- `catalogId` omitted → defaults to `https://haliphax-openclaw.github.io/1.0/built-in` (all built-in components)
+- `catalogId` omitted → defaults to `https://haliphax-openclaw.github.io/a2ui/1.0/built-in` (all built-in components)
 - `catalogId` set to a specific URI → built-in basic components + components assigned to that catalog by server config
-- `catalogId` set to `https://haliphax-openclaw.github.io/1.0/all` → all installed components available (useful for development)
+- `catalogId` set to `https://haliphax-openclaw.github.io/a2ui/1.0/all` → all installed components available (useful for development)
 
 This is stored in Vuex on `A2UISurfaceState`:
 
