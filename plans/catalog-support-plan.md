@@ -19,7 +19,7 @@ This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection 
 │  npm install @example/a2ui-charts                   │
 │                                                     │
 │  node_modules/@example/a2ui-charts/                 │
-│    package.json  ← declares openclaw-canvas field   │
+│    package.json  ← declares openclaw-canvas-web field   │
 │    dist/                                            │
 │      index.js    ← exports { components, catalogId }│
 │      Chart.vue   ← Vue 3 SFC (pre-built)           │
@@ -28,7 +28,7 @@ This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection 
          ▼  server startup: scan node_modules
 ┌─────────────────────────────────────────────────────┐
 │  Server: catalog-registry.ts                        │
-│    discovers packages with openclaw-canvas field    │
+│    discovers packages with openclaw-canvas-web field    │
 │    loads component maps into registry               │
 │    generates virtual module for Vite                 │
 └─────────────────────────────────────────────────────┘
@@ -43,22 +43,22 @@ This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection 
 
 ---
 
-## 2. Package Extraction — `@openclaw-canvas/sdk`
+## 2. Package Extraction — `@openclaw-canvas-web/sdk`
 
-External component authors need to import types and composables from the platform. Extract the following into a shared SDK package that lives in `packages/sdk/` (monorepo-style, published as `@openclaw-canvas/sdk`).
+External component authors need to import types and composables from the platform. Extract the following into a shared SDK package that lives in `packages/sdk/` (monorepo-style, published as `@openclaw-canvas-web/sdk`).
 
 ### 2.1 What to extract
 
 | Current location | SDK export | Purpose |
 |---|---|---|
-| `src/client/store/a2ui.ts` → `A2UISurfaceState`, `DataSource`, `FieldFilter` | `@openclaw-canvas/sdk/types` | Store shape contracts so external components can type their store access |
-| `src/client/composables/useDataSource.ts` | `@openclaw-canvas/sdk/composables` | Data binding — the primary way components read from data sources |
-| `src/client/composables/useFilterBind.ts` | `@openclaw-canvas/sdk/composables` | Filter binding — how interactive components push filters to the store |
-| `src/client/composables/useOptionsFrom.ts` | `@openclaw-canvas/sdk/composables` | Derived options from data sources |
-| `src/client/composables/useSortable.ts` | `@openclaw-canvas/sdk/composables` | Client-side sorting |
-| `src/client/services/filter-engine.ts` → `applyFilters`, `computeAggregate`, `formatCompact`, `FieldFilter`, `AggregateSpec` | `@openclaw-canvas/sdk/filters` | Filter/aggregate engine |
-| `src/client/services/ws-client.ts` → `wsClient.send()` | `@openclaw-canvas/sdk/ws` | Send events back to server (button clicks, select changes, etc.) |
-| Theme token definitions (from theme-support-plan) | `@openclaw-canvas/sdk/theme` | CSS custom property contract (`--a2ui-primary`, `--a2ui-text`, etc.) as documented constants |
+| `src/client/store/a2ui.ts` → `A2UISurfaceState`, `DataSource`, `FieldFilter` | `@openclaw-canvas-web/sdk/types` | Store shape contracts so external components can type their store access |
+| `src/client/composables/useDataSource.ts` | `@openclaw-canvas-web/sdk/composables` | Data binding — the primary way components read from data sources |
+| `src/client/composables/useFilterBind.ts` | `@openclaw-canvas-web/sdk/composables` | Filter binding — how interactive components push filters to the store |
+| `src/client/composables/useOptionsFrom.ts` | `@openclaw-canvas-web/sdk/composables` | Derived options from data sources |
+| `src/client/composables/useSortable.ts` | `@openclaw-canvas-web/sdk/composables` | Client-side sorting |
+| `src/client/services/filter-engine.ts` → `applyFilters`, `computeAggregate`, `formatCompact`, `FieldFilter`, `AggregateSpec` | `@openclaw-canvas-web/sdk/filters` | Filter/aggregate engine |
+| `src/client/services/ws-client.ts` → `wsClient.send()` | `@openclaw-canvas-web/sdk/ws` | Send events back to server (button clicks, select changes, etc.) |
+| Theme token definitions (from theme-support-plan) | `@openclaw-canvas-web/sdk/theme` | CSS custom property contract (`--a2ui-primary`, `--a2ui-text`, etc.) as documented constants |
 
 ### 2.2 What stays internal
 
@@ -71,7 +71,7 @@ External component authors need to import types and composables from the platfor
 
 ```
 packages/sdk/
-  package.json          ← name: @openclaw-canvas/sdk
+  package.json          ← name: @openclaw-canvas-web/sdk
   src/
     types.ts            ← A2UISurfaceState, DataSource, FieldFilter, AggregateSpec, ComponentRegistration
     composables/
@@ -88,14 +88,14 @@ packages/sdk/
 
 ### 2.4 Internal codebase migration
 
-After extraction, the main app imports from `@openclaw-canvas/sdk` instead of relative paths. This is a refactor — no behavior change. Use TypeScript path aliases during development so the monorepo resolves locally.
+After extraction, the main app imports from `@openclaw-canvas-web/sdk` instead of relative paths. This is a refactor — no behavior change. Use TypeScript path aliases during development so the monorepo resolves locally.
 
 ### 2.5 Component registration contract
 
 External packages export a `CatalogDefinition`:
 
 ```typescript
-// @openclaw-canvas/sdk/types.ts
+// @openclaw-canvas-web/sdk/types.ts
 import type { Component } from 'vue'
 
 export interface ComponentRegistration {
@@ -134,19 +134,19 @@ Components use `useDataSource(props)`, `useFilterBind(props)`, etc. from the SDK
 
 ### 3.1 Package.json convention
 
-External catalog packages declare themselves via an `openclaw-canvas` field in their `package.json`:
+External catalog packages declare themselves via an `openclaw-canvas-web` field in their `package.json`:
 
 ```json
 {
   "name": "@example/a2ui-charts",
   "version": "1.0.0",
-  "openclaw-canvas": {
+  "openclaw-canvas-web": {
     "catalogId": "https://example.com/a2ui-charts/v1",
     "entry": "./dist/index.js"
   },
   "peerDependencies": {
     "vue": "^3.5.0",
-    "@openclaw-canvas/sdk": "^0.1.0"
+    "@openclaw-canvas-web/sdk": "^0.1.0"
   }
 }
 ```
@@ -163,7 +163,7 @@ At startup, the server:
 
 1. Reads its own `package.json` to get the dependency list
 2. For each dependency, reads `node_modules/<pkg>/package.json`
-3. If the package has an `openclaw-canvas` field, records it
+3. If the package has an `openclaw-canvas-web` field, records it
 4. Builds a registry: `Map<catalogId, { packageName, entry, components[] }>`
 5. Exposes the registry to the Vite build pipeline and to the SPA via an API endpoint
 
@@ -387,7 +387,7 @@ A valid A2UI catalog component is a Vue 3 component that:
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource } from '@openclaw-canvas/sdk'
+import { useDataSource } from '@openclaw-canvas-web/sdk'
 
 export default defineComponent({
   name: 'A2UIBarChart',
@@ -423,8 +423,8 @@ export default defineComponent({
 ### 6.3 Catalog entry point
 
 ```typescript
-// index.ts — the entry point referenced in package.json openclaw-canvas.entry
-import type { CatalogDefinition } from '@openclaw-canvas/sdk'
+// index.ts — the entry point referenced in package.json openclaw-canvas-web.entry
+import type { CatalogDefinition } from '@openclaw-canvas-web/sdk'
 import BarChart from './BarChart.vue'
 import LineChart from './LineChart.vue'
 
@@ -541,15 +541,15 @@ The following components are custom extensions (not in the A2UI basic catalog) a
 
 ### Step 1: Create SDK package skeleton
 
-Create `packages/sdk/` with `package.json`, `tsconfig.json`, and barrel exports. Copy types and composables from the main app. Set up TypeScript path aliases so the main app can import from `@openclaw-canvas/sdk` during development.
+Create `packages/sdk/` with `package.json`, `tsconfig.json`, and barrel exports. Copy types and composables from the main app. Set up TypeScript path aliases so the main app can import from `@openclaw-canvas-web/sdk` during development.
 
 ### Step 2: Migrate internal imports
 
-Update all built-in components and composables to import from `@openclaw-canvas/sdk` instead of relative paths. Verify no behavior change.
+Update all built-in components and composables to import from `@openclaw-canvas-web/sdk` instead of relative paths. Verify no behavior change.
 
 ### Step 3: Implement catalog discovery
 
-Create `src/server/services/catalog-registry.ts`. Implement `node_modules` scanning for packages with the `openclaw-canvas` field. Add the `/api/catalogs` endpoint.
+Create `src/server/services/catalog-registry.ts`. Implement `node_modules` scanning for packages with the `openclaw-canvas-web` field. Add the `/api/catalogs` endpoint.
 
 ### Step 4: Implement Vite plugin
 
@@ -614,7 +614,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 - Inline catalogs from clients (spec feature, not needed for our use case)
 - Validation loop (`VALIDATION_FAILED` error feedback) — separate effort per v0.9 upgrade spec §5.4
 - `formatString` interpolation — separate effort per v0.9 upgrade spec §5.5
-- Publishing `@openclaw-canvas/sdk` to npm (future — start with local monorepo)
+- Publishing `@openclaw-canvas-web/sdk` to npm (future — start with local monorepo)
 
 ---
 
@@ -623,7 +623,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 | Risk | Likelihood | Mitigation |
 |---|---|---|
 | SDK extraction breaks internal components | Medium | Step 2 is a pure refactor — run full test suite before proceeding |
-| External components break when SDK changes | Medium | Semver the SDK; peer dependency on `@openclaw-canvas/sdk` |
+| External components break when SDK changes | Medium | Semver the SDK; peer dependency on `@openclaw-canvas-web/sdk` |
 | Vite virtual module doesn't work with HMR | Low | Virtual modules are well-supported in Vite; fallback to static codegen |
 | Component name collisions across catalogs | Low | Built-in always wins; `catalogId` restriction disambiguates; warn at startup |
 | External components access Vuex directly instead of via SDK | Medium | Document the contract clearly; SDK composables are the supported API |
