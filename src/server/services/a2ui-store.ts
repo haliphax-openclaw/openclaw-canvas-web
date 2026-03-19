@@ -8,6 +8,8 @@ export interface A2UISurfaceRow {
   components: string // JSON
   root: string | null
   dataModel: string // JSON
+  theme: string | null
+  catalogId: string | null
 }
 
 export class A2UIStore {
@@ -24,10 +26,10 @@ export class A2UIStore {
   }
 
   private migrate() {
-    // Check if old schema (no session column) exists
     const tableInfo = this.db.prepare("PRAGMA table_info(a2ui_surfaces)").all() as Array<{ name: string }>
     const hasTable = tableInfo.length > 0
     const hasSession = tableInfo.some(c => c.name === 'session')
+    const hasTheme = tableInfo.some(c => c.name === 'theme')
 
     if (hasTable && !hasSession) {
       // Migrate: add session column, rebuild primary key
@@ -39,6 +41,8 @@ export class A2UIStore {
           components TEXT NOT NULL DEFAULT '{}',
           root TEXT,
           dataModel TEXT NOT NULL DEFAULT '{}',
+          theme TEXT,
+          catalogId TEXT,
           PRIMARY KEY (session, surfaceId)
         );
         INSERT INTO a2ui_surfaces (session, surfaceId, components, root, dataModel)
@@ -53,19 +57,27 @@ export class A2UIStore {
           components TEXT NOT NULL DEFAULT '{}',
           root TEXT,
           dataModel TEXT NOT NULL DEFAULT '{}',
+          theme TEXT,
+          catalogId TEXT,
           PRIMARY KEY (session, surfaceId)
         )
+      `)
+    } else if (hasTable && !hasTheme) {
+      // Existing table with session but missing theme/catalogId columns
+      this.db.exec(`
+        ALTER TABLE a2ui_surfaces ADD COLUMN theme TEXT;
+        ALTER TABLE a2ui_surfaces ADD COLUMN catalogId TEXT;
       `)
     }
   }
 
-  save(session: string, surface: { surfaceId: string; components: Map<string, Record<string, unknown>>; root: string | null; dataModel: Record<string, unknown> }) {
+  save(session: string, surface: { surfaceId: string; components: Map<string, Record<string, unknown>>; root: string | null; dataModel: Record<string, unknown>; theme?: string; catalogId?: string }) {
     const componentsObj: Record<string, Record<string, unknown>> = {}
     for (const [id, comp] of surface.components) componentsObj[id] = comp
     this.db.prepare(`
-      INSERT OR REPLACE INTO a2ui_surfaces (session, surfaceId, components, root, dataModel)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(session, surface.surfaceId, JSON.stringify(componentsObj), surface.root, JSON.stringify(surface.dataModel))
+      INSERT OR REPLACE INTO a2ui_surfaces (session, surfaceId, components, root, dataModel, theme, catalogId)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(session, surface.surfaceId, JSON.stringify(componentsObj), surface.root, JSON.stringify(surface.dataModel), surface.theme ?? null, surface.catalogId ?? null)
   }
 
   load(session: string, surfaceId: string): A2UISurfaceRow | undefined {

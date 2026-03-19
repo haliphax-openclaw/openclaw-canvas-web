@@ -32,6 +32,8 @@ export class A2UIManager {
           components,
           root: row.root,
           dataModel: JSON.parse(row.dataModel),
+          catalogId: row.catalogId ?? undefined,
+          theme: row.theme ?? undefined,
         })
       }
     }
