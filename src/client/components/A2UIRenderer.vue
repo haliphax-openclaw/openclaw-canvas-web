@@ -54,25 +54,25 @@ export default defineComponent({
 .a2ui-renderer {
   width: 100%; min-height: 100%; height: auto; padding: 12px; box-sizing: border-box;
 
-  --a2ui-primary: #4a6cf7;
-  --a2ui-primary-hover: #5d7df9;
-  --a2ui-text: #e0e0e0;
-  --a2ui-text-muted: #999;
-  --a2ui-bg: #000000;
-  --a2ui-bg-surface: #1a1a2e;
-  --a2ui-bg-raised: #2a2a2a;
-  --a2ui-bg-raised-hover: #3a3a3a;
-  --a2ui-bg-inset: #1e1e1e;
-  --a2ui-border: #444;
-  --a2ui-track: #333;
-  --a2ui-badge-info-bg: #1e3a5f;
-  --a2ui-badge-info-fg: #7ec8e3;
-  --a2ui-badge-success-bg: #1b4332;
-  --a2ui-badge-success-fg: #74c69d;
-  --a2ui-badge-warning-bg: #5a3e00;
-  --a2ui-badge-warning-fg: #ffd166;
-  --a2ui-badge-error-bg: #5c1a1a;
-  --a2ui-badge-error-fg: #f28b82;
+  --a2ui-primary: var(--color-primary);
+  --a2ui-primary-hover: color-mix(in oklch, var(--color-primary) 85%, white);
+  --a2ui-text: var(--color-base-content);
+  --a2ui-text-muted: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  --a2ui-bg: var(--color-base-100);
+  --a2ui-bg-surface: var(--color-base-200);
+  --a2ui-bg-raised: var(--color-base-300);
+  --a2ui-bg-raised-hover: var(--color-neutral);
+  --a2ui-bg-inset: var(--color-base-200);
+  --a2ui-border: var(--color-base-300);
+  --a2ui-track: var(--color-base-300);
+  --a2ui-badge-info-bg: var(--color-info-content);
+  --a2ui-badge-info-fg: var(--color-info);
+  --a2ui-badge-success-bg: var(--color-success-content);
+  --a2ui-badge-success-fg: var(--color-success);
+  --a2ui-badge-warning-bg: var(--color-warning-content);
+  --a2ui-badge-warning-fg: var(--color-warning);
+  --a2ui-badge-error-bg: var(--color-error-content);
+  --a2ui-badge-error-fg: var(--color-error);
 }
 .a2ui-attribution { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.85em; color: var(--a2ui-text-muted); }
 .a2ui-attribution-icon { width: 20px; height: 20px; border-radius: 50%; }
