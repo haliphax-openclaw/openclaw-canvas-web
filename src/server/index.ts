@@ -68,7 +68,7 @@ app.use(canvasRoute(fileResolver, BASE_PATH))
 app.use(scaffoldRoute())
 app.use(canvasConfigRoute())
 
-// Deep link proxy: openclaw://?... → POST /api/agent → gateway /tools/invoke (sessions_spawn)
+// Deep link proxy: openclaw://... → POST /api/agent → gateway /tools/invoke (sessions_spawn)
 if (GATEWAY_TOKEN) {
   app.use(agentProxyRoute(GATEWAY_WS_URL, GATEWAY_TOKEN))
 }

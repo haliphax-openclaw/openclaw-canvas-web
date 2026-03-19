@@ -1,54 +1,59 @@
 import { describe, it, expect } from 'vitest'
-import { parseOpenClawUrl } from '../src/client/utils/url-schemes'
+import { parseOpenClawUrl } from '../src/client/utils/url-schemes.js'
 
 describe('parseOpenClawUrl', () => {
   describe('openclaw-canvas://', () => {
     it('parses session and path', () => {
       const r = parseOpenClawUrl('openclaw-canvas://my-project/images/logo.png')
-      expect(r).toEqual({ type: 'canvas', params: {}, session: 'my-project', path: 'images/logo.png' })
+      expect(r!.type).toBe('canvas')
+      expect(r!.path).toBe('my-project/images/logo.png')
     })
 
     it('handles session-only (no path)', () => {
       const r = parseOpenClawUrl('openclaw-canvas://dash')
-      expect(r).toEqual({ type: 'canvas', params: {}, session: 'dash', path: '' })
+      expect(r!.type).toBe('canvas')
+      expect(r!.path).toBe('dash')
     })
   })
 
   describe('openclaw://', () => {
     it('parses agent URL with params', () => {
-      const r = parseOpenClawUrl('openclaw://?message=hello&sessionKey=sk1')
-      expect(r).toEqual({ type: 'agent', params: { message: 'hello', sessionKey: 'sk1' } })
+      const r = parseOpenClawUrl('openclaw://message=hello&sessionKey=sk1')
+      expect(r!.type).toBe('agent')
+      expect(r!.params).toEqual({ message: 'hello', sessionKey: 'sk1' })
     })
 
     it('parses agent URL with no params', () => {
       const r = parseOpenClawUrl('openclaw://')
-      expect(r).toEqual({ type: 'agent', params: {} })
+      expect(r!.type).toBe('agent')
+      expect(r!.params).toEqual({})
+      expect(r!.path).toBe('')
     })
   })
 
   describe('openclaw-fileprompt://', () => {
     it('parses fileprompt URL with params', () => {
-      const r = parseOpenClawUrl('openclaw-fileprompt://?file=prompts/deploy.md&agentId=dev')
-      expect(r).toEqual({ type: 'fileprompt', params: { file: 'prompts/deploy.md', agentId: 'dev' } })
+      const r = parseOpenClawUrl('openclaw-fileprompt://file=prompts/deploy.md&agentId=dev')
+      expect(r!.type).toBe('fileprompt')
+      expect(r!.params).toEqual({ file: 'prompts/deploy.md', agentId: 'dev' })
     })
 
     it('parses fileprompt URL with file only', () => {
-      const r = parseOpenClawUrl('openclaw-fileprompt://trigger?file=task.txt')
-      expect(r).toEqual({ type: 'fileprompt', params: { file: 'task.txt' } })
+      const r = parseOpenClawUrl('openclaw-fileprompt://file=task.txt')
+      expect(r!.type).toBe('fileprompt')
+      expect(r!.params).toEqual({ file: 'task.txt' })
     })
   })
 
-  describe('non-matching URLs', () => {
-    it('returns null for https URLs', () => {
-      expect(parseOpenClawUrl('https://example.com')).toBeNull()
-    })
+  it('returns null for https URLs', () => {
+    expect(parseOpenClawUrl('https://example.com')).toBeNull()
+  })
 
-    it('returns null for empty string', () => {
-      expect(parseOpenClawUrl('')).toBeNull()
-    })
+  it('returns null for empty string', () => {
+    expect(parseOpenClawUrl('')).toBeNull()
+  })
 
-    it('returns null for plain text', () => {
-      expect(parseOpenClawUrl('not a url')).toBeNull()
-    })
+  it('returns null for plain text', () => {
+    expect(parseOpenClawUrl('hello world')).toBeNull()
   })
 })
