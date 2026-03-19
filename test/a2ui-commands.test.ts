@@ -51,24 +51,24 @@ describe('a2ui commands', () => {
   it('a2ui.push processes surfaceUpdate JSONL', async () => {
     const ws = await connectGw()
     const payload = JSON.stringify({
-      surfaceUpdate: {
+      updateComponents: {
         surfaceId: 's1',
-        components: [{ id: 'c1', component: { Text: { text: 'hi' } } }],
+        components: [{ id: 'c1', component: 'Text', text: 'hi' }],
       },
     })
     const res = await rpc(ws, { id: '1', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
     expect(mgr.getSurface('main', 's1')).toBeTruthy()
-    expect(mgr.getSurface('main', 's1')!.components.get('c1')).toEqual({ Text: { text: 'hi' } })
+    expect(mgr.getSurface('main', 's1')!.components.get('c1')).toEqual({ component: 'Text', text: 'hi' })
     ws.close()
   })
 
   it('a2ui.push processes multi-line JSONL', async () => {
     const ws = await connectGw()
     const lines = [
-      JSON.stringify({ surfaceUpdate: { surfaceId: 's1', components: [{ id: 'c1', component: { Text: {} } }] } }),
-      JSON.stringify({ beginRendering: { surfaceId: 's1', root: 'c1' } }),
-      JSON.stringify({ dataModelUpdate: { surfaceId: 's1', data: { count: 5 } } }),
+      JSON.stringify({ updateComponents: { surfaceId: 's1', components: [{ id: 'c1', component: 'Text' }] } }),
+      JSON.stringify({ createSurface: { surfaceId: 's1', root: 'c1' } }),
+      JSON.stringify({ updateDataModel: { surfaceId: 's1', data: { count: 5 } } }),
     ].join('\n')
     const res = await rpc(ws, { id: '2', command: 'a2ui.push', session: 'main', payload: lines })
     expect(res.ok).toBe(true)
@@ -91,7 +91,7 @@ describe('a2ui commands', () => {
     const ws = await connectGw()
     const lines = [
       'not valid json',
-      JSON.stringify({ surfaceUpdate: { surfaceId: 's1', components: [{ id: 'c1', component: {} }] } }),
+      JSON.stringify({ updateComponents: { surfaceId: 's1', components: [{ id: 'c1', component: 'Empty' }] } }),
     ].join('\n')
     const res = await rpc(ws, { id: '4', command: 'a2ui.push', session: 'main', payload: lines })
     expect(res.ok).toBe(true)
@@ -101,18 +101,18 @@ describe('a2ui commands', () => {
 
   it('a2ui.push skips surfaceUpdate with missing surfaceId', async () => {
     const ws = await connectGw()
-    const payload = JSON.stringify({ surfaceUpdate: { components: [] } })
+    const payload = JSON.stringify({ updateComponents: { components: [] } })
     const res = await rpc(ws, { id: '5', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
     ws.close()
   })
 
-  it('a2ui.push skips beginRendering with missing root', async () => {
+  it('a2ui.push handles createSurface with default root', async () => {
     mgr.upsertSurface('main', 's1', [])
     const ws = await connectGw()
-    const payload = JSON.stringify({ beginRendering: { surfaceId: 's1' } })
+    const payload = JSON.stringify({ createSurface: { surfaceId: 's1' } })
     await rpc(ws, { id: '6', command: 'a2ui.push', session: 'main', payload })
-    expect(mgr.getSurface('main', 's1')!.root).toBeNull()
+    expect(mgr.getSurface('main', 's1')!.root).toBe('root')
     ws.close()
   })
 
@@ -165,15 +165,15 @@ describe('a2ui commands', () => {
 
     const gwWs = await connectGw()
     const payload = JSON.stringify({
-      surfaceUpdate: {
+      updateComponents: {
         surfaceId: 's1',
-        components: [{ id: 'c1', component: { Text: { text: 'broadcast' } } }],
+        components: [{ id: 'c1', component: 'Text', text: 'broadcast' }],
       },
     })
     await rpc(gwWs, { id: '11', command: 'a2ui.push', session: 'main', payload })
 
     const received = await mainMsg
-    expect(received.type).toBe('a2ui.surfaceUpdate')
+    expect(received.type).toBe('a2ui.updateComponents')
     expect(received.surfaceId).toBe('s1')
     expect(received.session).toBe('main')
 
@@ -188,7 +188,7 @@ describe('a2ui commands', () => {
   it('a2ui.push defaults to session main when not specified', async () => {
     const ws = await connectGw()
     const payload = JSON.stringify({
-      surfaceUpdate: { surfaceId: 's1', components: [{ id: 'c1', component: {} }] },
+      surfaceUpdate: { surfaceId: 's1', components: [{ id: 'c1', component: 'Empty' }] },
     })
     await rpc(ws, { id: '12', command: 'a2ui.push', payload })
     expect(mgr.getSurface('main', 's1')).toBeTruthy()

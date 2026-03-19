@@ -17,7 +17,7 @@ export default defineComponent({
   },
   setup(props) {
     const { aggregatedValue, compoundAggregates, filteredRows, mappedProps, binding } = useDataSource(props as any)
-    const tag = computed(() => hintMap[(props.def as any).usageHint] ?? 'p')
+    const tag = computed(() => hintMap[(props.def as any).variant] ?? 'p')
     const strokeWidth = computed(() => (props.def as any).strokeWidth ?? null)
     const displayText = computed(() => {
       if (binding.value) {

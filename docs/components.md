@@ -1,6 +1,12 @@
 # A2UI Component Reference
 
-All components are defined in JSONL surface updates as `{"ComponentName": { ...props }}` and referenced by ID in the component tree.
+Components are referenced by ID in the component tree. In v0.9, each component entry in an `updateComponents` command uses a flat shape:
+
+```json
+{"id": "example", "component": "Text", "text": "Hello", "variant": "h1"}
+```
+
+The component type is a string in the `component` field, and props are siblings at the top level.
 
 ## Layout Components
 
@@ -101,24 +107,24 @@ The `active` prop reacts to surface updates, allowing agents to switch tabs prog
 
 ### Text
 
-Text display component. Renders as `<p>` by default, or as heading/span based on `usageHint`. Supports reactive data binding with template interpolation.
+Text display component. Renders as `<p>` by default, or as heading/span based on `variant`. Supports reactive data binding with template interpolation.
 
 **Static mode:**
 
 ```json
-{"Text": {"text": "Hello world", "usageHint": "h2"}}
+{"Text": {"text": "Hello world", "variant": "h2"}}
 ```
 
 **Data source mode (aggregate with map):**
 
 ```json
-{"Text": {"dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total", "format": "compact"}, "map": {"text": "$value"}}, "usageHint": "h1"}}
+{"Text": {"dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total", "format": "compact"}, "map": {"text": "$value"}}, "variant": "h1"}}
 ```
 
 **Data source mode (template interpolation in text):**
 
 ```json
-{"Text": {"text": "Total: {{$value}} across {{$count}} orders", "usageHint": "h2", "dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total"}, "aggregates": {"$count": {"fn": "count"}}}}}
+{"Text": {"text": "Total: {{$value}} across {{$count}} orders", "variant": "h2", "dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total"}, "aggregates": {"$count": {"fn": "count"}}}}}
 ```
 
 **Data source mode (row field interpolation):**
@@ -130,7 +136,7 @@ Text display component. Renders as `<p>` by default, or as heading/span based on
 | Prop | Type | Description |
 |------|------|-------------|
 | `text` | `string \| { literalString: string }` | Static text content. Supports `{{field}}` placeholders when `dataSource` is set — resolves against the first filtered row. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
-| `usageHint` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
+| `variant` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
 | `strokeWidth` | `string` | CSS text stroke width (e.g. `"1px"`). Renders a black outline for readability over images. |
 | `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
 
@@ -406,4 +412,4 @@ All container and layout components render children via `A2UINode`, which recurs
 
 ## Data Source Binding
 
-Components that support `dataSource` can bind to reactive data pushed via `dataSourcePush` or `dataModelUpdate`. See [a2ui-reactive.md](a2ui-reactive.md) for the full data binding guide, including filter operations, aggregates, transforms, and incremental merges.
+Components that support `dataSource` can bind to reactive data pushed via `dataSourcePush` or `updateDataModel`. See [a2ui-reactive.md](a2ui-reactive.md) for the full data binding guide, including filter operations, aggregates, transforms, and incremental merges.

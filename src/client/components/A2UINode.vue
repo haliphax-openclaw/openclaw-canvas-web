@@ -58,23 +58,20 @@ export default defineComponent({
       return surface?.components?.[props.componentId] ?? null
     })
 
-    // The component definition is { "Column": { children: ... } } — extract the type key and inner def
+    // v0.9 flat shape: { component: "Column", children: [...] }
     const typeName = computed(() => {
       const entry = componentEntry.value
       if (!entry) return null
-      return Object.keys(entry)[0] ?? null
+      return (entry.component as string) ?? null
     })
 
     const componentDef = computed(() => {
       const entry = componentEntry.value
-      const name = typeName.value
-      if (!entry || !name) return null
-      const def = (entry as Record<string, unknown>)[name]
+      if (!entry || !typeName.value) return null
+      const { component, ...props } = entry as Record<string, unknown>
       // MultiSelect alias implies multi: true
-      if (name === 'MultiSelect' && def && typeof def === 'object') {
-        return { ...(def as Record<string, unknown>), multi: true }
-      }
-      return def
+      if (component === 'MultiSelect') return { ...props, multi: true }
+      return props
     })
 
     const resolvedComponent = computed(() => {

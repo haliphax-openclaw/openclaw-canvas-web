@@ -16,18 +16,18 @@ interface DataSource {
 }
 ```
 
-### Pushing data via `dataModelUpdate`
+### Pushing data via `updateDataModel`
 
-Include a `$sources` key inside the `data` object of a `dataModelUpdate` JSONL command. The `$sources` key is extracted and stored separately from the regular data model.
+Include a `$sources` key inside the `data` object of an `updateDataModel` JSONL command. The `$sources` key is extracted and stored separately from the regular data model.
 
 ```jsonl
-{"dataModelUpdate": {"surfaceId": "dash", "data": {"$sources": {"users": {"fields": ["id", "name", "role"], "rows": [{"id": "1", "name": "Alice", "role": "admin"}, {"id": "2", "name": "Bob", "role": "viewer"}], "primaryKey": "id"}}}}}
+{"updateDataModel": {"surfaceId": "dash", "data": {"$sources": {"users": {"fields": ["id", "name", "role"], "rows": [{"id": "1", "name": "Alice", "role": "admin"}, {"id": "2", "name": "Bob", "role": "viewer"}], "primaryKey": "id"}}}}}
 ```
 
-You can mix regular data model keys alongside `$sources` in the same `dataModelUpdate`:
+You can mix regular data model keys alongside `$sources` in the same `updateDataModel`:
 
 ```jsonl
-{"dataModelUpdate": {"surfaceId": "dash", "data": {"title": "Dashboard", "$sources": {"users": {"fields": ["id", "name"], "rows": []}}}}}
+{"updateDataModel": {"surfaceId": "dash", "data": {"title": "Dashboard", "$sources": {"users": {"fields": ["id", "name"], "rows": []}}}}}
 ```
 
 ### Pushing data via `dataSourcePush` shorthand
@@ -40,10 +40,10 @@ The `dataSourcePush` JSONL command is a convenience wrapper that sends sources w
 
 ### Incremental updates with merge
 
-When a `dataModelUpdate` is sent with `merge: true` and the data source has a `primaryKey`, existing rows are updated by primary key and new rows are appended. Rows not present in the update are preserved.
+When an `updateDataModel` is sent with `merge: true` and the data source has a `primaryKey`, existing rows are updated by primary key and new rows are appended. Rows not present in the update are preserved.
 
 ```jsonl
-{"dataModelUpdate": {"surfaceId": "dash", "merge": true, "data": {"$sources": {"users": {"rows": [{"id": "1", "name": "Alice Updated", "role": "admin"}, {"id": "3", "name": "Charlie", "role": "editor"}]}}}}}
+{"updateDataModel": {"surfaceId": "dash", "merge": true, "data": {"$sources": {"users": {"rows": [{"id": "1", "name": "Alice Updated", "role": "admin"}, {"id": "3", "name": "Charlie", "role": "editor"}]}}}}}
 ```
 
 After this merge, the `users` source contains rows for ids 1 (updated), 2 (unchanged), and 3 (new).
@@ -80,7 +80,7 @@ interface FilterBind {
 ### Example: Select with filter binding
 
 ```jsonl
-{"surfaceUpdate": {"surfaceId": "dash", "components": [{"id": "role-filter", "component": {"Select": {"options": [{"label": "All Roles", "value": ""}, {"label": "Admin", "value": "admin"}, {"label": "Viewer", "value": "viewer"}], "selected": "", "bind": {"source": "users", "field": "role", "op": "eq", "nullValue": ""}}}}]}}
+{"updateComponents": {"surfaceId": "dash", "components": [{"id": "role-filter", "component": "Select", "options": [{"label": "All Roles", "value": ""}, {"label": "Admin", "value": "admin"}, {"label": "Viewer", "value": "viewer"}], "selected": "", "bind": {"source": "users", "field": "role", "op": "eq", "nullValue": ""}}]}}
 ```
 
 When the user selects "Admin", only rows where `role === "admin"` pass through. When "All Roles" is selected (value `""`), the filter is inactive because the value matches `nullValue`.
@@ -237,9 +237,9 @@ The following components support reactive data binding. See [components.md](comp
 A complete dashboard with a data source, filter, table, and summary badges:
 
 ```jsonl
-{"surfaceUpdate":{"surfaceId":"dash","components":[{"id":"root","component":{"Column":{"children":["title","filter-row","stats-row","user-table"]}}},{"id":"title","component":{"Text":{"text":"User Dashboard","usageHint":"h2"}}},{"id":"filter-row","component":{"Row":{"children":["role-filter","count-badge"]}}},{"id":"role-filter","component":{"Select":{"options":[{"label":"All Roles","value":""},{"label":"Admin","value":"admin"},{"label":"Viewer","value":"viewer"}],"selected":"","bind":{"source":"users","field":"role","op":"eq","nullValue":""}}}},{"id":"count-badge","component":{"Badge":{"variant":"info","dataSource":{"source":"users","aggregate":{"fn":"count"},"map":{"text":"$value"}}}}},{"id":"stats-row","component":{"Row":{"children":["total-badge"]}}},{"id":"total-badge","component":{"Badge":{"variant":"success","dataSource":{"source":"users","aggregate":{"fn":"count","format":"compact"},"map":{"text":"$value"}}}}},{"id":"user-table","component":{"Table":{"dataSource":{"source":"users","columns":["name","role","email"]}}}}]}}
+{"updateComponents":{"surfaceId":"dash","components":[{"id":"root","component":"Column","children":["title","filter-row","stats-row","user-table"]},{"id":"title","component":"Text","text":"User Dashboard","variant":"h2"},{"id":"filter-row","component":"Row","children":["role-filter","count-badge"]},{"id":"role-filter","component":"Select","options":[{"label":"All Roles","value":""},{"label":"Admin","value":"admin"},{"label":"Viewer","value":"viewer"}],"selected":"","bind":{"source":"users","field":"role","op":"eq","nullValue":""}},{"id":"count-badge","component":"Badge","variant":"info","dataSource":{"source":"users","aggregate":{"fn":"count"},"map":{"text":"$value"}}},{"id":"stats-row","component":"Row","children":["total-badge"]},{"id":"total-badge","component":"Badge","variant":"success","dataSource":{"source":"users","aggregate":{"fn":"count","format":"compact"},"map":{"text":"$value"}}},{"id":"user-table","component":"Table","dataSource":{"source":"users","columns":["name","role","email"]}}]}}
 {"dataSourcePush":{"surfaceId":"dash","sources":{"users":{"fields":["name","role","email"],"rows":[{"name":"Alice","role":"admin","email":"alice@example.com"},{"name":"Bob","role":"viewer","email":"bob@example.com"},{"name":"Charlie","role":"admin","email":"charlie@example.com"}],"primaryKey":"name"}}}}
-{"beginRendering":{"surfaceId":"dash","root":"root"}}
+{"createSurface":{"surfaceId":"dash","root":"root"}}
 ```
 
 This renders a dashboard where selecting a role filters the table and updates the count badge in real time.

@@ -42,7 +42,7 @@ Remove duplicated JSONL processing logic from `src/server/commands/a2ui.ts`. The
 
 Change the in-memory component representation from v0.8 wrapped to v0.9 flat.
 
-**Prerequisite:** Wipe the SQLite state cache database before deploying. v0.8 stored surfaces are not migrated — surfaces will be rebuilt on next agent push. This avoids the complexity of a migration script for cached state that is easily regenerated.
+**Prerequisite:** Wipe the SQLite state cache database (`~/.openclaw-canvas/a2ui-cache.db`) before deploying. v0.8 stored surfaces are not migrated — surfaces will be rebuilt on next agent push. This avoids the complexity of a migration script for cached state that is easily regenerated.
 
 **Tasks:**
 1. Update `upsertSurface()` to accept and store v0.9 flat components (`{ component: "Text", text: "..." }`)
@@ -155,47 +155,19 @@ Update all test fixtures from v0.8 to v0.9 format. Add backward-compat normaliza
 
 **Files:** `test/*.test.ts`
 
-### Step 11: Update skill docs
+### ~~Step 11: Update skill docs~~ ✅ DONE
 
-Update all JSONL examples and command references in the canvas skill.
+Completed — PR opened: https://github.com/haliphax-openclaw/skills/pull/1
 
-**Tasks:**
-1. `SKILL.md` — update command names in the JSONL Commands section and all inline examples
-2. `references/surface-updates.md` — rename `surfaceUpdate` → `updateComponents`, `beginRendering` → `createSurface`, update component shape examples to v0.9 flat format
-3. `references/data-sources.md` — rename `dataModelUpdate` → `updateDataModel` in examples
-4. `references/components.md` — update all component JSONL examples to v0.9 flat shape, `usageHint` → `variant`
-5. `references/reactive.md` — update any JSONL examples
+### ~~Step 12: Update project docs~~ ✅ DONE
 
-**Files:** `~/.openclaw/skills/custom/canvas/SKILL.md`, `~/.openclaw/skills/custom/canvas/references/*.md`
-
-### Step 12: Migrate existing JSONL files
-
-Convert on-disk JSONL files to v0.9 format.
-
-**Tasks:**
-1. `~/.openclaw/workspaces/developer/canvas/jsonl/dashboard-demo.jsonl` — update command names, flatten component shapes, `usageHint` → `variant`
-2. `~/.openclaw/workspaces/developer/canvas/jsonl/dashboard-demo-data.jsonl` — update command names if applicable
-3. Search for any other `.jsonl` files across workspaces and update
-
-**Files:** `~/.openclaw/workspaces/*/canvas/jsonl/*.jsonl`
-
-### Step 13: Update project docs
-
-Update README and internal docs to reflect v0.9 terminology.
-
-**Tasks:**
-1. `README.md` — update A2UI command references
-2. `docs/a2ui-reactive.md` — update command names in examples
-3. `docs/jsonl-watcher.md` — update command names in examples
-4. `docs/components.md` — update component shape examples
-
-**Files:** `README.md`, `docs/*.md`
+Completed — committed to `a2ui-v0.9` branch (fe389af).
 
 ---
 
 ## Phase 2 — Remove backward-compat shim
 
-*Target: 2 weeks after Phase 1 ships and skill docs are live.*
+*Timeline: Indefinite. May align with OpenClaw's internal canvas server upgrade plans.*
 
 ### Step 14: Remove v0.8 acceptance
 

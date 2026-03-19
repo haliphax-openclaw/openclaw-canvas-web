@@ -14,6 +14,9 @@ export interface A2UISurfaceState {
   dataModel: Record<string, unknown>
   sources: Record<string, DataSource>
   filters: Record<string, FieldFilter[]>
+  theme?: Record<string, unknown>
+  catalogId?: string
+  sendDataModel?: boolean
 }
 
 export interface A2UIState {
@@ -38,18 +41,23 @@ export const a2uiModule: Module<A2UIState, RootState> = {
     },
   },
   mutations: {
-    upsertSurface(state, payload: { surfaceId: string; components: Array<{ id: string; component: Record<string, unknown> }> }) {
+    upsertSurface(state, payload: { surfaceId: string; components: Array<{ id: string; component: string; [key: string]: unknown }> }) {
       if (!state.surfaces[payload.surfaceId]) {
         state.surfaces[payload.surfaceId] = makeSurface()
       }
       const s = state.surfaces[payload.surfaceId]
       for (const c of payload.components) {
-        s.components[c.id] = c.component
+        const { id, ...rest } = c
+        s.components[id] = rest
       }
     },
-    setRoot(state, payload: { surfaceId: string; root: string }) {
+    setRoot(state, payload: { surfaceId: string; root: string; theme?: Record<string, unknown>; catalogId?: string; sendDataModel?: boolean }) {
       if (state.surfaces[payload.surfaceId]) {
-        state.surfaces[payload.surfaceId].root = payload.root
+        const s = state.surfaces[payload.surfaceId]
+        s.root = payload.root
+        if (payload.theme !== undefined) s.theme = payload.theme
+        if (payload.catalogId !== undefined) s.catalogId = payload.catalogId
+        if (payload.sendDataModel !== undefined) s.sendDataModel = payload.sendDataModel
       }
     },
     updateDataModel(state, payload: { surfaceId: string; data: Record<string, unknown>; merge?: boolean }) {

@@ -1,6 +1,6 @@
 # OpenClaw Canvas
 
-A cross-platform canvas server for OpenClaw. Serves HTML content, renders A2UI v0.8 surfaces, and provides a WebSocket gateway for agent-driven UI control.
+A cross-platform canvas server for OpenClaw. Serves HTML content, renders A2UI v0.9 surfaces, and provides a WebSocket gateway for agent-driven UI control.
 
 ## MCP Server
 
@@ -135,7 +135,7 @@ Connect via WebSocket to `/gateway`. Send JSON messages with a `command` field. 
 
 **a2ui.push** — Push A2UI JSONL payload.
 ```json
-{ "id": "7", "command": "a2ui.push", "payload": "{\"surfaceUpdate\":{...}}\n{\"beginRendering\":{...}}" }
+{ "id": "7", "command": "a2ui.push", "payload": "{\"updateComponents\":{...}}\n{\"createSurface\":{...}}" }
 ```
 
 **a2ui.reset** — Clear all A2UI surfaces.
@@ -242,13 +242,27 @@ Features available in the web server that are not present in the macOS app:
 - **Container hostname URLs** — `openclaw://<hostname>/agent?message=...` is accepted alongside the standard `openclaw://agent?message=...` form, supporting Docker network hostnames in the URL authority.
 - **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
 
+## Backward Compatibility
+
+The server includes a normalization layer (`src/server/services/a2ui-commands.ts`) that auto-converts v0.8 commands and component shapes to v0.9 format with deprecation warnings logged. v0.8 payloads still work but are deprecated:
+
+| v0.8 (deprecated) | v0.9 |
+|--------------------|------|
+| `surfaceUpdate` | `updateComponents` |
+| `beginRendering` | `createSurface` |
+| `dataModelUpdate` | `updateDataModel` |
+| `usageHint` (Text prop) | `variant` |
+| Wrapped component shape: `{ id, component: { "Text": { "text": "..." } } }` | Flat component shape: `{ id, component: "Text", "text": "..." }` |
+
+`dataSourcePush` and `deleteSurface` are unchanged.
+
 ## Reactive Data Binding (A2UI)
 
 A2UI surfaces support a reactive data-binding layer that lets agents push structured data sources and bind UI components to live, filterable data.
 
 Key capabilities:
 
-- **Data Sources** — Push named datasets via `dataModelUpdate` (with `$sources`) or the `dataSourcePush` JSONL shorthand. Supports incremental merges with `primaryKey`.
+- **Data Sources** — Push named datasets via `updateDataModel` (with `$sources`) or the `dataSourcePush` JSONL shorthand. Supports incremental merges with `primaryKey`.
 - **Filtering** — Select and MultiSelect components can `bind` to data sources, applying filter operations (`eq`, `contains`, `gte`, `lte`, `range`, `in`) that reactively update all bound displays. Clearing a MultiSelect shows all data.
 - **Sorting** — Table and Repeat components support optional sorting via the `sortable` prop. Tables sort by clicking column headers (⬆/⬇ indicators); Repeat components include a sort direction dropdown. Sorting operates on raw data values.
 - **Display Binding** — Table, Badge, and Text components accept a `dataSource` prop for dynamic content with built-in aggregates (`count`, `sum`, `avg`, `min`, `max`) and compact number formatting.

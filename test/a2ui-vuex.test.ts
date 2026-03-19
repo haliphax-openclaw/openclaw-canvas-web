@@ -15,14 +15,14 @@ describe('a2ui Vuex module mutations', () => {
   beforeEach(() => { state = createState() })
 
   it('upsertSurface creates surface and adds components', () => {
-    mutations.upsertSurface(state, { surfaceId: 's1', components: [{ id: 'c1', component: { Text: { text: 'hi' } } }] })
+    mutations.upsertSurface(state, { surfaceId: 's1', components: [{ id: 'c1', component: 'Text', text: 'hi' }] })
     expect(state.surfaces.s1).toBeTruthy()
-    expect(state.surfaces.s1.components.c1).toEqual({ Text: { text: 'hi' } })
+    expect(state.surfaces.s1.components.c1).toEqual({ component: 'Text', text: 'hi' })
   })
 
   it('upsertSurface merges into existing surface', () => {
-    mutations.upsertSurface(state, { surfaceId: 's1', components: [{ id: 'c1', component: { Text: {} } }] })
-    mutations.upsertSurface(state, { surfaceId: 's1', components: [{ id: 'c2', component: { Button: {} } }] })
+    mutations.upsertSurface(state, { surfaceId: 's1', components: [{ id: 'c1', component: 'Text' }] })
+    mutations.upsertSurface(state, { surfaceId: 's1', components: [{ id: 'c2', component: 'Button' }] })
     expect(Object.keys(state.surfaces.s1.components)).toEqual(['c1', 'c2'])
   })
 
