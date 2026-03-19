@@ -33,6 +33,23 @@ OPENCLAW_CANVAS_PORT=9999 npm start
 
 Open `http://localhost:9999` in a browser.
 
+## Canvas Session URLs
+
+Each canvas session is accessed via its session ID in the URL path:
+
+```
+http://<host>:<port>/<sessionId>/
+```
+
+For example:
+- `http://localhost:3456/main/` — the default `main` session
+- `http://localhost:3456/developer/` — the `developer` session
+
+When running behind a reverse proxy with a base path (e.g., `OPENCLAW_CANVAS_BASE_PATH=/canvas`):
+- `https://example.com/canvas/developer/`
+
+The root path (`/`) redirects to `/main/` by default.
+
 ## Scripts
 
 | Command | Description |
