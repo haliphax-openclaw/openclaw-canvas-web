@@ -158,8 +158,8 @@ export default defineComponent({
             })
             wsClient.send({ type: 'canvas.snapshotResult', id: d.id, image })
             return
-          } catch {
-            // Fall through to parent-level capture
+          } catch (err) {
+            console.error('[snapshot] Iframe capture failed, falling through:', err)
           }
         }
 

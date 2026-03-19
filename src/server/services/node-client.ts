@@ -59,7 +59,7 @@ function loadOrCreateIdentity(): DeviceIdentity {
       if (parsed?.deviceId && parsed?.publicKeyPem && parsed?.privateKeyPem)
         return parsed
     }
-  } catch { /* regenerate */ }
+  } catch (err) { console.warn('[node-client] Key load failed, regenerating:', err) }
 
   const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519')
   const publicKeyPem = publicKey.export({ type: 'spki', format: 'pem' }).toString()
