@@ -46,9 +46,11 @@ export function parseOpenclawUrl(url: string): DeepLinkRequest | null {
   if (!url.startsWith('openclaw://')) return null
 
   try {
-    // Strip scheme and parse params directly — no hostname or ? delimiter
+    // Strip scheme, split path and query string
     const rest = url.slice('openclaw://'.length)
-    const params = new URLSearchParams(rest)
+    const qIdx = rest.indexOf('?')
+    const query = qIdx >= 0 ? rest.slice(qIdx + 1) : ''
+    const params = new URLSearchParams(query)
     const message = params.get('message')
     if (!message) {
       console.warn('[deep-link] Missing required "message" param')

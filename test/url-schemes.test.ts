@@ -18,30 +18,33 @@ describe('parseOpenClawUrl', () => {
 
   describe('openclaw://', () => {
     it('parses agent URL with params', () => {
-      const r = parseOpenClawUrl('openclaw://message=hello&sessionKey=sk1')
+      const r = parseOpenClawUrl('openclaw://agent?message=hello&sessionKey=sk1')
       expect(r!.type).toBe('agent')
+      expect(r!.path).toBe('agent')
       expect(r!.params).toEqual({ message: 'hello', sessionKey: 'sk1' })
     })
 
     it('parses agent URL with no params', () => {
-      const r = parseOpenClawUrl('openclaw://')
+      const r = parseOpenClawUrl('openclaw://agent')
       expect(r!.type).toBe('agent')
+      expect(r!.path).toBe('agent')
       expect(r!.params).toEqual({})
-      expect(r!.path).toBe('')
     })
   })
 
   describe('openclaw-fileprompt://', () => {
     it('parses fileprompt URL with params', () => {
-      const r = parseOpenClawUrl('openclaw-fileprompt://file=prompts/deploy.md&agentId=dev')
+      const r = parseOpenClawUrl('openclaw-fileprompt://prompts/deploy.md?agentId=dev')
       expect(r!.type).toBe('fileprompt')
-      expect(r!.params).toEqual({ file: 'prompts/deploy.md', agentId: 'dev' })
+      expect(r!.path).toBe('prompts/deploy.md')
+      expect(r!.params).toEqual({ agentId: 'dev' })
     })
 
     it('parses fileprompt URL with file only', () => {
-      const r = parseOpenClawUrl('openclaw-fileprompt://file=task.txt')
+      const r = parseOpenClawUrl('openclaw-fileprompt://task.txt')
       expect(r!.type).toBe('fileprompt')
-      expect(r!.params).toEqual({ file: 'task.txt' })
+      expect(r!.path).toBe('task.txt')
+      expect(r!.params).toEqual({})
     })
   })
 

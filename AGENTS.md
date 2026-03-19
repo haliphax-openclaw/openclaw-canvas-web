@@ -31,7 +31,7 @@ Canvas HTML ──click openclaw://──▶ injected script ──postMessage�
 
 ## Custom URL Protocols
 
-- `openclaw://message=...` — triggers agent runs via deep link.
+- `openclaw://agent?message=...` — triggers agent runs via deep link.
 - `openclaw-canvas://<session>/<path>` — references canvas files across sessions, rewritten to `/_c/<session>/<path>` at runtime.
 
 ## Adding a New Command

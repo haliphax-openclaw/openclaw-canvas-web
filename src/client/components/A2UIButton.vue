@@ -49,7 +49,7 @@ export default defineComponent({
         fetch(`${base}/api/file-spawn`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parsed.params),
+          body: JSON.stringify({ file: parsed.path, ...parsed.params }),
         }).then(flashSent).catch(() => {})
       }
     }
