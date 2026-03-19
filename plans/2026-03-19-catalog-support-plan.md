@@ -10,7 +10,17 @@
 
 Enable third-party Vue 3 components to be installed via npm and served alongside the built-in A2UI components. External components are NOT loaded at runtime from external sites — they are installed on the server, discovered at startup, and bundled into the SPA as a unified app.
 
-This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection of components identified by a `catalogId` URI. openclaw-canvas-web becomes a platform that ships the "basic" catalog built-in and allows additional catalogs to be installed as npm packages.
+This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection of components identified by a `catalogId` URI. Packages advertise component IDs — the server owns catalog membership and bundles components into catalogs based on local configuration.
+
+Catalog namespace: `https://haliphax-openclaw.github.io`
+
+### Default catalogs
+
+| Catalog ID | Contents |
+|---|---|
+| `https://haliphax-openclaw.github.io/1.0/basic` | The basic set of built-in components (maps to A2UI v0.9 basic catalog) |
+| `https://haliphax-openclaw.github.io/1.0/built-in` | All built-in components, including those outside the basic set |
+| `https://haliphax-openclaw.github.io/1.0/all` | Everything — all built-in + all installed third-party components |
 
 ### Architecture overview
 
@@ -21,7 +31,7 @@ This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection 
 │  node_modules/@example/a2ui-charts/                 │
 │    package.json  ← declares openclaw-canvas-web field   │
 │    dist/                                            │
-│      index.js    ← exports { components, catalogId }│
+│      index.js    ← exports { components }           │
 │      Chart.vue   ← Vue 3 SFC (pre-built)           │
 └─────────────────────────────────────────────────────┘
          │
@@ -29,7 +39,8 @@ This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection 
 ┌─────────────────────────────────────────────────────┐
 │  Server: catalog-registry.ts                        │
 │    discovers packages with openclaw-canvas-web field    │
-│    loads component maps into registry               │
+│    loads component IDs into registry                │
+│    assigns components to catalogs via server config │
 │    generates virtual module for Vite                 │
 └─────────────────────────────────────────────────────┘
          │
@@ -92,7 +103,7 @@ After extraction, the main app imports from `@openclaw-canvas-web/sdk` instead o
 
 ### 2.5 Component registration contract
 
-External packages export a `CatalogDefinition`:
+External packages export a `PackageDefinition`:
 
 ```typescript
 // @openclaw-canvas-web/sdk/types.ts
@@ -105,10 +116,8 @@ export interface ComponentRegistration {
   component: Component
 }
 
-export interface CatalogDefinition {
-  /** Unique catalog identifier URI (e.g. "https://example.com/a2ui-charts/v1") */
-  catalogId: string
-  /** Components provided by this catalog */
+export interface PackageDefinition {
+  /** Components provided by this package */
   components: ComponentRegistration[]
 }
 ```
@@ -141,7 +150,6 @@ External catalog packages declare themselves via an `openclaw-canvas-web` field 
   "name": "@example/a2ui-charts",
   "version": "1.0.0",
   "openclaw-canvas-web": {
-    "catalogId": "https://example.com/a2ui-charts/v1",
     "entry": "./dist/index.js"
   },
   "peerDependencies": {
@@ -152,8 +160,9 @@ External catalog packages declare themselves via an `openclaw-canvas-web` field 
 ```
 
 Fields:
-- `catalogId` (required): The A2UI catalog identifier URI. Must be globally unique (convention: domain you own + path + version).
-- `entry` (required): Path to the ES module that default-exports a `CatalogDefinition`.
+- `entry` (required): Path to the ES module that default-exports a `PackageDefinition`.
+
+Packages advertise component IDs only. Catalog membership is determined by the server's local configuration.
 
 ### 3.2 Server-side discovery
 
@@ -169,19 +178,20 @@ At startup, the server:
 
 ```typescript
 export interface CatalogEntry {
-  catalogId: string
   packageName: string
   entry: string          // resolved absolute path to entry module
   componentNames: string[] // populated after loading the entry
 }
 
 export class CatalogRegistry {
-  private catalogs = new Map<string, CatalogEntry>()
+  private packages = new Map<string, CatalogEntry>()
+  private catalogs = new Map<string, Set<string>>() // catalogId → component names
 
   async discover(projectRoot: string): Promise<void> { /* scan node_modules */ }
-  getCatalog(catalogId: string): CatalogEntry | undefined { /* ... */ }
-  allCatalogs(): CatalogEntry[] { /* ... */ }
-  getComponentMap(): Record<string, { catalogId: string; importPath: string }> { /* ... */ }
+  getPackage(packageName: string): CatalogEntry | undefined { /* ... */ }
+  getCatalogComponents(catalogId: string): string[] { /* ... */ }
+  allCatalogs(): { catalogId: string; components: string[] }[] { /* ... */ }
+  getComponentMap(): Record<string, { packageName: string; importPath: string }> { /* ... */ }
 }
 ```
 
@@ -195,13 +205,16 @@ Returns the list of available catalogs and their component names. Used by agents
 {
   "catalogs": [
     {
-      "catalogId": "builtin",
+      "catalogId": "https://haliphax-openclaw.github.io/1.0/basic",
+      "components": ["Column", "Row", "Text", "Button", "Image", "Select", "MultiSelect", "Checkbox", "Slider", "Divider", "Tabs"]
+    },
+    {
+      "catalogId": "https://haliphax-openclaw.github.io/1.0/built-in",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs"]
     },
     {
-      "catalogId": "https://example.com/a2ui-charts/v1",
-      "package": "@example/a2ui-charts",
-      "components": ["BarChart", "LineChart", "PieChart"]
+      "catalogId": "https://haliphax-openclaw.github.io/1.0/all",
+      "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs", "BarChart", "LineChart", "PieChart"]
     }
   ]
 }
@@ -240,7 +253,8 @@ const builtinMap: Record<string, Component> = {
 // 2. Catalog components (loaded from discovered packages)
 // This is populated at build time via a Vite virtual module
 import { catalogComponents } from 'virtual:openclaw-catalogs'
-// catalogComponents: Record<string, { catalogId: string; component: Component }>
+// catalogComponents: Record<string, { component: Component }>
+// Server config determines which catalogs include which components
 
 const resolvedComponent = computed(() => {
   const name = typeName.value
@@ -249,13 +263,13 @@ const resolvedComponent = computed(() => {
   // Built-in always wins
   if (builtinMap[name]) return builtinMap[name]
 
-  // Catalog lookup, optionally filtered by surface catalogId
+  // Catalog lookup, filtered by surface catalogId via server-side catalog membership
   const catalogComp = catalogComponents[name]
   if (!catalogComp) return null
 
-  // If surface has a catalogId restriction, enforce it
+  // If surface has a catalogId restriction, check server-side catalog membership
   const surfaceCatalogId = surface.value?.catalogId
-  if (surfaceCatalogId && surfaceCatalogId !== 'builtin' && catalogComp.catalogId !== surfaceCatalogId) {
+  if (surfaceCatalogId && !catalogMembership[surfaceCatalogId]?.includes(name)) {
     return null
   }
 
@@ -267,9 +281,9 @@ const resolvedComponent = computed(() => {
 
 The `createSurface` command already stores `catalogId` on the surface (from the v0.9 upgrade plan §5.2). The resolution logic uses it:
 
-- `catalogId` omitted or `"builtin"` → only built-in components available
-- `catalogId` set to a specific URI → built-in components + components from that catalog only
-- `catalogId` set to `"*"` (extension) → all installed catalogs available (useful for development)
+- `catalogId` omitted → defaults to `https://haliphax-openclaw.github.io/1.0/built-in` (all built-in components)
+- `catalogId` set to a specific URI → built-in basic components + components assigned to that catalog by server config
+- `catalogId` set to `https://haliphax-openclaw.github.io/1.0/all` → all installed components available (useful for development)
 
 This is stored in Vuex on `A2UISurfaceState`:
 
@@ -321,10 +335,10 @@ export function catalogPlugin(registry: CatalogRegistry): Plugin {
         }
         return `
           ${imports.join('\n')}
-          function registerCatalog(def) {
+          function registerPackage(def) {
             const map = {}
             for (const c of def.components) {
-              map[c.name] = { catalogId: def.catalogId, component: c.component }
+              map[c.name] = { component: c.component }
             }
             return map
           }
@@ -424,19 +438,18 @@ export default defineComponent({
 
 ```typescript
 // index.ts — the entry point referenced in package.json openclaw-canvas-web.entry
-import type { CatalogDefinition } from '@openclaw-canvas-web/sdk'
+import type { PackageDefinition } from '@openclaw-canvas-web/sdk'
 import BarChart from './BarChart.vue'
 import LineChart from './LineChart.vue'
 
-const catalog: CatalogDefinition = {
-  catalogId: 'https://example.com/a2ui-charts/v1',
+const pkg: PackageDefinition = {
   components: [
     { name: 'BarChart', component: BarChart },
     { name: 'LineChart', component: LineChart },
   ],
 }
 
-export default catalog
+export default pkg
 ```
 
 ### 6.4 Data binding participation
@@ -565,7 +578,7 @@ Add `catalogId` to `A2UISurfaceState`. Update `createSurface` handling in the se
 
 ### Step 7: Extract Badge as test catalog
 
-Create a test package `packages/test-catalog/` that exports Badge as a catalog component using the SDK. Install it locally. Verify it renders correctly when referenced from a surface with the matching `catalogId`.
+Create a test package `packages/test-catalog/` that exports Badge as a component package using the SDK. Install it locally. Add it to a test catalog via server config. Verify it renders correctly when referenced from a surface with the matching `catalogId`.
 
 ### Step 8: Extract Table as complex test
 
@@ -588,7 +601,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 |---|---|
 | `packages/sdk/` | New — SDK package |
 | `packages/sdk/package.json` | New |
-| `packages/sdk/src/types.ts` | New — extracted from `store/a2ui.ts` + new `CatalogDefinition` |
+| `packages/sdk/src/types.ts` | New — extracted from `store/a2ui.ts` + new `PackageDefinition` |
 | `packages/sdk/src/composables/*.ts` | New — extracted from `src/client/composables/` |
 | `packages/sdk/src/filters.ts` | New — extracted from `services/filter-engine.ts` |
 | `packages/sdk/src/ws.ts` | New — thin event sender wrapper |
