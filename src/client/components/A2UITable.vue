@@ -78,11 +78,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-table { border-collapse: collapse; width: 100%; color: #e0e0e0; }
+.a2ui-table { border-collapse: collapse; width: 100%; color: var(--a2ui-text); }
 .a2ui-table-wrapper { overflow-x: auto; width: 100%; }
 .a2ui-table-wrapper .a2ui-table { width: max-content; min-width: 100%; }
-.a2ui-table th, .a2ui-table td { border: 1px solid #444; padding: 6px 10px; text-align: left; }
-.a2ui-table th { background: #16213e; }
+.a2ui-table th, .a2ui-table td { border: 1px solid var(--a2ui-border); padding: 6px 10px; text-align: left; }
+.a2ui-table th { background: var(--a2ui-bg-surface); }
 .a2ui-table.sortable th { cursor: pointer; }
 .a2ui-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
 </style>

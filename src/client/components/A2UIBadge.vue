@@ -35,8 +35,8 @@ export default defineComponent({
 
 <style scoped>
 .a2ui-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 600; }
-.a2ui-badge--info { background: #1e3a5f; color: #7ec8e3; }
-.a2ui-badge--success { background: #1b4332; color: #74c69d; }
-.a2ui-badge--warning { background: #5a3e00; color: #ffd166; }
-.a2ui-badge--error { background: #5c1a1a; color: #f28b82; }
+.a2ui-badge--info { background: var(--a2ui-badge-info-bg); color: var(--a2ui-badge-info-fg); }
+.a2ui-badge--success { background: var(--a2ui-badge-success-bg); color: var(--a2ui-badge-success-fg); }
+.a2ui-badge--warning { background: var(--a2ui-badge-warning-bg); color: var(--a2ui-badge-warning-fg); }
+.a2ui-badge--error { background: var(--a2ui-badge-error-bg); color: var(--a2ui-badge-error-fg); }
 </style>

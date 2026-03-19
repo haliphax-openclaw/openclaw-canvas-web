@@ -1,5 +1,5 @@
 <template>
-  <button :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
+  <button :class="variantClass" :disabled="sentFlash" @click="onClick">{{ displayLabel }}</button>
 </template>
 
 <script lang="ts">
@@ -19,6 +19,8 @@ export default defineComponent({
       const t = (props.def as any).label ?? (props.def as any).text
       return t?.literalString ?? t ?? 'Button'
     })
+    const variant = computed(() => (props.def as any).variant ?? 'default')
+    const variantClass = computed(() => variant.value !== 'default' ? `a2ui-btn--${variant.value}` : undefined)
     const href = computed(() => (props.def as any).href as string | undefined)
     const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '')
     const sentFlash = ref(false)
@@ -53,7 +55,14 @@ export default defineComponent({
         }).then(flashSent).catch(() => {})
       }
     }
-    return { displayLabel, onClick, sentFlash }
+    return { displayLabel, variantClass, onClick, sentFlash }
   },
 })
 </script>
+
+<style scoped>
+.a2ui-btn--primary { background: var(--a2ui-primary); color: #fff; border-color: var(--a2ui-primary); }
+.a2ui-btn--primary:hover:not(:disabled) { background: var(--a2ui-primary-hover); border-color: var(--a2ui-primary-hover); }
+.a2ui-btn--borderless { background: transparent; border: none; color: var(--a2ui-primary); }
+.a2ui-btn--borderless:hover:not(:disabled) { text-decoration: underline; }
+</style>

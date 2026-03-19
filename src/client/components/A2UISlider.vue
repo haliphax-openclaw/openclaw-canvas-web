@@ -35,7 +35,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-slider { color: #e0e0e0; }
+.a2ui-slider { color: var(--a2ui-text); }
 .a2ui-slider-label { display: block; margin-bottom: 4px; font-size: 0.85em; }
-input[type="range"] { width: 100%; accent-color: #4a6cf7; }
+input[type="range"] { width: 100%; accent-color: var(--a2ui-primary); }
 </style>

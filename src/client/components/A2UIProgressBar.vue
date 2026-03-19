@@ -46,8 +46,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-progress { color: #e0e0e0; }
+.a2ui-progress { color: var(--a2ui-text); }
 .a2ui-progress-label { display: block; margin-bottom: 4px; font-size: 0.85em; }
-.a2ui-progress-track { background: #333; border-radius: 4px; height: 12px; overflow: hidden; }
-.a2ui-progress-fill { background: #4a6cf7; height: 100%; transition: width 0.3s; width: var(--progress, 0%); }
+.a2ui-progress-track { background: var(--a2ui-track); border-radius: 4px; height: 12px; overflow: hidden; }
+.a2ui-progress-fill { background: var(--a2ui-primary); height: 100%; transition: width 0.3s; width: var(--progress, 0%); }
 </style>

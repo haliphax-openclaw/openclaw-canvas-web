@@ -49,32 +49,32 @@ export default defineComponent({
 .a2ui-tabs--right { flex-direction: row-reverse; }
 .a2ui-tabs--bottom { flex-direction: column-reverse; }
 
-.a2ui-tabs-bar { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid #444; }
+.a2ui-tabs-bar { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--a2ui-border); }
 .a2ui-tabs-bar--left,
 .a2ui-tabs-bar--right { flex-direction: column; flex-wrap: nowrap; border-bottom: none; width: fit-content; max-width: 33%; flex-shrink: 0; }
-.a2ui-tabs-bar--left { border-right: 1px solid #444; }
-.a2ui-tabs-bar--right { border-left: 1px solid #444; }
-.a2ui-tabs-bar--bottom { border-bottom: none; border-top: 1px solid #444; }
+.a2ui-tabs-bar--left { border-right: 1px solid var(--a2ui-border); }
+.a2ui-tabs-bar--right { border-left: 1px solid var(--a2ui-border); }
+.a2ui-tabs-bar--bottom { border-bottom: none; border-top: 1px solid var(--a2ui-border); }
 
 .a2ui-tab {
   padding: 6px 14px;
   cursor: pointer;
   user-select: none;
-  color: #999;
+  color: var(--a2ui-text-muted);
   background: transparent;
   overflow-wrap: break-word;
   word-break: break-word;
   border-bottom: 2px solid transparent;
 }
-.a2ui-tab:hover { color: #ccc; background: #2a2a2a; }
-.a2ui-tab--active { color: #e0e0e0; background: #16213e; border-bottom-color: #e0e0e0; }
+.a2ui-tab:hover { color: var(--a2ui-text); background: var(--a2ui-bg-raised); }
+.a2ui-tab--active { color: var(--a2ui-text); background: var(--a2ui-bg-surface); border-bottom-color: var(--a2ui-primary); }
 
 .a2ui-tabs-bar--bottom .a2ui-tab { border-top: 2px solid transparent; }
-.a2ui-tabs-bar--bottom .a2ui-tab--active { border-bottom-color: transparent; border-top-color: #e0e0e0; }
+.a2ui-tabs-bar--bottom .a2ui-tab--active { border-bottom-color: transparent; border-top-color: var(--a2ui-primary); }
 .a2ui-tabs-bar--left .a2ui-tab { border-bottom: none; border-right: 2px solid transparent; }
 .a2ui-tabs-bar--right .a2ui-tab { border-bottom: none; border-left: 2px solid transparent; }
-.a2ui-tabs-bar--left .a2ui-tab--active { border-right-color: #e0e0e0; }
-.a2ui-tabs-bar--right .a2ui-tab--active { border-left-color: #e0e0e0; }
+.a2ui-tabs-bar--left .a2ui-tab--active { border-right-color: var(--a2ui-primary); }
+.a2ui-tabs-bar--right .a2ui-tab--active { border-left-color: var(--a2ui-primary); }
 
 .a2ui-tabs-content { position: relative; display: grid; }
 .a2ui-tabs-content--fixed { height: var(--tabs-content-height); overflow: auto; }
