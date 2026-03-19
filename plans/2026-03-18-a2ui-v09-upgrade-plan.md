@@ -185,7 +185,7 @@ Completed — committed to `a2ui-v0.9` branch, merged to main.
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/5
 Spec: [a2ui-v09-upgrade-spec.md §5.4](2026-03-18-a2ui-v09-upgrade-spec.md)
 
-### formatString interpolation engine
+### ~~formatString interpolation engine~~
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/8
 Spec: [a2ui-v09-upgrade-spec.md §5.5](2026-03-18-a2ui-v09-upgrade-spec.md)
