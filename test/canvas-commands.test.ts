@@ -18,10 +18,26 @@ function connectGw(): Promise<WebSocket> {
   })
 }
 
+function connectSpa(session?: string): Promise<WebSocket> {
+  const qs = session ? `?session=${session}` : ''
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws${qs}`)
+    ws.on('open', () => resolve(ws))
+    ws.on('error', reject)
+  })
+}
+
 function rpc(ws: WebSocket, msg: Record<string, unknown>): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     ws.once('message', (raw) => resolve(JSON.parse(raw.toString())))
     ws.send(JSON.stringify(msg))
+  })
+}
+
+function waitForMessage(ws: WebSocket, timeoutMs = 500): Promise<Record<string, unknown> | null> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => { ws.removeAllListeners('message'); resolve(null) }, timeoutMs)
+    ws.once('message', (raw) => { clearTimeout(timer); resolve(JSON.parse(raw.toString())) })
   })
 }
 
@@ -102,5 +118,41 @@ describe('canvas commands', () => {
     const res = await rpc(ws, { id: '10', command: 'canvas.eval', js: 'alert(1)' })
     expect(res.ok).toBe(true)
     ws.close()
+  })
+
+  it('canvas.show only broadcasts to matching session SPA clients', async () => {
+    const spaProj = await connectSpa('proj')
+    const spaOther = await connectSpa('other')
+    await new Promise((r) => setTimeout(r, 50))
+
+    const projP = waitForMessage(spaProj)
+    const otherP = waitForMessage(spaOther)
+
+    const ws = await connectGw()
+    await rpc(ws, { id: '11', command: 'canvas.show', session: 'proj' })
+
+    const projMsg = await projP
+    const otherMsg = await otherP
+    expect(projMsg).toEqual({ type: 'canvas.show', session: 'proj' })
+    expect(otherMsg).toBeNull()
+    ws.close(); spaProj.close(); spaOther.close()
+  })
+
+  it('canvas.navigate only broadcasts to matching session SPA clients', async () => {
+    const spaDemo = await connectSpa('demo')
+    const spaMain = await connectSpa('main')
+    await new Promise((r) => setTimeout(r, 50))
+
+    const demoP = waitForMessage(spaDemo)
+    const mainP = waitForMessage(spaMain)
+
+    const ws = await connectGw()
+    await rpc(ws, { id: '12', command: 'canvas.navigate', session: 'demo', path: 'index.html' })
+
+    const demoMsg = await demoP
+    const mainMsg = await mainP
+    expect(demoMsg).toEqual({ type: 'canvas.navigate', session: 'demo', path: 'index.html' })
+    expect(mainMsg).toBeNull()
+    ws.close(); spaDemo.close(); spaMain.close()
   })
 })
