@@ -87,7 +87,7 @@ export function processA2UICommand(
     if (!dp.surfaceId) return false
     const data = { $sources: dp.sources ?? {} }
     a2uiManager.updateDataModel(session, dp.surfaceId, data)
-    gateway.broadcastSpaSession(session, { type: 'a2ui.dataModelUpdate', surfaceId: dp.surfaceId, data })
+    gateway.broadcastSpaSession(session, { type: 'a2ui.updateDataModel', surfaceId: dp.surfaceId, data })
     return true
   } else if (parsed.deleteSurface) {
     const ds = parsed.deleteSurface as { surfaceId: string }

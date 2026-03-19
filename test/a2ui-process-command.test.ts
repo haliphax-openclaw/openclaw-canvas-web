@@ -58,7 +58,7 @@ describe('processA2UICommand', () => {
 
     expect(result).toBe(true)
     expect(a2uiManager.updateDataModel).toHaveBeenCalledWith('dev', 's1', { $sources: sources })
-    expect(broadcasts[0].type).toBe('a2ui.dataModelUpdate')
+    expect(broadcasts[0].type).toBe('a2ui.updateDataModel')
     expect(broadcasts[0].data.$sources).toEqual(sources)
   })
 
