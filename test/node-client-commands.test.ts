@@ -1,6 +1,28 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import crypto from 'node:crypto'
 import http from 'node:http'
 import { WebSocket } from 'ws'
+
+// Mock fs so NodeClient constructor never touches the real filesystem
+const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519')
+const fakePub = publicKey.export({ type: 'spki', format: 'pem' }).toString()
+const fakePriv = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString()
+const fakeIdentity = JSON.stringify({ deviceId: 'test-device', publicKeyPem: fakePub, privateKeyPem: fakePriv })
+
+vi.mock('node:fs', async (importOriginal) => {
+  const real = await importOriginal<typeof import('node:fs')>()
+  return {
+    ...real,
+    default: {
+      ...real,
+      existsSync: (p: string) => String(p).includes('device-identity') ? true : real.existsSync(p),
+      readFileSync: (p: string, ...args: any[]) => String(p).includes('device-identity') ? fakeIdentity : (real.readFileSync as any)(p, ...args),
+      writeFileSync: (p: string, ...args: any[]) => { if (!String(p).includes('device-identity')) (real.writeFileSync as any)(p, ...args) },
+      mkdirSync: (p: string, ...args: any[]) => { if (!String(p).includes('device-identity')) (real.mkdirSync as any)(p, ...args) },
+    },
+  }
+})
+
 import { Gateway } from '../src/server/services/gateway.js'
 import { SessionManager } from '../src/server/services/session-manager.js'
 import { A2UIManager } from '../src/server/services/a2ui-manager.js'
