@@ -189,13 +189,13 @@ describe('A2UISelect', () => {
 describe('A2UIProgressBar', () => {
   it('renders with clamped width', () => {
     const w = mountWith(A2UIProgressBar, { def: { value: 75, label: 'Loading' }, surfaceId: 's1', componentId: 'pb1' })
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 75%')
+    expect(w.find('progress').attributes('value')).toBe('75')
     expect(w.find('.a2ui-progress-label').text()).toBe('Loading')
   })
 
   it('clamps value to 0-100', () => {
     const w = mountWith(A2UIProgressBar, { def: { value: 150 }, surfaceId: 's1', componentId: 'pb1' })
-    expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 100%')
+    expect(w.find('progress').attributes('value')).toBe('100')
   })
 })
 

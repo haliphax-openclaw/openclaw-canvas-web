@@ -1,6 +1,6 @@
 <template>
   <div class="a2ui-table-wrapper">
-    <table class="a2ui-table" :class="{ sortable }">
+    <table class="table table-zebra" :class="{ sortable }">
     <thead v-if="headers.length">
       <tr>
         <th v-for="(h, i) in headers" :key="i" @click="sortable && cycleSort(h)">{{ sortIndicator(h) }}{{ h }}</th>

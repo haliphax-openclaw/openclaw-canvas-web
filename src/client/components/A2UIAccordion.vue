@@ -1,6 +1,6 @@
 <template>
-  <div class="a2ui-accordion">
-    <div v-for="(panel, i) in panels" :key="i" class="collapse collapse-arrow bg-base-200">
+  <div class="join join-vertical w-fit min-w-[200px]">
+    <div v-for="(panel, i) in panels" :key="i" class="collapse collapse-arrow join-item border border-base-300 bg-base-200">
       <input type="checkbox" :checked="isOpen(i)" @change="toggle(i)" />
       <div class="collapse-title font-medium">{{ panel.title }}</div>
       <div class="collapse-content">

@@ -8,6 +8,7 @@ import { wsClient } from '../services/ws-client'
 import { parseOpenClawUrl } from '../utils/url-schemes'
 
 const variantClassMap: Record<string, string> = {
+  default: 'btn-soft',
   primary: 'btn-primary',
   borderless: 'btn-ghost',
 }

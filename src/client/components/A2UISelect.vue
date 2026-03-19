@@ -62,7 +62,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-select { background: var(--a2ui-bg-surface); color: var(--a2ui-text); border: 1px solid var(--a2ui-border); padding: 4px 8px; border-radius: 4px; }
 select[multiple] { min-height: 5em; }
 select[multiple] option { padding: 1px 4px; line-height: 1; margin: 0; }
 </style>

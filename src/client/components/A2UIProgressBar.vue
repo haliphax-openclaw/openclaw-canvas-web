@@ -1,9 +1,7 @@
 <template>
   <div class="a2ui-progress">
     <span v-if="resolvedLabel" class="a2ui-progress-label">{{ resolvedLabel }}</span>
-    <div class="a2ui-progress-track">
-      <div class="a2ui-progress-fill" :style="`--progress: ${clampedValue}%`" />
-    </div>
+    <progress class="progress progress-primary w-full" :value="clampedValue" max="100"></progress>
   </div>
 </template>
 
