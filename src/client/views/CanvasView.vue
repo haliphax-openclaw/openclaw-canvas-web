@@ -82,7 +82,7 @@ export default defineComponent({
     const onShow = (d: Record<string, unknown>) => {
       store.commit('setVisible', true)
       externalUrl.value = null
-      if (d.session) router.push(`/session/${d.session}/`)
+      if (d.session) router.push(`/${d.session}/`)
     }
     const onHide = () => store.commit('setVisible', false)
     const onNavigate = (d: Record<string, unknown>) => {
@@ -90,7 +90,7 @@ export default defineComponent({
       externalUrl.value = null
       const s = (d.session as string) || sessionId.value
       const p = (d.path as string) || ''
-      router.push(`/session/${s}/${p}`)
+      router.push(`/${s}/${p}`)
     }
     const onNavigateExternal = (d: Record<string, unknown>) => {
       const url = d.url as string

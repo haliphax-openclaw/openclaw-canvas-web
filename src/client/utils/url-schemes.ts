@@ -18,7 +18,7 @@ const SCHEMES: [string, SchemeType][] = [
  *
  *   openclaw://agent?message=hello&agentId=dev
  *   openclaw-fileprompt://path/to/file.md?agentId=dev
- *   openclaw-canvas://session/subpath
+ *   openclaw-canvas://subpath
  */
 export function parseOpenClawUrl(url: string): ParsedScheme | null {
   for (const [prefix, type] of SCHEMES) {
