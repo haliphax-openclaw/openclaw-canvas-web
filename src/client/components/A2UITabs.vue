@@ -1,11 +1,11 @@
 <template>
   <div class="a2ui-tabs" :class="`a2ui-tabs--${pos}`">
-    <div v-if="pos !== 'hidden'" class="tabs a2ui-tabs-bar" :class="`a2ui-tabs-bar--${pos}`" role="tablist">
+    <div v-if="pos !== 'hidden'" class="tabs tabs-border a2ui-tabs-bar" :class="`a2ui-tabs-bar--${pos}`" role="tablist">
       <a
         v-for="(tab, i) in tabs"
         :key="i"
         role="tab"
-        class="tab tab-bordered"
+        class="tab"
         :class="{ 'tab-active': i === activeIndex }"
         @click="activeIndex = i"
       >{{ tab.label }}</a>
