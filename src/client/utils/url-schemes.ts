@@ -21,12 +21,11 @@ export function parseOpenClawUrl(url: string): ParsedScheme | null {
   if (!isAgent && !isSpawn) return null
 
   try {
-    const asHttp = isAgent
-      ? url.replace('openclaw://', 'http://')
-      : url.replace('openclaw-fileprompt://', 'http://')
-    const parsed = new URL(asHttp)
+    const rest = url.slice(isAgent ? 'openclaw://'.length : 'openclaw-fileprompt://'.length)
+    const qIdx = rest.indexOf('?')
+    const query = qIdx >= 0 ? rest.slice(qIdx + 1) : rest
     const params: Record<string, string> = {}
-    parsed.searchParams.forEach((v, k) => { params[k] = v })
+    new URLSearchParams(query).forEach((v, k) => { params[k] = v })
     return { type: isAgent ? 'agent' : 'fileprompt', params }
   } catch {
     return null

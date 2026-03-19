@@ -5,7 +5,7 @@
  * /api/agent proxy (which forwards to the gateway).
  * 
  * Supported URL forms:
- *   openclaw://_?message=...&sessionKey=...&thinking=...&deliver=...&to=...&channel=...&timeoutSeconds=...&key=...
+ *   openclaw://?message=...&sessionKey=...&thinking=...&deliver=...&to=...&channel=...&timeoutSeconds=...&key=...
  */
 
 export interface DeepLinkRequest {
@@ -46,11 +46,11 @@ export function parseOpenclawUrl(url: string): DeepLinkRequest | null {
   if (!url.startsWith('openclaw://')) return null
 
   try {
-    // Convert to parseable URL format
-    // The authority is always "_" — only query params matter.
-    const fakeUrl = new URL(url.replace('openclaw://', 'http://'))
-
-    const params = fakeUrl.searchParams
+    // Strip scheme and parse query params directly (no hostname needed)
+    const rest = url.slice('openclaw://'.length)
+    const qIdx = rest.indexOf('?')
+    const query = qIdx >= 0 ? rest.slice(qIdx + 1) : rest
+    const params = new URLSearchParams(query)
     const message = params.get('message')
     if (!message) {
       console.warn('[deep-link] Missing required "message" param')
