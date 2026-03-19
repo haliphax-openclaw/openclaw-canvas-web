@@ -1,6 +1,6 @@
 import type { Gateway } from '../services/gateway.js'
 import type { A2UIManager } from '../services/a2ui-manager.js'
-import { processA2UICommand } from '../services/a2ui-commands.js'
+import { processBatch } from '../services/a2ui-pipeline.js'
 
 export function registerA2UICommands(gateway: Gateway, a2uiManager: A2UIManager) {
   gateway.on('a2ui.push', (msg, reply) => {
@@ -10,20 +10,9 @@ export function registerA2UICommands(gateway: Gateway, a2uiManager: A2UIManager)
       return
     }
     const session = (msg.session as string) || 'main'
-
-    const lines = payload.split('\n').filter(l => l.trim())
-    for (const line of lines) {
-      let parsed: Record<string, unknown>
-      try {
-        parsed = JSON.parse(line)
-      } catch (e) {
-        console.warn(`[a2ui] Skipping malformed JSONL line: ${line.slice(0, 100)}`)
-        continue
-      }
-
-      processA2UICommand(session, parsed, a2uiManager, gateway)
-    }
-    reply({ ok: true })
+    const results = processBatch(session, payload, a2uiManager, gateway)
+    const errors = results.filter(r => !r.ok)
+    reply({ ok: true, results, errors })
   })
 
   gateway.on('a2ui.reset', (msg, reply) => {

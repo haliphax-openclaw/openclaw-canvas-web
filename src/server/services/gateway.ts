@@ -1,5 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws'
 import type { Server } from 'node:http'
+import type { A2UIManager } from './a2ui-manager.js'
+import { processPipelineCommand, type ValidationResult } from './a2ui-pipeline.js'
 
 export interface GatewayMessage {
   id?: string
@@ -20,6 +22,8 @@ export class Gateway {
   private pendingSnapshots = new Map<string, (data: Record<string, unknown>) => void>()
   private pingTimer: ReturnType<typeof setInterval> | null = null
   private spaConnectListeners: Array<(ws: WebSocket) => void> = []
+  private a2uiManager: A2UIManager | null = null
+  private a2uiStreamClients = new Set<WebSocket>()
 
   constructor(server: Server) {
     this.wss = new WebSocketServer({ noServer: true })
@@ -47,6 +51,16 @@ export class Gateway {
             this.handleSpaMessage(raw, ws)
           })
           for (const listener of this.spaConnectListeners) listener(ws)
+        })
+      } else if (path === '/ws/a2ui') {
+        // Streaming A2UI interface — per-command validation feedback
+        this.wss.handleUpgrade(req, socket, head, (ws) => {
+          (ws as any).__alive = true
+          this.a2uiStreamClients.add(ws)
+          const session = url.searchParams.get('session') ?? 'main'
+          ws.on('pong', () => { (ws as any).__alive = true })
+          ws.on('close', () => { this.a2uiStreamClients.delete(ws) })
+          ws.on('message', (raw) => { this.handleA2UIStreamMessage(raw, ws, session) })
         })
       } else {
         socket.destroy()
@@ -92,6 +106,13 @@ export class Gateway {
         }
         ws.ping()
       }
+      for (const ws of this.a2uiStreamClients) {
+        if (ws.readyState !== WebSocket.OPEN) {
+          this.a2uiStreamClients.delete(ws)
+          continue
+        }
+        ws.ping()
+      }
     }, PING_INTERVAL)
   }
 
@@ -112,6 +133,32 @@ export class Gateway {
     } else if (data.type === 'session.switch' && data.session) {
       this.spaSessionMap.set(ws, data.session as string)
     }
+  }
+
+  /** Process streaming A2UI commands — validates each line and sends per-command results. */
+  private handleA2UIStreamMessage(raw: unknown, ws: WebSocket, session: string) {
+    if (!this.a2uiManager) {
+      ws.send(JSON.stringify({ ok: false, error: 'A2UI manager not initialized' }))
+      return
+    }
+    const line = String(raw).trim()
+    if (!line) return
+
+    let parsed: Record<string, unknown>
+    try {
+      parsed = JSON.parse(line)
+    } catch {
+      ws.send(JSON.stringify({ ok: false, command: 'parse', index: 0, error: `Invalid JSON: ${line.slice(0, 100)}` } as ValidationResult))
+      return
+    }
+
+    const result = processPipelineCommand(session, parsed, 0, this.a2uiManager, this)
+    ws.send(JSON.stringify(result))
+  }
+
+  /** Set the A2UI manager for streaming interface. */
+  setA2UIManager(manager: A2UIManager) {
+    this.a2uiManager = manager
   }
 
   on(command: string, handler: CommandHandler) {
@@ -171,6 +218,7 @@ export class Gateway {
   close() {
     if (this.pingTimer) clearInterval(this.pingTimer)
     for (const ws of this.spaClients) ws.close()
+    for (const ws of this.a2uiStreamClients) ws.close()
     for (const ws of this.wss.clients) ws.close()
     this.wss.close()
   }
