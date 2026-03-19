@@ -6,7 +6,7 @@ The canvas web server includes a file watcher that monitors each agent's `canvas
 
 1. On startup, the server creates an `fs.watch` on `~/.openclaw/workspaces/<agent-id>/canvas/jsonl/` for each configured agent
 2. When a `.jsonl` file is created or modified, the watcher debounces (300ms) then reads the file
-3. Each line is parsed as JSON and processed as an A2UI command (`surfaceUpdate`, `beginRendering`, `dataModelUpdate`, `dataSourcePush`, `deleteSurface`)
+3. Each line is parsed as JSON and processed as an A2UI command (`updateComponents`, `createSurface`, `updateDataModel`, `dataSourcePush`, `deleteSurface`)
 4. Commands are applied to the A2UI manager (persisted in SQLite) and broadcast to connected SPA clients
 
 ## Usage
@@ -16,9 +16,9 @@ Write JSONL files to your agent's `canvas/jsonl/` directory:
 ```bash
 # Layout file
 cat > ~/.openclaw/workspaces/developer/canvas/jsonl/dashboard-layout.jsonl << 'EOF'
-{"surfaceUpdate":{"surfaceId":"main","components":[{"id":"root","component":{"type":"Column","children":["title","table"]}}]}}
-{"surfaceUpdate":{"surfaceId":"main","components":[{"id":"title","component":{"type":"Text","props":{"content":"Dashboard"}}}]}}
-{"beginRendering":{"surfaceId":"main","root":"root"}}
+{"updateComponents":{"surfaceId":"main","components":[{"id":"root","component":"Column","children":["title","table"]}]}}
+{"updateComponents":{"surfaceId":"main","components":[{"id":"title","component":"Text","text":"Dashboard"}]}}
+{"createSurface":{"surfaceId":"main","root":"root"}}
 EOF
 
 # Data file (can target the same surfaceId)
