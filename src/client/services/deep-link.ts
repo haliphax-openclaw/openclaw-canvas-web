@@ -5,8 +5,7 @@
  * /api/agent proxy (which forwards to the gateway).
  * 
  * Supported URL forms:
- *   openclaw://agent?message=...&sessionKey=...&thinking=...&deliver=...&to=...&channel=...&timeoutSeconds=...&key=...
- *   openclaw://<hostname>/agent?message=...  (container hostname in authority position)
+ *   openclaw://_?message=...&sessionKey=...&thinking=...&deliver=...&to=...&channel=...&timeoutSeconds=...&key=...
  */
 
 export interface DeepLinkRequest {
@@ -48,16 +47,8 @@ export function parseOpenclawUrl(url: string): DeepLinkRequest | null {
 
   try {
     // Convert to parseable URL format
-    // The authority may be "agent" (openclaw://agent?...) or a container
-    // hostname (openclaw://openclaw/agent?...) — accept both forms.
+    // The authority is always "_" — only query params matter.
     const fakeUrl = new URL(url.replace('openclaw://', 'http://'))
-    const host = fakeUrl.hostname
-    const action = host === 'agent' ? 'agent' : fakeUrl.pathname.replace(/^\//, '').split('/')[0]
-
-    if (action !== 'agent') {
-      console.warn(`[deep-link] Unknown openclaw:// action: ${action} (host=${host})`)
-      return null
-    }
 
     const params = fakeUrl.searchParams
     const message = params.get('message')

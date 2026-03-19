@@ -16,8 +16,8 @@ Three custom URL schemes are supported:
 
 | Scheme | Purpose | Example |
 |--------|---------|---------|
-| `openclaw://` | Agent deep links | `openclaw://agent?message=Run+the+tests` |
-| `openclaw-fileprompt://` | File-based subagent spawn | `openclaw-fileprompt://run?file=prompts/deploy.md` |
+| `openclaw://` | Agent deep links | `openclaw://_?message=Run+the+tests` |
+| `openclaw-fileprompt://` | File-based subagent spawn | `openclaw-fileprompt://_?file=prompts/deploy.md` |
 | `openclaw-canvas://` | Session file references | `openclaw-canvas://my-project/logo.png` |
 
 A shared utility (`src/client/utils/url-schemes.ts`) provides `parseOpenClawUrl()` for parsing all three schemes.
@@ -25,14 +25,11 @@ A shared utility (`src/client/utils/url-schemes.ts`) provides `parseOpenClawUrl(
 ### `openclaw://` — Agent Deep Links
 
 ```
-openclaw://agent?message=<text>&sessionKey=<key>&agentId=<id>&model=<model>&thinking=<mode>
+openclaw://_?message=<text>&sessionKey=<key>&agentId=<id>&model=<model>&thinking=<mode>
 ```
 
-The authority position can be either `agent` directly or a container hostname:
-
 ```
-openclaw://agent?message=Run+the+tests
-openclaw://my-container/agent?message=Run+the+tests
+openclaw://_?message=Run+the+tests
 ```
 
 ### Parameters
@@ -87,11 +84,11 @@ An agent can build a dashboard with actionable links:
 <ul>
   <li>
     openclaw-tools-mcp-server — test workflow
-    <a href="openclaw://agent?message=Fix+the+failing+test+in+openclaw-tools-mcp-server">Fix this</a>
+    <a href="openclaw://_?message=Fix+the+failing+test+in+openclaw-tools-mcp-server">Fix this</a>
   </li>
   <li>
     skills — validate workflow
-    <a href="openclaw://agent?message=Fix+the+schema+validation+in+the+skills+repo">Fix this</a>
+    <a href="openclaw://_?message=Fix+the+schema+validation+in+the+skills+repo">Fix this</a>
   </li>
 </ul>
 ```
@@ -119,7 +116,7 @@ openclaw-fileprompt://<action>?file=<path>&agentId=<id>&model=<model>
 ### Example
 
 ```html
-<a href="openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer">Deploy</a>
+<a href="openclaw-fileprompt://_?file=prompts/deploy.md&agentId=developer">Deploy</a>
 ```
 
 ## API Proxy
@@ -144,7 +141,7 @@ By default, `sessions_spawn` auto-announces completion back to the parent sessio
 To route the completion to a specific session instead (e.g., for monitoring), pass `sessionKey` in the deep link URL:
 
 ```
-openclaw://agent?message=Refresh+data&agentId=developer&sessionKey=agent:developer:discord:channel:123
+openclaw://_?message=Refresh+data&agentId=developer&sessionKey=agent:developer:discord:channel:123
 ```
 
 If `sessionKey` is omitted, it defaults to `"devnull"` (no announcement).
@@ -171,12 +168,12 @@ A2UI Button components support deep links via the `href` prop. Unlike iframe-bas
 
 Agent trigger:
 ```json
-{"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+data&agentId=developer"}}
+{"Button": {"label": "Refresh", "href": "openclaw://_?message=Refresh+data&agentId=developer"}}
 ```
 
 File-spawn trigger:
 ```json
-{"Button": {"label": "Deploy", "href": "openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer"}}
+{"Button": {"label": "Deploy", "href": "openclaw-fileprompt://_?file=prompts/deploy.md&agentId=developer"}}
 ```
 
 ## Gateway Configuration

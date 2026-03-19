@@ -157,7 +157,7 @@ A2UI surface state is persisted to a local SQLite database so it survives server
 Trigger agent runs from links inside canvas HTML. When a user clicks an `openclaw://` link in the canvas iframe, a confirmation dialog appears, and on approval the request is proxied to the gateway to start an agent run.
 
 ```html
-<a href="openclaw://agent?message=run+my+task">Run Task</a>
+<a href="openclaw://_?message=run+my+task">Run Task</a>
 ```
 
 See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parameters, confirmation dialog, script injection details, and security considerations.
@@ -167,7 +167,7 @@ See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parame
 Spawn a subagent with its prompt loaded from a file in the workspace associated with the canvas session. The server reads the file and passes its contents as the task to `sessions_spawn` via the gateway.
 
 ```html
-<a href="openclaw-fileprompt://run?file=prompts/deploy.md&agentId=developer">Deploy</a>
+<a href="openclaw-fileprompt://_?file=prompts/deploy.md&agentId=developer">Deploy</a>
 ```
 
 ### `openclaw-canvas://` — Canvas File References
@@ -237,7 +237,6 @@ Features available in the web server that are not present in the macOS app:
 - **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link and snapshot script injection.
 - **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
 - **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
-- **Container hostname URLs** — `openclaw://<hostname>/agent?message=...` is accepted alongside the standard `openclaw://agent?message=...` form, supporting Docker network hostnames in the URL authority.
 - **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
 
 ## Backward Compatibility

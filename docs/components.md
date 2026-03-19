@@ -295,7 +295,7 @@ Repeated items are rendered with a 12px vertical gap between them.
 Clickable button. Sends an `a2ui.buttonClick` WebSocket message with the component ID when clicked. Supports optional `href` for deep linking.
 
 ```json
-{"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+the+dashboard"}}
+{"Button": {"label": "Refresh", "href": "openclaw://_?message=Refresh+the+dashboard"}}
 ```
 
 | Prop | Type | Description |

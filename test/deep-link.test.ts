@@ -2,18 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { parseOpenclawUrl, isOpenclawDeepLink, truncateMessage } from '../src/client/services/deep-link'
 
 describe('parseOpenclawUrl', () => {
-  it('parses direct form: openclaw://agent?message=hello', () => {
-    const req = parseOpenclawUrl('openclaw://agent?message=hello')
+  it('parses direct form: openclaw://_?message=hello', () => {
+    const req = parseOpenclawUrl('openclaw://_?message=hello')
     expect(req).toEqual({ message: 'hello' })
   })
 
-  it('parses container hostname form', () => {
-    const req = parseOpenclawUrl('openclaw://myhost/agent?message=test')
-    expect(req).toEqual({ message: 'test' })
-  })
-
   it('parses all optional params', () => {
-    const url = 'openclaw://agent?message=hi&sessionKey=sk&thinking=stream&deliver=d&to=t&channel=ch&timeoutSeconds=30&key=k&agentId=a1&model=m1'
+    const url = 'openclaw://_?message=hi&sessionKey=sk&thinking=stream&deliver=d&to=t&channel=ch&timeoutSeconds=30&key=k&agentId=a1&model=m1'
     const req = parseOpenclawUrl(url)!
     expect(req.message).toBe('hi')
     expect(req.sessionKey).toBe('sk')
@@ -32,17 +27,13 @@ describe('parseOpenclawUrl', () => {
   })
 
   it('returns null when message param is missing', () => {
-    expect(parseOpenclawUrl('openclaw://agent?foo=bar')).toBeNull()
-  })
-
-  it('returns null for unknown action', () => {
-    expect(parseOpenclawUrl('openclaw://unknown?message=hi')).toBeNull()
+    expect(parseOpenclawUrl('openclaw://_?foo=bar')).toBeNull()
   })
 })
 
 describe('isOpenclawDeepLink', () => {
   it('returns true for openclaw:// URLs', () => {
-    expect(isOpenclawDeepLink('openclaw://agent?message=hi')).toBe(true)
+    expect(isOpenclawDeepLink('openclaw://_?message=hi')).toBe(true)
   })
   it('returns false for other URLs', () => {
     expect(isOpenclawDeepLink('https://example.com')).toBe(false)

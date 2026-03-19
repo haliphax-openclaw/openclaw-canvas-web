@@ -16,19 +16,19 @@ describe('parseOpenClawUrl', () => {
 
   describe('openclaw://', () => {
     it('parses agent URL with params', () => {
-      const r = parseOpenClawUrl('openclaw://agent?message=hello&sessionKey=sk1')
+      const r = parseOpenClawUrl('openclaw://_?message=hello&sessionKey=sk1')
       expect(r).toEqual({ type: 'agent', params: { message: 'hello', sessionKey: 'sk1' } })
     })
 
     it('parses agent URL with no params', () => {
-      const r = parseOpenClawUrl('openclaw://agent')
+      const r = parseOpenClawUrl('openclaw://_')
       expect(r).toEqual({ type: 'agent', params: {} })
     })
   })
 
   describe('openclaw-fileprompt://', () => {
     it('parses fileprompt URL with params', () => {
-      const r = parseOpenClawUrl('openclaw-fileprompt://run?file=prompts/deploy.md&agentId=dev')
+      const r = parseOpenClawUrl('openclaw-fileprompt://_?file=prompts/deploy.md&agentId=dev')
       expect(r).toEqual({ type: 'fileprompt', params: { file: 'prompts/deploy.md', agentId: 'dev' } })
     })
 
