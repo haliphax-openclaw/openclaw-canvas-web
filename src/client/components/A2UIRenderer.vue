@@ -1,5 +1,5 @@
 <template>
-  <div class="a2ui-renderer" v-if="root">
+  <div class="a2ui-renderer" v-if="root" :style="themeStyle">
     <A2UINode :component-id="root" :surface-id="surfaceId" />
   </div>
 </template>
@@ -18,7 +18,11 @@ export default defineComponent({
   setup(props) {
     const store = useStore()
     const root = computed(() => store.state.a2ui?.surfaces?.[props.surfaceId]?.root ?? null)
-    return { root }
+    const themeStyle = computed(() => {
+      const t = store.state.a2ui?.surfaces?.[props.surfaceId]?.theme
+      return t?.primaryColor ? { '--a2ui-primary': t.primaryColor } : {}
+    })
+    return { root, themeStyle }
   },
 })
 </script>

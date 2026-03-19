@@ -57,9 +57,9 @@ describe('JSONLWatcher', () => {
 
     const filePath = path.join(jsonlDir, 'test.jsonl')
     const jsonl = JSON.stringify({
-      surfaceUpdate: {
+      updateComponents: {
         surfaceId: 'dash',
-        components: [{ id: 'c1', component: { type: 'Text', props: { content: 'hello' } } }]
+        components: [{ id: 'c1', component: 'Text', content: 'hello' }]
       }
     })
     fs.writeFileSync(filePath, jsonl + '\n')
@@ -68,14 +68,14 @@ describe('JSONLWatcher', () => {
     watcher.processFile('testagent', filePath)
 
     const msg = await msgPromise
-    expect(msg.type).toBe('a2ui.surfaceUpdate')
+    expect(msg.type).toBe('a2ui.updateComponents')
     expect(msg.surfaceId).toBe('dash')
     expect(msg.session).toBe('testagent')
 
     // Verify manager state
     const surface = mgr.getSurface('testagent', 'dash')
     expect(surface).toBeDefined()
-    expect(surface!.components.get('c1')).toEqual({ type: 'Text', props: { content: 'hello' } })
+    expect(surface!.components.get('c1')).toEqual({ component: 'Text', content: 'hello' })
 
     spa.close()
     watcher.close()
@@ -90,10 +90,10 @@ describe('JSONLWatcher', () => {
     const watcher = new JSONLWatcher(sessionMap, gateway, mgr, { debounceMs: 10 })
 
     // First create the surface
-    mgr.upsertSurface('agent2', 'dash', [{ id: 'root', component: { type: 'Column' } }])
+    mgr.upsertSurface('agent2', 'dash', [{ id: 'root', component: 'Column' }])
 
     const filePath = path.join(jsonlDir, 'render.jsonl')
-    fs.writeFileSync(filePath, JSON.stringify({ beginRendering: { surfaceId: 'dash', root: 'root' } }) + '\n')
+    fs.writeFileSync(filePath, JSON.stringify({ createSurface: { surfaceId: 'dash', root: 'root' } }) + '\n')
 
     watcher.processFile('agent2', filePath)
 
@@ -111,7 +111,7 @@ describe('JSONLWatcher', () => {
     const sessionMap = new Map([['agent3', canvasDir]])
     const watcher = new JSONLWatcher(sessionMap, gateway, mgr, { debounceMs: 10 })
 
-    mgr.upsertSurface('agent3', 'dash', [{ id: 'c1', component: { type: 'Table' } }])
+    mgr.upsertSurface('agent3', 'dash', [{ id: 'c1', component: 'Table' }])
 
     const filePath = path.join(jsonlDir, 'data.jsonl')
     fs.writeFileSync(filePath, JSON.stringify({
@@ -137,7 +137,7 @@ describe('JSONLWatcher', () => {
     const filePath = path.join(jsonlDir, 'mixed.jsonl')
     const lines = [
       'not valid json',
-      JSON.stringify({ surfaceUpdate: { surfaceId: 'ok', components: [{ id: 'c1', component: { type: 'Text' } }] } }),
+      JSON.stringify({ updateComponents: { surfaceId: 'ok', components: [{ id: 'c1', component: 'Text' }] } }),
       '{broken',
     ]
     fs.writeFileSync(filePath, lines.join('\n') + '\n')
@@ -159,7 +159,7 @@ describe('JSONLWatcher', () => {
     const sessionMap = new Map([['agent5', canvasDir]])
     const watcher = new JSONLWatcher(sessionMap, gateway, mgr, { debounceMs: 10 })
 
-    mgr.upsertSurface('agent5', 'dash', [{ id: 'c1', component: { type: 'Text' } }])
+    mgr.upsertSurface('agent5', 'dash', [{ id: 'c1', component: 'Text' }])
     expect(mgr.getSurface('agent5', 'dash')).toBeDefined()
 
     const filePath = path.join(jsonlDir, 'delete.jsonl')
@@ -183,7 +183,7 @@ describe('JSONLWatcher', () => {
     // File 1: layout
     const file1 = path.join(jsonlDir, 'layout.jsonl')
     fs.writeFileSync(file1, JSON.stringify({
-      surfaceUpdate: { surfaceId: 'dash', components: [{ id: 'c1', component: { type: 'Column' } }] }
+      updateComponents: { surfaceId: 'dash', components: [{ id: 'c1', component: 'Column' }] }
     }) + '\n')
 
     // File 2: data
@@ -197,7 +197,7 @@ describe('JSONLWatcher', () => {
 
     const surface = mgr.getSurface('agent6', 'dash')
     expect(surface).toBeDefined()
-    expect(surface!.components.get('c1')).toEqual({ type: 'Column' })
+    expect(surface!.components.get('c1')).toEqual({ component: 'Column' })
     expect((surface!.dataModel as any).$sources.items.rows[0].x).toBe(1)
 
     watcher.close()

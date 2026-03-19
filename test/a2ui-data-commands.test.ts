@@ -51,7 +51,7 @@ describe('a2ui commands - dataModelUpdate and dataSourcePush', () => {
   it('a2ui.push processes dataModelUpdate', async () => {
     mgr.upsertSurface('main', 's1', [])
     const ws = await connectGw()
-    const payload = JSON.stringify({ dataModelUpdate: { surfaceId: 's1', data: { count: 42 } } })
+    const payload = JSON.stringify({ updateDataModel: { surfaceId: 's1', data: { count: 42 } } })
     const res = await rpc(ws, { id: '1', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
     expect(mgr.getSurface('main', 's1')!.dataModel).toEqual({ count: 42 })
@@ -60,7 +60,7 @@ describe('a2ui commands - dataModelUpdate and dataSourcePush', () => {
 
   it('a2ui.push skips dataModelUpdate with missing surfaceId', async () => {
     const ws = await connectGw()
-    const payload = JSON.stringify({ dataModelUpdate: { data: { x: 1 } } })
+    const payload = JSON.stringify({ updateDataModel: { data: { x: 1 } } })
     const res = await rpc(ws, { id: '2', command: 'a2ui.push', session: 'main', payload })
     expect(res.ok).toBe(true)
     ws.close()
@@ -94,11 +94,11 @@ describe('a2ui commands - dataModelUpdate and dataSourcePush', () => {
     })
 
     const gwWs = await connectGw()
-    const payload = JSON.stringify({ dataModelUpdate: { surfaceId: 's1', data: { key: 'val' } } })
+    const payload = JSON.stringify({ updateDataModel: { surfaceId: 's1', data: { key: 'val' } } })
     await rpc(gwWs, { id: '5', command: 'a2ui.push', session: 'main', payload })
 
     const received = await spaMsg
-    expect(received.type).toBe('a2ui.dataModelUpdate')
+    expect(received.type).toBe('a2ui.updateDataModel')
     expect(received.surfaceId).toBe('s1')
     expect(received.session).toBe('main')
 

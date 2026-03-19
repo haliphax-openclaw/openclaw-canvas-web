@@ -3,9 +3,12 @@ import type { A2UIStore } from './a2ui-store.js'
 export interface A2UISurface {
   surfaceId: string
   session: string
-  components: Map<string, Record<string, unknown>>
+  /** v0.9 flat shape: value is { component: "Text", text: "..." } (no id) */
+  components: Map<string, { component: string; [key: string]: unknown }>
   root: string | null
   dataModel: Record<string, unknown>
+  catalogId?: string
+  theme?: Record<string, unknown>
 }
 
 /** Composite key for session-scoped surfaces */
@@ -46,23 +49,25 @@ export class A2UIManager {
     return result
   }
 
-  upsertSurface(session: string, surfaceId: string, components: Array<{ id: string; component: Record<string, unknown> }>) {
+  upsertSurface(session: string, surfaceId: string, components: Array<{ id: string; component: string; [key: string]: unknown }>) {
     const k = key(session, surfaceId)
     let surface = this.surfaces.get(k)
     if (!surface) {
       surface = { surfaceId, session, components: new Map(), root: null, dataModel: {} }
       this.surfaces.set(k, surface)
     }
-    for (const c of components) {
-      surface.components.set(c.id, c.component)
+    for (const { id, ...rest } of components) {
+      surface.components.set(id, rest as { component: string; [key: string]: unknown })
     }
     this.store?.save(session, surface)
   }
 
-  setRoot(session: string, surfaceId: string, root: string) {
+  setRoot(session: string, surfaceId: string, root: string, opts?: { catalogId?: string; theme?: Record<string, unknown> }) {
     const surface = this.surfaces.get(key(session, surfaceId))
     if (surface) {
       surface.root = root
+      if (opts?.catalogId !== undefined) surface.catalogId = opts.catalogId
+      if (opts?.theme !== undefined) surface.theme = opts.theme
       this.store?.save(session, surface)
     }
   }

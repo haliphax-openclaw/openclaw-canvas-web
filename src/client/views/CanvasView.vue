@@ -215,9 +215,9 @@ export default defineComponent({
       ['canvas.navigateExternal', onNavigateExternal],
       ['canvas.eval', onEval],
       ['canvas.snapshot', onSnapshot],
-      ['a2ui.surfaceUpdate', onSurfaceUpdate],
-      ['a2ui.beginRendering', onBeginRendering],
-      ['a2ui.dataModelUpdate', onDataModelUpdate],
+      ['a2ui.updateComponents', onSurfaceUpdate],
+      ['a2ui.createSurface', onBeginRendering],
+      ['a2ui.updateDataModel', onDataModelUpdate],
       ['a2ui.deleteSurface', onDeleteSurface],
       ['a2ui.clearAll', onClearAll],
     ]

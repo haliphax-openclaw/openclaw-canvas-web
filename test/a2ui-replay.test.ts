@@ -38,10 +38,10 @@ function wireReplay(gateway: Gateway, mgr: A2UIManager) {
   gateway.onSpaConnect((ws) => {
     const session = gateway.getSpaSession(ws)
     for (const surface of mgr.surfacesForSession(session)) {
-      const components = Array.from(surface.components.entries()).map(([id, component]) => ({ id, component }))
-      gateway.sendToSpa(ws, { type: 'a2ui.surfaceUpdate', session, surfaceId: surface.surfaceId, components })
+      const components = Array.from(surface.components.entries()).map(([id, comp]) => ({ id, ...comp }))
+      gateway.sendToSpa(ws, { type: 'a2ui.updateComponents', session, surfaceId: surface.surfaceId, components })
       if (surface.root) {
-        gateway.sendToSpa(ws, { type: 'a2ui.beginRendering', session, surfaceId: surface.surfaceId, root: surface.root })
+        gateway.sendToSpa(ws, { type: 'a2ui.createSurface', session, surfaceId: surface.surfaceId, root: surface.root })
       }
     }
   })
@@ -63,19 +63,19 @@ afterEach(async () => {
 
 describe('A2UI state replay on SPA connect', () => {
   it('replays surfaceUpdate and beginRendering to new client', async () => {
-    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: { Text: { text: 'hello' } } }])
+    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: 'Text', text: 'hello' }])
     mgr.setRoot('main', 'main', 'c1')
 
     const { ws, msgs } = await connectAndCollect(2, 'main')
 
     expect(msgs[0]).toMatchObject({
-      type: 'a2ui.surfaceUpdate',
+      type: 'a2ui.updateComponents',
       session: 'main',
       surfaceId: 'main',
-      components: [{ id: 'c1', component: { Text: { text: 'hello' } } }],
+      components: [{ id: 'c1', component: 'Text', text: 'hello' }],
     })
     expect(msgs[1]).toMatchObject({
-      type: 'a2ui.beginRendering',
+      type: 'a2ui.createSurface',
       session: 'main',
       surfaceId: 'main',
       root: 'c1',
@@ -84,10 +84,10 @@ describe('A2UI state replay on SPA connect', () => {
   })
 
   it('skips beginRendering when root is null', async () => {
-    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: { Text: {} } }])
+    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: 'Text' }])
 
     const { ws, msgs } = await connectAndCollect(1, 'main')
-    expect(msgs[0].type).toBe('a2ui.surfaceUpdate')
+    expect(msgs[0].type).toBe('a2ui.updateComponents')
 
     // Ensure no beginRendering arrives
     let extra = false
@@ -98,16 +98,16 @@ describe('A2UI state replay on SPA connect', () => {
   })
 
   it('replays multiple surfaces for the same session', async () => {
-    mgr.upsertSurface('main', 's1', [{ id: 'a', component: { Text: {} } }])
+    mgr.upsertSurface('main', 's1', [{ id: 'a', component: 'Text' }])
     mgr.setRoot('main', 's1', 'a')
-    mgr.upsertSurface('main', 's2', [{ id: 'b', component: { Button: {} } }])
+    mgr.upsertSurface('main', 's2', [{ id: 'b', component: 'Button' }])
     mgr.setRoot('main', 's2', 'b')
 
     const { ws, msgs } = await connectAndCollect(4, 'main')
 
     const types = msgs.map((m) => m.type)
-    expect(types).toContain('a2ui.surfaceUpdate')
-    expect(types).toContain('a2ui.beginRendering')
+    expect(types).toContain('a2ui.updateComponents')
+    expect(types).toContain('a2ui.createSurface')
     const surfaceIds = msgs.map((m) => m.surfaceId)
     expect(surfaceIds).toContain('s1')
     expect(surfaceIds).toContain('s2')
@@ -128,7 +128,7 @@ describe('A2UI state replay on SPA connect', () => {
     await new Promise((r) => setTimeout(r, 50))
 
     // Add surface after ws1 is connected
-    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: { Text: {} } }])
+    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: 'Text' }])
     mgr.setRoot('main', 'main', 'c1')
 
     let ws1Received = false
@@ -136,8 +136,8 @@ describe('A2UI state replay on SPA connect', () => {
 
     // ws2 connects — only ws2 should get replay
     const { ws: ws2, msgs } = await connectAndCollect(2, 'main')
-    expect(msgs[0].type).toBe('a2ui.surfaceUpdate')
-    expect(msgs[1].type).toBe('a2ui.beginRendering')
+    expect(msgs[0].type).toBe('a2ui.updateComponents')
+    expect(msgs[1].type).toBe('a2ui.createSurface')
 
     await new Promise((r) => setTimeout(r, 100))
     expect(ws1Received).toBe(false)
@@ -147,9 +147,9 @@ describe('A2UI state replay on SPA connect', () => {
   })
 
   it('only replays surfaces for the connected session', async () => {
-    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: { Text: {} } }])
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Text' }])
     mgr.setRoot('main', 's1', 'c1')
-    mgr.upsertSurface('other', 's2', [{ id: 'c2', component: { Button: {} } }])
+    mgr.upsertSurface('other', 's2', [{ id: 'c2', component: 'Button' }])
     mgr.setRoot('other', 's2', 'c2')
 
     // Connect to 'main' — should only get s1

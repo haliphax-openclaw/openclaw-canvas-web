@@ -80,13 +80,13 @@ describe('A2UIText', () => {
     expect(w.find('p').text()).toBe('Lit')
   })
 
-  it('uses usageHint to pick tag', () => {
-    const w = mountWith(A2UIText, { def: { text: 'Title', usageHint: 'h1' }, surfaceId: 's1', componentId: 'c1' })
+  it('uses variant to pick tag', () => {
+    const w = mountWith(A2UIText, { def: { text: 'Title', variant: 'h1' }, surfaceId: 's1', componentId: 'c1' })
     expect(w.find('h1').text()).toBe('Title')
   })
 
   it('maps label hint to span', () => {
-    const w = mountWith(A2UIText, { def: { text: 'lbl', usageHint: 'label' }, surfaceId: 's1', componentId: 'c1' })
+    const w = mountWith(A2UIText, { def: { text: 'lbl', variant: 'label' }, surfaceId: 's1', componentId: 'c1' })
     expect(w.find('span').text()).toBe('lbl')
   })
 })
@@ -221,8 +221,8 @@ describe('A2UIColumn / A2UIRow / A2UIStack (layout)', () => {
   const surfaces = {
     s1: {
       components: {
-        t1: { Text: { text: 'A' } },
-        t2: { Text: { text: 'B' } },
+        t1: { component: 'Text', text: 'A' },
+        t2: { component: 'Text', text: 'B' },
       },
       root: null, dataModel: {}, sources: {}, filters: {},
     },
@@ -264,7 +264,7 @@ describe('A2UINode', () => {
   it('resolves Text component from store', () => {
     const surfaces = {
       s1: {
-        components: { c1: { Text: { text: 'Hello' } } },
+        components: { c1: { component: 'Text', text: 'Hello' } },
         root: 'c1', dataModel: {}, sources: {}, filters: {},
       },
     }
@@ -276,7 +276,7 @@ describe('A2UINode', () => {
   it('resolves Button component', () => {
     const surfaces = {
       s1: {
-        components: { b1: { Button: { label: 'Go' } } },
+        components: { b1: { component: 'Button', label: 'Go' } },
         root: 'b1', dataModel: {}, sources: {}, filters: {},
       },
     }
@@ -288,7 +288,7 @@ describe('A2UINode', () => {
   it('renders nothing for unknown component type', () => {
     const surfaces = {
       s1: {
-        components: { x1: { UnknownWidget: {} } },
+        components: { x1: { component: 'UnknownWidget' } },
         root: 'x1', dataModel: {}, sources: {}, filters: {},
       },
     }
@@ -307,7 +307,7 @@ describe('A2UINode', () => {
   it('resolves MultiSelect as Select with multi: true', () => {
     const surfaces = {
       s1: {
-        components: { ms1: { MultiSelect: { options: [{ value: 'a', label: 'A' }], selected: ['a'] } } },
+        components: { ms1: { component: 'MultiSelect', options: [{ value: 'a', label: 'A' }], selected: ['a'] } },
         root: 'ms1', dataModel: {}, sources: {}, filters: {},
       },
     }
@@ -321,7 +321,7 @@ describe('A2UIRenderer', () => {
   it('renders root component from store', () => {
     const surfaces = {
       s1: {
-        components: { root: { Text: { text: 'Root' } } },
+        components: { root: { component: 'Text', text: 'Root' } },
         root: 'root', dataModel: {}, sources: {}, filters: {},
       },
     }

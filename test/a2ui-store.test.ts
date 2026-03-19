@@ -97,16 +97,16 @@ describe('A2UIManager + A2UIStore integration', () => {
   it('persists upsertSurface to store', () => {
     const store = new A2UIStore(dbPath)
     const mgr = new A2UIManager(store)
-    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: { Text: { text: 'hi' } } }])
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Text', text: 'hi' }])
     const row = store.load('main', 's1')!
-    expect(JSON.parse(row.components)).toEqual({ c1: { Text: { text: 'hi' } } })
+    expect(JSON.parse(row.components)).toEqual({ c1: { component: 'Text', text: 'hi' } })
     store.close()
   })
 
   it('persists setRoot to store', () => {
     const store = new A2UIStore(dbPath)
     const mgr = new A2UIManager(store)
-    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: {} }])
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Empty' }])
     mgr.setRoot('main', 's1', 'c1')
     expect(store.load('main', 's1')!.root).toBe('c1')
     store.close()
@@ -143,7 +143,7 @@ describe('A2UIManager + A2UIStore integration', () => {
   it('loads surfaces from store on construction', () => {
     const store1 = new A2UIStore(dbPath)
     const mgr1 = new A2UIManager(store1)
-    mgr1.upsertSurface('main', 's1', [{ id: 'c1', component: { Text: { text: 'persisted' } } }])
+    mgr1.upsertSurface('main', 's1', [{ id: 'c1', component: 'Text', text: 'persisted' }])
     mgr1.setRoot('main', 's1', 'c1')
     mgr1.updateDataModel('main', 's1', { key: 'val' })
     store1.close()
@@ -153,7 +153,7 @@ describe('A2UIManager + A2UIStore integration', () => {
     const mgr2 = new A2UIManager(store2)
     const surface = mgr2.getSurface('main', 's1')!
     expect(surface).toBeTruthy()
-    expect(surface.components.get('c1')).toEqual({ Text: { text: 'persisted' } })
+    expect(surface.components.get('c1')).toEqual({ component: 'Text', text: 'persisted' })
     expect(surface.root).toBe('c1')
     expect(surface.dataModel).toEqual({ key: 'val' })
     store2.close()
@@ -161,9 +161,33 @@ describe('A2UIManager + A2UIStore integration', () => {
 
   it('works without a store (backward compatible)', () => {
     const mgr = new A2UIManager()
-    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: {} }])
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Empty' }])
     expect(mgr.getSurface('main', 's1')).toBeTruthy()
     mgr.deleteSurface('main', 's1')
     expect(mgr.getSurface('main', 's1')).toBeUndefined()
+  })
+})
+
+describe('A2UIManager fresh initialization', () => {
+  it('initializes cleanly with an empty store', () => {
+    const store = new A2UIStore(dbPath)
+    const mgr = new A2UIManager(store)
+    expect(mgr.surfacesForSession('main')).toHaveLength(0)
+    expect(mgr.getSurface('main', 's1')).toBeUndefined()
+    store.close()
+  })
+
+  it('initializes cleanly with a wiped store', () => {
+    const store1 = new A2UIStore(dbPath)
+    const mgr1 = new A2UIManager(store1)
+    mgr1.upsertSurface('main', 's1', [{ id: 'c1', component: 'Text', text: 'hi' }])
+    mgr1.clearAll()
+    store1.close()
+
+    const store2 = new A2UIStore(dbPath)
+    const mgr2 = new A2UIManager(store2)
+    expect(mgr2.surfacesForSession('main')).toHaveLength(0)
+    expect(mgr2.getSurface('main', 's1')).toBeUndefined()
+    store2.close()
   })
 })
