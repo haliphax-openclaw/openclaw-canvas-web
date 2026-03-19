@@ -6,7 +6,7 @@ import type { Gateway } from './gateway.js'
 import { injectDeepLinkIntoDataUrl } from '../shared/deep-link-script.js'
 import { injectSnapshotIntoDataUrl } from '../shared/snapshot-script.js'
 import type { A2UIManager } from './a2ui-manager.js'
-import { processA2UICommand } from './a2ui-commands.js'
+import { processBatch } from './a2ui-pipeline.js'
 import type { SessionManager } from './session-manager.js'
 
 const IDENTITY_PATH = path.join(
@@ -291,12 +291,10 @@ export class NodeClient {
         const jsonl = params.jsonl ?? params.payload ?? ''
         if (!jsonl) throw new Error('payload required')
         const session = params.session ?? 'main'
-        const lines = (typeof jsonl === 'string' ? jsonl : JSON.stringify(jsonl)).split('\n').filter((l: string) => l.trim())
-        for (const line of lines) {
-          const parsed = JSON.parse(line)
-          processA2UICommand(session, parsed, this.a2uiManager, this.gateway)
-        }
-        return { ok: true }
+        const payload = typeof jsonl === 'string' ? jsonl : JSON.stringify(jsonl)
+        const results = processBatch(session, payload, this.a2uiManager, this.gateway)
+        const errors = results.filter(r => !r.ok)
+        return { ok: true, results, errors }
       }
       case 'canvas.a2ui.reset': {
         const session = params.session as string | undefined

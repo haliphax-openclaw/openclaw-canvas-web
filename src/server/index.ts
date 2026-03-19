@@ -96,6 +96,7 @@ const server = app.listen(PORT, HOST, () => {
 const gateway = new Gateway(server)
 const a2uiStore = new A2UIStore()
 const a2uiManager = new A2UIManager(a2uiStore)
+gateway.setA2UIManager(a2uiManager)
 registerCanvasCommands(gateway, sessionManager)
 registerA2UICommands(gateway, a2uiManager)
 
