@@ -1,6 +1,6 @@
 # A2UI v0.9 Upgrade — Implementation Plan
 
-**Spec:** [a2ui-v09-upgrade-spec.md](a2ui-v09-upgrade-spec.md)
+**Spec:** [a2ui-v09-upgrade-spec.md](2026-03-18-a2ui-v09-upgrade-spec.md)
 **Date:** 2026-03-18
 **Status:** Phase 1 complete
 
@@ -183,12 +183,12 @@ Completed — committed to `a2ui-v0.9` branch, merged to main.
 ### Streaming A2UI ingestion with ValidationFailed
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/5
-Spec: [a2ui-v09-upgrade-spec.md §5.4](a2ui-v09-upgrade-spec.md)
+Spec: [a2ui-v09-upgrade-spec.md §5.4](2026-03-18-a2ui-v09-upgrade-spec.md)
 
 ### formatString interpolation engine
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/8
-Spec: [a2ui-v09-upgrade-spec.md §5.5](a2ui-v09-upgrade-spec.md)
+Spec: [a2ui-v09-upgrade-spec.md §5.5](2026-03-18-a2ui-v09-upgrade-spec.md)
 
 ### Theme support
 
