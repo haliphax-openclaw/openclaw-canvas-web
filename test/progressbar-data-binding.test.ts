@@ -47,19 +47,19 @@ describe('A2UIProgressBar data binding', () => {
     expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 75%')
   })
 
-  it('interpolates {{field}} in label from first row', () => {
+  it('interpolates ${field} in label from first row', () => {
     const rows = [{ progress_label: 'Season 3 Completion', progress_value: 63 }]
     const w = mountBar(
-      { label: '{{progress_label}}', value: 50, dataSource: { source: 'content' } },
+      { label: '${progress_label}', value: 50, dataSource: { source: 'content' } },
       baseSurface(rows),
     )
     expect(w.find('.a2ui-progress-label').text()).toBe('Season 3 Completion')
   })
 
-  it('interpolates {{field}} in value from first row', () => {
+  it('interpolates ${field} in value from first row', () => {
     const rows = [{ progress_label: 'Test', progress_value: 63 }]
     const w = mountBar(
-      { label: 'Progress', value: '{{progress_value}}', dataSource: { source: 'content' } },
+      { label: 'Progress', value: '${progress_value}', dataSource: { source: 'content' } },
       baseSurface(rows),
     )
     expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 63%')
@@ -68,7 +68,7 @@ describe('A2UIProgressBar data binding', () => {
   it('interpolates both label and value together', () => {
     const rows = [{ progress_label: 'Op Permafrost', progress_value: 42 }]
     const w = mountBar(
-      { label: '{{progress_label}}', value: '{{progress_value}}', dataSource: { source: 'content' } },
+      { label: '${progress_label}', value: '${progress_value}', dataSource: { source: 'content' } },
       baseSurface(rows),
     )
     expect(w.find('.a2ui-progress-label').text()).toBe('Op Permafrost')
@@ -78,15 +78,15 @@ describe('A2UIProgressBar data binding', () => {
   it('clamps resolved value to 0-100', () => {
     const rows = [{ val: 150 }]
     const surfaces = { s1: { components: {}, root: null, dataModel: {}, sources: { s: { fields: ['val'], rows } }, filters: {} } }
-    const w = mountBar({ label: 'X', value: '{{val}}', dataSource: { source: 's' } }, surfaces)
+    const w = mountBar({ label: 'X', value: '${val}', dataSource: { source: 's' } }, surfaces)
     expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 100%')
   })
 
-  it('resolves aggregate {{$value}} in value', () => {
+  it('resolves aggregate ${$value} in value', () => {
     const rows = [{ score: 30 }, { score: 70 }]
     const surfaces = { s1: { components: {}, root: null, dataModel: {}, sources: { s: { fields: ['score'], rows } }, filters: {} } }
     const w = mountBar(
-      { label: 'Avg', value: '{{$value}}', dataSource: { source: 's', aggregate: { fn: 'avg', field: 'score' } } },
+      { label: 'Avg', value: '${$value}', dataSource: { source: 's', aggregate: { fn: 'avg', field: 'score' } } },
       surfaces,
     )
     expect(w.find('.a2ui-progress-fill').attributes('style')).toContain('--progress: 50%')
@@ -97,7 +97,7 @@ describe('A2UIProgressBar data binding', () => {
     const surfaces = { s1: { components: {}, root: null, dataModel: {}, sources: { s: { fields: ['name', 'score'], rows } }, filters: {} } }
     const w = mountBar(
       {
-        label: '{{$count}} items, total {{$total}}',
+        label: '${$count} items, total ${$total}',
         value: 50,
         dataSource: { source: 's', aggregates: { $count: { fn: 'count' }, $total: { fn: 'sum', field: 'score' } } },
       },
@@ -106,25 +106,25 @@ describe('A2UIProgressBar data binding', () => {
     expect(w.find('.a2ui-progress-label').text()).toBe('2 items, total 30')
   })
 
-  it('returns empty string for unknown placeholders', () => {
+  it('returns original token for unknown placeholders', () => {
     const rows = [{ name: 'Alice' }]
     const w = mountBar(
-      { label: 'Hi {{unknown}}!', value: 50, dataSource: { source: 'content' } },
+      { label: 'Hi ${unknown}!', value: 50, dataSource: { source: 'content' } },
       baseSurface(rows),
     )
-    expect(w.find('.a2ui-progress-label').text()).toBe('Hi !')
+    expect(w.find('.a2ui-progress-label').text()).toBe('Hi ${unknown}!')
   })
 
   it('does not interpolate without dataSource', () => {
-    const w = mountBar({ label: 'Hello {{name}}', value: 50 })
-    expect(w.find('.a2ui-progress-label').text()).toBe('Hello {{name}}')
+    const w = mountBar({ label: 'Hello ${name}', value: 50 })
+    expect(w.find('.a2ui-progress-label').text()).toBe('Hello ${name}')
   })
 
   it('reacts to data source changes', async () => {
     const surfaces = baseSurface([{ progress_label: 'Phase 1', progress_value: 25 }])
     const store = makeStore(surfaces)
     const w = mount(A2UIProgressBar, {
-      props: { def: { label: '{{progress_label}}', value: '{{progress_value}}', dataSource: { source: 'content' } }, surfaceId: 's1', componentId: 'c1' },
+      props: { def: { label: '${progress_label}', value: '${progress_value}', dataSource: { source: 'content' } }, surfaceId: 's1', componentId: 'c1' },
       global: { plugins: [store] },
     })
     expect(w.find('.a2ui-progress-label').text()).toBe('Phase 1')

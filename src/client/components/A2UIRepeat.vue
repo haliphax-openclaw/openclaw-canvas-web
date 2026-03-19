@@ -25,6 +25,7 @@
 import { defineComponent, computed, ref, watch } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
 import { useSortable, type SortDirection } from '../composables/useSortable'
+import { formatString } from '../utils/format-string'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'
@@ -35,23 +36,8 @@ const templateComponents: Record<string, ReturnType<typeof defineComponent>> = {
   Badge: A2UIBadge,
 }
 
-function resolveTemplate(template: string, row: Record<string, unknown>, transforms: Record<string, any>, allRows: Record<string, unknown>[]): string {
-  return template.replace(/\{\{(\w+)(?:\s*\|\s*(\w+))?\}\}/g, (_, field, transformName) => {
-    let val = row[field]
-    if (transformName && transforms?.[transformName]) {
-      const t = transforms[transformName]
-      if (t.fn === 'percentOfMax') {
-        const f = t.field || field
-        const max = Math.max(...allRows.map(r => Number(r[f]) || 0))
-        val = max ? ((Number(row[f]) || 0) / max) * 100 : 0
-      }
-    }
-    return String(val ?? '')
-  })
-}
-
 function deepResolve(obj: unknown, row: Record<string, unknown>, transforms: Record<string, any>, allRows: Record<string, unknown>[]): unknown {
-  if (typeof obj === 'string') return resolveTemplate(obj, row, transforms, allRows)
+  if (typeof obj === 'string') return formatString(obj, row, { transforms, allRows })
   if (Array.isArray(obj)) return obj.map(v => deepResolve(v, row, transforms, allRows))
   if (obj && typeof obj === 'object') {
     const out: Record<string, unknown> = {}

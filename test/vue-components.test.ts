@@ -352,7 +352,7 @@ describe('A2UIRepeat', () => {
     }
     const def = {
       dataSource: { source: 'items' },
-      template: { Text: { text: '{{name}}' } },
+      template: { Text: { text: '${name}' } },
     }
     const w = mountWith(A2UIRepeat, { def, surfaceId: 's1', componentId: 'r1' }, surfaces)
     const texts = w.findAllComponents(A2UIText)
@@ -371,7 +371,7 @@ describe('A2UIRepeat', () => {
     }
     const def = {
       dataSource: { source: 'items' },
-      template: { Text: { text: '{{name}}' } },
+      template: { Text: { text: '${name}' } },
       emptyText: 'No data',
     }
     const w = mountWith(A2UIRepeat, { def, surfaceId: 's1', componentId: 'r1' }, surfaces)

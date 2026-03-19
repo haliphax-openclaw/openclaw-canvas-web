@@ -10,6 +10,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { useDataSource } from '../composables/useDataSource'
+import { formatString } from '../utils/format-string'
 
 export default defineComponent({
   name: 'A2UIProgressBar',
@@ -23,23 +24,19 @@ export default defineComponent({
 
     function resolveTemplate(raw: unknown): string {
       const str = typeof raw === 'string' ? raw : String(raw ?? '')
-      if (!binding.value || !str.includes('{{')) return str
+      if (!binding.value || !str.includes('${')) return str
       const aggs = compoundAggregates.value
-      const allKeys: Record<string, string | number> = { ...aggs }
+      const allKeys: Record<string, unknown> = { ...aggs }
       if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
       const row = filteredRows.value && filteredRows.value.length > 0 ? filteredRows.value[0] : null
-      return str.replace(/\{\{(\$?\w+)\}\}/g, (_: string, k: string) => {
-        if (k in allKeys) return String(allKeys[k] ?? '')
-        if (row && k in row) return String(row[k] ?? '')
-        return ''
-      })
+      return formatString(str, { ...allKeys, ...(row ?? {}) })
     }
 
     const resolvedLabel = computed(() => resolveTemplate((props.def as any).label ?? ''))
 
     const clampedValue = computed(() => {
       const raw = (props.def as any).value
-      const resolved = binding.value && typeof raw === 'string' && raw.includes('{{') ? resolveTemplate(raw) : raw
+      const resolved = binding.value && typeof raw === 'string' && raw.includes('${') ? resolveTemplate(raw) : raw
       return Math.min(100, Math.max(0, Number(resolved) || 0))
     })
 

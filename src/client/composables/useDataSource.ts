@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { computeAggregate, applyFilters, formatCompact } from '../services/filter-engine'
+import { formatString } from '../utils/format-string'
 
 export function useDataSource(props: { def: Record<string, unknown>; surfaceId: string }) {
   const store = useStore()
@@ -43,15 +44,11 @@ export function useDataSource(props: { def: Record<string, unknown>; surfaceId: 
     const hasCompound = Object.keys(aggs).length > 0
     const result: Record<string, unknown> = {}
     for (const [prop, template] of Object.entries(binding.value.map)) {
-      if (template.includes('{{')) {
-        const allKeys: Record<string, string | number> = { ...aggs }
+      if (template.includes('${')) {
+        const allKeys: Record<string, unknown> = { ...aggs }
         if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
         const row = filteredRows.value && filteredRows.value.length > 0 ? filteredRows.value[0] : null
-        result[prop] = template.replace(/\{\{(\$?\w+)\}\}/g, (_, k: string) => {
-          if (k in allKeys) return String(allKeys[k] ?? '')
-          if (row && k in row) return String(row[k] ?? '')
-          return ''
-        })
+        result[prop] = formatString(template, { ...allKeys, ...(row ?? {}) })
       } else if (template === '$value') {
         result[prop] = aggregatedValue.value
       } else if (filteredRows.value && filteredRows.value.length > 0) {
