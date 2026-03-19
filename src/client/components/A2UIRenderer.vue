@@ -1,5 +1,5 @@
 <template>
-  <div class="a2ui-renderer" v-if="root" :style="themeStyle" data-theme="dark">
+  <div class="a2ui-renderer" v-if="root" :style="themeStyle" :data-theme="activeTheme">
     <div v-if="attribution" class="a2ui-attribution">
       <img v-if="attribution.iconUrl" :src="attribution.iconUrl" class="a2ui-attribution-icon" />
       <span>{{ attribution.name }}</span>
@@ -26,17 +26,31 @@ export default defineComponent({
     const root = computed(() => surface.value?.root ?? null)
     const theme = computed(() => surface.value?.theme)
 
+    const activeTheme = computed(() => {
+      const t = theme.value
+      return (t?.['--a2ui-theme'] as string) || 'dark'
+    })
+
     const themeStyle = computed(() => {
       const t = theme.value
-      if (!t?.primaryColor) return {}
-      const pc = t.primaryColor as string
-      return {
-        '--a2ui-primary': pc,
-        '--a2ui-primary-hover': lighten(pc, 15),
-        '--a2ui-badge-info-bg': darken(pc, 40),
-        '--a2ui-badge-info-fg': lighten(pc, 30),
-        '--color-primary': pc,
+      if (!t) return {}
+      const style: Record<string, string> = {}
+      // Apply primaryColor legacy support
+      if (t.primaryColor) {
+        const pc = t.primaryColor as string
+        style['--a2ui-primary'] = pc
+        style['--a2ui-primary-hover'] = lighten(pc, 15)
+        style['--a2ui-badge-info-bg'] = darken(pc, 40)
+        style['--a2ui-badge-info-fg'] = lighten(pc, 30)
+        style['--color-primary'] = pc
       }
+      // Apply all CSS custom properties from theme object
+      for (const [key, value] of Object.entries(t)) {
+        if (key.startsWith('--')) {
+          style[key] = value as string
+        }
+      }
+      return style
     })
 
     const attribution = computed(() => {
@@ -45,7 +59,7 @@ export default defineComponent({
       return { name: t.agentDisplayName as string, iconUrl: t.iconUrl as string | undefined }
     })
 
-    return { root, themeStyle, attribution }
+    return { root, themeStyle, activeTheme, attribution }
   },
 })
 </script>
