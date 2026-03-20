@@ -171,6 +171,7 @@ External catalog packages declare themselves via an `openclaw-canvas-web` field 
   "name": "@example/a2ui-charts",
   "version": "1.0.0",
   "openclaw-canvas-web": {
+    "catalog": "./catalog.json",
     "entry": "./dist/index.js"
   },
   "peerDependencies": {
@@ -181,7 +182,8 @@ External catalog packages declare themselves via an `openclaw-canvas-web` field 
 ```
 
 Fields:
-- `entry` (required): Path to the ES module that default-exports a `PackageDefinition`.
+- `catalog` (required): Path to the JSON Schema catalog definition file. Describes component names, prop contracts, and theme schema per the A2UI v0.9 spec.
+- `entry` (required): Path to the ES module that default-exports a `PackageDefinition` with Vue component implementations.
 
 Packages advertise component IDs only. Catalog membership is determined by the server's local configuration.
 
