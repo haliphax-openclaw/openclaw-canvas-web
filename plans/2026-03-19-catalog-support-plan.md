@@ -680,7 +680,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 - Runtime dynamic loading of components from URLs (architectural decision: not doing this)
 - Catalog negotiation protocol (A2UI spec's client↔server capability exchange) — our agents are local, not remote
 - Inline catalogs from clients (spec feature, not needed for our use case)
-- Validation loop (`VALIDATION_FAILED` error feedback) — separate effort per v0.9 upgrade spec §5.4
+- ~~Validation loop (`VALIDATION_FAILED` error feedback) — separate effort per v0.9 upgrade spec §5.4~~ ✅
 - ~~`formatString` interpolation — separate effort per v0.9 upgrade spec §5.5~~ ✅
 - Publishing `@haliphax-openclaw/a2ui-sdk` to npm (future — start with workspaces)
 
