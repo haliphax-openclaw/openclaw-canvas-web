@@ -186,15 +186,6 @@ Connect via WebSocket to `/gateway`. Send JSON messages with a `command` field. 
 { "id": "8", "command": "a2ui.reset" }
 ```
 
-## A2UI Persistence
-
-A2UI surface state is persisted to a local SQLite database so it survives server restarts. On startup, all cached surfaces are loaded from the database and replayed to connecting SPA clients.
-
-- The database is managed by `A2UIStore` (`better-sqlite3`, synchronous)
-- The in-memory `Map` in `A2UIManager` remains the primary data source; SQLite is the backing store
-- Every mutation (`upsertSurface`, `setRoot`, `updateDataModel`, `deleteSurface`, `clearAll`) writes through to SQLite
-- DB location defaults to `~/.openclaw-canvas/a2ui-cache.db`, configurable via `OPENCLAW_CANVAS_A2UI_DB`
-
 ## Custom URL Protocols
 
 ### `openclaw://` — Agent Deep Links
@@ -267,23 +258,14 @@ The dialog includes a collapsible "Options" section with controls for:
 
 Place HTML/CSS/JS files in the agent's `canvas/` workspace directory. The server serves them at `/<session>/<path>`. File changes trigger live reload in the browser.
 
-## Limitations vs macOS App
+## A2UI Persistence
 
-The canvas web server provides feature parity with the macOS OpenClaw app's canvas panel, with a few browser-inherent limitations:
+A2UI surface state is persisted to a local SQLite database so it survives server restarts. On startup, all cached surfaces are loaded from the database and replayed to connecting SPA clients.
 
-- **`file://` URLs** — The macOS app supports `file://` URLs in canvas.navigate. Browsers block these for security reasons. Use `openclaw-canvas://` or `http(s)` URLs instead.
-- **Snapshot fidelity** — The macOS app captures snapshots natively via WKWebView. The web server injects `dom-to-image-more` into canvas HTML and captures from within the iframe via `postMessage`. This works for locally-served canvas files and `data:` URLs. External cross-origin URLs (http/https from other domains) cannot be captured since the snapshot script can't be injected into third-party content.
-- **Panel geometry** — The macOS app's canvas is a floating, resizable panel sharing screen space with the menu bar, webchat, and voice overlay. It supports `canvas.geometry` commands and persists size/position per session. The web server omits this — the canvas owns the full browser tab, so viewport sizing is handled by the browser itself.
-
-## Extra Features
-
-Features available in the web server that are not present in the macOS app:
-
-- **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link and snapshot script injection.
-- **`openclaw-fileprompt://` deep links** — Spawn subagents with prompts loaded directly from workspace files. The server reads the file and passes its contents as the task, removing the indirection of telling an agent to load a file. See [Custom URL Protocols](#openclaw-fileprompt----file-based-subagent-spawn).
-- **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
-- **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
-- **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
+- The database is managed by `A2UIStore` (`better-sqlite3`, synchronous)
+- The in-memory `Map` in `A2UIManager` remains the primary data source; SQLite is the backing store
+- Every mutation (`upsertSurface`, `setRoot`, `updateDataModel`, `deleteSurface`, `clearAll`) writes through to SQLite
+- DB location defaults to `~/.openclaw-canvas/a2ui-cache.db`, configurable via `OPENCLAW_CANVAS_A2UI_DB`
 
 ## Backward Compatibility
 
@@ -312,6 +294,24 @@ Key capabilities:
 - **Repeat** — The Repeat component iterates over filtered rows, rendering a template per row with `{{field}}` placeholders and transforms like `percentOfMax`.
 
 See [docs/a2ui-reactive.md](docs/a2ui-reactive.md) for the full data binding guide and [docs/components.md](docs/components.md) for the complete component reference.
+
+## Limitations vs macOS App
+
+The canvas web server provides feature parity with the macOS OpenClaw app's canvas panel, with a few browser-inherent limitations:
+
+- **`file://` URLs** — The macOS app supports `file://` URLs in canvas.navigate. Browsers block these for security reasons. Use `openclaw-canvas://` or `http(s)` URLs instead.
+- **Snapshot fidelity** — The macOS app captures snapshots natively via WKWebView. The web server injects `dom-to-image-more` into canvas HTML and captures from within the iframe via `postMessage`. This works for locally-served canvas files and `data:` URLs. External cross-origin URLs (http/https from other domains) cannot be captured since the snapshot script can't be injected into third-party content.
+- **Panel geometry** — The macOS app's canvas is a floating, resizable panel sharing screen space with the menu bar, webchat, and voice overlay. It supports `canvas.geometry` commands and persists size/position per session. The web server omits this — the canvas owns the full browser tab, so viewport sizing is handled by the browser itself.
+
+## Extra Features
+
+Features available in the web server that are not present in the macOS app:
+
+- **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link and snapshot script injection.
+- **`openclaw-fileprompt://` deep links** — Spawn subagents with prompts loaded directly from workspace files. The server reads the file and passes its contents as the task, removing the indirection of telling an agent to load a file. See [Custom URL Protocols](#openclaw-fileprompt----file-based-subagent-spawn).
+- **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
+- **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
+- **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.
 
 ## License
 
