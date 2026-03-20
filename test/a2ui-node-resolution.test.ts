@@ -35,7 +35,7 @@ describe('A2UINode two-tier component resolution', () => {
     it('resolves known built-in component names', () => {
       const builtinNames = [
         'Column', 'Row', 'Text', 'Button', 'Image', 'Stack', 'Spacer',
-        'Select', 'MultiSelect', 'Table', 'Checkbox', 'ProgressBar',
+        'Select', 'MultiSelect', 'Checkbox', 'ProgressBar',
         'Slider', 'Divider', 'Repeat', 'Accordion', 'Tabs',
       ]
       for (const name of builtinNames) {

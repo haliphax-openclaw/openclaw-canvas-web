@@ -15,7 +15,6 @@ import A2UIImage from './A2UIImage.vue'
 import A2UIStack from './A2UIStack.vue'
 import A2UISpacer from './A2UISpacer.vue'
 import A2UISelect from './A2UISelect.vue'
-import A2UITable from './A2UITable.vue'
 import A2UICheckbox from './A2UICheckbox.vue'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UISlider from './A2UISlider.vue'
@@ -35,7 +34,6 @@ const builtinMap: Record<string, Component> = {
   Spacer: A2UISpacer,
   Select: A2UISelect,
   MultiSelect: A2UISelect,
-  Table: A2UITable,
   Checkbox: A2UICheckbox,
   ProgressBar: A2UIProgressBar,
   Slider: A2UISlider,

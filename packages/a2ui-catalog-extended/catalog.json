@@ -22,6 +22,38 @@
           }
         }
       }
+    },
+    {
+      "name": "Table",
+      "description": "Data table with sorting and formatting support",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "headers": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Column header labels"
+          },
+          "rows": {
+            "type": "array",
+            "items": { "type": "array" },
+            "description": "Static row data (array of arrays)"
+          },
+          "sortable": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable column sorting"
+          },
+          "formatters": {
+            "type": "object",
+            "description": "Column formatter map (column name → formatter name)"
+          },
+          "dataSource": {
+            "type": "object",
+            "description": "Data source binding for dynamic data"
+          }
+        }
+      }
     }
   ]
 }

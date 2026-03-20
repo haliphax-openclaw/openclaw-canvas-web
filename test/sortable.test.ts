@@ -16,7 +16,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import A2UITable from '../src/client/components/A2UITable.vue'
+import A2UITable from '../packages/a2ui-catalog-extended/src/A2UITable.vue'
 import A2UIRepeat from '../src/client/components/A2UIRepeat.vue'
 import A2UIText from '../src/client/components/A2UIText.vue'
 
