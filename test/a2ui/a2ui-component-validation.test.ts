@@ -15,7 +15,7 @@ const TEST_SCHEMAS: Record<string, ComponentSchema> = {
   List:          { props: { rows: { type: 'array' }, wrap: { type: 'number' }, grow: { type: 'number' } } },
   Card:          { props: { child: { type: 'string' }, title: { type: 'string' }, image: { type: 'string' }, imageAlt: { type: 'string' }, actions: { type: 'array' }, variant: { type: 'string' }, side: { type: 'boolean' }, size: { type: 'string' }, shadow: { type: 'string' } } },
   Modal:         { props: { trigger: { type: 'string' }, content: { type: 'string' } } },
-  TextField:     { props: { label: { type: 'string' }, placeholder: { type: 'string' }, value: { type: 'string' }, variant: { type: 'string' }, validationRegexp: { type: 'string' } } },
+  TextField:     { props: { label: { type: 'string|object', required: true }, value: { type: 'string|object' }, variant: { type: 'string' }, validationRegexp: { type: 'string' }, checks: { type: 'array' }, accessibility: { type: 'object' }, placeholder: { type: 'string' } } },
   DateTimeInput: { props: { label: { type: 'string' }, value: { type: 'string' }, enableDate: { type: 'boolean' }, enableTime: { type: 'boolean' }, min: { type: 'string' }, max: { type: 'string' } } },
   Icon:          { props: { icon: { type: 'string|object', required: true }, size: { type: 'number' }, color: { type: 'string' } } },
   AudioPlayer:   { props: { url: { type: 'string', required: true }, description: { type: 'string' }, autoplay: { type: 'boolean' }, loop: { type: 'boolean' }, muted: { type: 'boolean' } } },
@@ -166,6 +166,21 @@ describe('validateComponent', () => {
   it('errors on AudioPlayer missing url', () => {
     const r = validateComponent({ id: 'c1', component: 'AudioPlayer' }, resolve)
     expect(r.errors).toContain("Missing required prop 'url'")
+  })
+
+  it('passes TextField with string label', () => {
+    const r = validateComponent({ id: 'c1', component: 'TextField', label: 'Name' }, resolve)
+    expect(r.errors).toEqual([])
+  })
+
+  it('passes TextField with path-bound label', () => {
+    const r = validateComponent({ id: 'c1', component: 'TextField', label: { path: '/labels/name' } }, resolve)
+    expect(r.errors).toEqual([])
+  })
+
+  it('errors on TextField missing label', () => {
+    const r = validateComponent({ id: 'c1', component: 'TextField', value: 'x' }, resolve)
+    expect(r.errors).toContain("Missing required prop 'label'")
   })
 })
 

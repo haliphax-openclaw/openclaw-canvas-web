@@ -22,10 +22,24 @@ registerWsSend(wsClient.send.bind(wsClient))
 
 import A2UITextField from '../../packages/a2ui-catalog-basic/src/A2UITextField.vue'
 
+const emptySurface = () => ({
+  root: null,
+  dataModel: {} as Record<string, unknown>,
+  components: {},
+  sources: {},
+  filters: {},
+})
+
 function makeStore(surfaces: Record<string, any> = {}) {
+  const merged =
+    Object.keys(surfaces).length === 0
+      ? { s1: emptySurface() }
+      : Object.fromEntries(
+          Object.entries(surfaces).map(([id, s]) => [id, { ...emptySurface(), ...s }]),
+        )
   return createStore({
     state: { session: { active: 'main', sessions: ['main'] }, panel: { visible: true } },
-    modules: { a2ui: { ...a2uiModule, state: () => ({ surfaces }) } },
+    modules: { a2ui: { ...a2uiModule, state: () => ({ surfaces: merged }) } },
   })
 }
 
@@ -38,19 +52,19 @@ beforeEach(() => { vi.mocked(wsClient.send).mockClear() })
 
 describe('A2UITextField', () => {
   it('renders an input element by default', () => {
-    const w = mountWith({ value: 'hello' })
+    const w = mountWith({ label: 'L', value: 'hello' })
     expect(w.find('input').exists()).toBe(true)
     expect((w.find('input').element as HTMLInputElement).value).toBe('hello')
   })
 
   it('renders a textarea for longText variant', () => {
-    const w = mountWith({ variant: 'longText', value: 'long content' })
+    const w = mountWith({ label: 'L', variant: 'longText', value: 'long content' })
     expect(w.find('textarea').exists()).toBe(true)
     expect(w.find('input').exists()).toBe(false)
   })
 
   it('renders password input for obscured variant', () => {
-    const w = mountWith({ variant: 'obscured', value: 'secret' })
+    const w = mountWith({ label: 'L', variant: 'obscured', value: 'secret' })
     expect(w.find('input').attributes('type')).toBe('password')
   })
 
@@ -59,8 +73,37 @@ describe('A2UITextField', () => {
     expect(w.find('.label-text').text()).toBe('Username')
   })
 
+  it('resolves value from data model path', () => {
+    const w = mountWith(
+      { label: 'Email', value: { path: '/user/email' } },
+      { s1: { dataModel: { user: { email: 'x@y.z' } } } },
+    )
+    expect((w.find('input').element as HTMLInputElement).value).toBe('x@y.z')
+  })
+
+  it('shows check messages when condition is false', () => {
+    const w = mountWith(
+      {
+        label: 'L',
+        value: '',
+        checks: [{ condition: { path: '/flags/bad' }, message: 'Not good' }],
+      },
+      { s1: { dataModel: { flags: { bad: false } } } },
+    )
+    expect(w.find('.a2ui-field-checks').text()).toContain('Not good')
+  })
+
+  it('shows accessibility description', () => {
+    const w = mountWith({
+      label: 'L',
+      value: '',
+      accessibility: { description: 'Use 8+ characters' },
+    })
+    expect(w.find('.a2ui-field-hint').text()).toBe('Use 8+ characters')
+  })
+
   it('sends textFieldChange on input', async () => {
-    const w = mountWith({ value: '' })
+    const w = mountWith({ label: 'L', value: '' })
     await w.find('input').setValue('typed')
     expect(wsClient.send).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'a2ui.textFieldChange', componentId: 'tf1', value: 'typed' }),
@@ -68,7 +111,7 @@ describe('A2UITextField', () => {
   })
 
   it('defaults variant to shortText (text input)', () => {
-    const w = mountWith({})
+    const w = mountWith({ label: 'L' })
     expect(w.find('input').attributes('type')).toBe('text')
   })
 })

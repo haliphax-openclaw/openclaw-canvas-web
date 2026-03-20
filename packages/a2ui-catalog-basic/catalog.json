@@ -326,34 +326,138 @@
     },
     {
       "name": "TextField",
-      "description": "A text input field with label, variant, and data binding support",
+      "description": "Text input aligned with A2UI v0.9 basic catalog (label, value, variant, validationRegexp, checks, accessibility)",
       "schema": {
         "type": "object",
         "properties": {
           "label": {
-            "type": "string",
-            "description": "The text label for the input field"
+            "description": "Field label (DynamicString: string, v0.8 literalString object, or path binding)",
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "literalString": { "type": "string" }
+                },
+                "required": ["literalString"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" }
+                },
+                "required": ["path"],
+                "additionalProperties": false
+              }
+            ]
           },
           "value": {
-            "type": "string",
-            "description": "The value of the text field"
+            "description": "Current value (DynamicString)",
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "literalString": { "type": "string" }
+                },
+                "required": ["literalString"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" }
+                },
+                "required": ["path"],
+                "additionalProperties": false
+              }
+            ]
           },
           "variant": {
             "type": "string",
             "enum": [
-              "shortText",
               "longText",
               "number",
+              "shortText",
               "obscured"
             ],
             "default": "shortText",
-            "description": "The type of input field to display"
+            "description": "Input kind: longText uses a textarea; number, shortText, and obscured use input types number, text, and password"
           },
           "validationRegexp": {
             "type": "string",
-            "description": "A regular expression used for client-side validation"
+            "description": "HTML pattern attribute for single-line inputs (not applied to longText textarea)"
+          },
+          "checks": {
+            "type": "array",
+            "description": "v0.9 Checkable rules: show message when condition is false (boolean or { \"path\": \"/model/valid\" } to a boolean)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "condition": {
+                  "description": "When false, validation fails and message is shown (boolean or { \"path\" } to a boolean in the data model)",
+                  "oneOf": [
+                    { "type": "boolean" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "path": { "type": "string" }
+                      },
+                      "required": ["path"],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Error text when the check fails"
+                }
+              },
+              "required": [
+                "condition",
+                "message"
+              ]
+            }
+          },
+          "accessibility": {
+            "type": "object",
+            "description": "v0.9 ComponentCommon accessibility hints",
+            "properties": {
+              "label": {
+                "description": "Assistive name (DynamicString)",
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": { "path": { "type": "string" } },
+                    "required": ["path"],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "description": {
+                "description": "Hint shown below the field (DynamicString)",
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": { "path": { "type": "string" } },
+                    "required": ["path"],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          },
+          "placeholder": {
+            "type": "string",
+            "description": "Optional placeholder (renderer extension; not in v0.9 JSON schema)"
           }
-        }
+        },
+        "required": [
+          "label"
+        ]
       }
     },
     {
