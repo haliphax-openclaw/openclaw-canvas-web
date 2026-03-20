@@ -6,6 +6,7 @@ import A2UISpacer from './A2UISpacer.vue'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIRepeat from './A2UIRepeat.vue'
 import A2UIAccordion from './A2UIAccordion.vue'
+import A2UIWrap from './A2UIWrap.vue'
 
 const definition: PackageDefinition = {
   components: [
@@ -16,6 +17,7 @@ const definition: PackageDefinition = {
     { name: 'ProgressBar', component: A2UIProgressBar },
     { name: 'Repeat', component: A2UIRepeat },
     { name: 'Accordion', component: A2UIAccordion },
+    { name: 'Wrap', component: A2UIWrap },
   ],
 }
 

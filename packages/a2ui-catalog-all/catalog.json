@@ -21,6 +21,7 @@
     { "name": "MultiSelect", "description": "Multi-select dropdown" },
     { "name": "ProgressBar", "description": "Progress bar with label and data binding support" },
     { "name": "Repeat", "description": "Data-driven repeater that renders a template for each row" },
+    { "name": "Wrap", "description": "Flex-wrap container that flows children across multiple lines" },
     { "name": "Accordion", "description": "Collapsible accordion panels" }
   ]
 }

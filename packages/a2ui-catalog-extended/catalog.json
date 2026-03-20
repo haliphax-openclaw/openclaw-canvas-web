@@ -136,6 +136,27 @@
       }
     },
     {
+      "name": "Wrap",
+      "description": "Flex-wrap container that flows children across multiple lines",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Child component IDs"
+          },
+          "gap": {
+            "type": "string",
+            "default": "8px",
+            "description": "CSS gap between children (e.g. '8px', '1rem')"
+          }
+        }
+      }
+    },
+    {
       "name": "Accordion",
       "description": "Collapsible accordion panels",
       "schema": {
