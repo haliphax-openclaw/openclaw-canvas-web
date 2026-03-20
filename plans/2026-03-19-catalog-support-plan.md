@@ -10,83 +10,36 @@
 
 Enable third-party Vue 3 components to be installed via npm and served alongside the built-in A2UI components. External components are NOT loaded at runtime from external sites — they are installed on the server, discovered at startup, and bundled into the SPA as a unified app.
 
-This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection of components identified by a `catalogId` URI. Packages advertise component IDs — the server owns catalog membership and bundles components into catalogs based on local configuration.
+This aligns with the A2UI v0.9 catalog concept: a catalog is a named collection of components identified by a `catalogId`. Packages advertise component names — the server owns catalog membership and bundles components into catalogs based on local configuration.
 
-Catalog namespace: `https://haliphax-openclaw.github.io/a2ui/1.0/`
+### Monorepo packages
 
-### Default catalogs
+The `openclaw-canvas-web` repo releases multiple packages:
 
-| Catalog ID | Contents |
+| Package | Description |
 |---|---|
-| `.../catalog/basic` | The basic set of built-in components (maps to A2UI v0.9 basic catalog) |
-| `.../catalog/extended` | All built-in components, including those outside the basic set |
-| `.../catalog/all` | Everything — all built-in + all installed third-party components (default) |
+| `@haliphax-openclaw/canvas-server` | The canvas web server (node + SPA) |
+| `@haliphax-openclaw/canvas-mcp` | MCP server for canvas tool calls |
+| `@haliphax-openclaw/a2ui-sdk` | Component SDK (types, composables, filters, ws) |
+| `@haliphax-openclaw/a2ui-components` | All first-party Vue component implementations |
+| `@haliphax-openclaw/a2ui-catalog-basic` | Basic catalog — core A2UI components |
+| `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — all first-party components |
+| `@haliphax-openclaw/a2ui-catalog-all` | All catalog — all first-party + installed third-party |
 
-### Component IDs
+During development, all packages live in `packages/` and are referenced via `file:` protocol. Publishing to npm is a future step.
 
-Each component has a canonical URI identifier under the namespace:
+### Catalog IDs
 
-| Component ID | Component |
+A catalog ID is the npm package name of the catalog package. This convention is uniform for first-party and third-party catalogs:
+
+| Catalog ID (package name) | Contents |
 |---|---|
-| `.../component/column` | Column layout |
-| `.../component/row` | Row layout |
-| `.../component/text` | Text display |
-| `.../component/button` | Button |
-| `.../component/image` | Image display |
-| `.../component/select` | Single-select picker |
-| `.../component/multi-select` | Multi-select picker |
-| `.../component/checkbox` | Checkbox |
-| `.../component/slider` | Slider |
-| `.../component/divider` | Divider |
-| `.../component/tabs` | Tabbed container |
-| `.../component/stack` | Stack/overlay layout |
-| `.../component/spacer` | Flex spacer |
-| `.../component/table` | Data table |
-| `.../component/progress-bar` | Progress bar |
-| `.../component/badge` | Status badge |
-| `.../component/repeat` | Data-driven repeater |
-| `.../component/accordion` | Collapsible panels |
+| `@haliphax-openclaw/a2ui-catalog-basic` | Core A2UI components (maps to A2UI v0.9 basic catalog) |
+| `@haliphax-openclaw/a2ui-catalog-extended` | All first-party components |
+| `@haliphax-openclaw/a2ui-catalog-all` | Everything — all first-party + all installed third-party (default) |
+| `@example/a2ui-charts` | Third-party example — same convention |
 
-Third-party packages register component IDs under their own namespace (e.g., `https://example.com/a2ui/1.0/component/bar-chart`).
-
-### Catalog JSON files
-
-Each catalog URI should resolve to a JSON document describing the catalog's theme schema and component definitions. These files are hosted on GitHub Pages at the catalog namespace URLs.
-
-```json
-{
-  "$id": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/basic",
-  "$schema": "https://a2ui.org/specification/v0.9-a2ui/catalog.json",
-  "name": "Basic",
-  "description": "A2UI basic catalog components",
-  "$defs": {
-    "theme": {
-      "type": "object",
-      "properties": {
-        "theme": {
-          "type": "string",
-          "description": "DaisyUI theme name (e.g. dark, cyberpunk, synthwave)"
-        }
-      }
-    }
-  },
-  "components": [
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/column",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/row",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/text",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/button",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/image",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/select",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/multi-select",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/checkbox",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/slider",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/divider",
-    "https://haliphax-openclaw.github.io/a2ui/1.0/component/tabs"
-  ]
-}
-```
-
-The `extended` and `all` catalogs follow the same structure with their respective component lists. These JSON files serve as the formal catalog definition referenced by `catalogId` in `createSurface`.
+The default `catalogId` when omitted from `createSurface` is `@haliphax-openclaw/a2ui-catalog-all`.
 
 ### Architecture overview
 
@@ -123,22 +76,22 @@ The `extended` and `all` catalogs follow the same structure with their respectiv
 
 ---
 
-## 2. Package Extraction — `@openclaw-canvas-web/sdk`
+## 2. Package Extraction — `@haliphax-openclaw/a2ui-sdk`
 
-External component authors need to import types and composables from the platform. Extract the following into a shared SDK package that lives in `packages/sdk/` (monorepo-style, published as `@openclaw-canvas-web/sdk`).
+External component authors need to import types and composables from the platform. Extract the following into a shared SDK package that lives in `packages/a2ui-sdk/` (monorepo-style, published as `@haliphax-openclaw/a2ui-sdk`).
 
 ### 2.1 What to extract
 
 | Current location | SDK export | Purpose |
 |---|---|---|
-| `src/client/store/a2ui.ts` → `A2UISurfaceState`, `DataSource`, `FieldFilter` | `@openclaw-canvas-web/sdk/types` | Store shape contracts so external components can type their store access |
-| `src/client/composables/useDataSource.ts` | `@openclaw-canvas-web/sdk/composables` | Data binding — the primary way components read from data sources |
-| `src/client/composables/useFilterBind.ts` | `@openclaw-canvas-web/sdk/composables` | Filter binding — how interactive components push filters to the store |
-| `src/client/composables/useOptionsFrom.ts` | `@openclaw-canvas-web/sdk/composables` | Derived options from data sources |
-| `src/client/composables/useSortable.ts` | `@openclaw-canvas-web/sdk/composables` | Client-side sorting |
-| `src/client/services/filter-engine.ts` → `applyFilters`, `computeAggregate`, `formatCompact`, `FieldFilter`, `AggregateSpec` | `@openclaw-canvas-web/sdk/filters` | Filter/aggregate engine |
-| `src/client/services/ws-client.ts` → `wsClient.send()` | `@openclaw-canvas-web/sdk/ws` | Send events back to server (button clicks, select changes, etc.) |
-| Theme token definitions (from theme-support-plan) | `@openclaw-canvas-web/sdk/theme` | CSS custom property contract (`--a2ui-primary`, `--a2ui-text`, etc.) as documented constants |
+| `src/client/store/a2ui.ts` → `A2UISurfaceState`, `DataSource`, `FieldFilter` | `@haliphax-openclaw/a2ui-sdk/types` | Store shape contracts so external components can type their store access |
+| `src/client/composables/useDataSource.ts` | `@haliphax-openclaw/a2ui-sdk/composables` | Data binding — the primary way components read from data sources |
+| `src/client/composables/useFilterBind.ts` | `@haliphax-openclaw/a2ui-sdk/composables` | Filter binding — how interactive components push filters to the store |
+| `src/client/composables/useOptionsFrom.ts` | `@haliphax-openclaw/a2ui-sdk/composables` | Derived options from data sources |
+| `src/client/composables/useSortable.ts` | `@haliphax-openclaw/a2ui-sdk/composables` | Client-side sorting |
+| `src/client/services/filter-engine.ts` → `applyFilters`, `computeAggregate`, `formatCompact`, `FieldFilter`, `AggregateSpec` | `@haliphax-openclaw/a2ui-sdk/filters` | Filter/aggregate engine |
+| `src/client/services/ws-client.ts` → `wsClient.send()` | `@haliphax-openclaw/a2ui-sdk/ws` | Send events back to server (button clicks, select changes, etc.) |
+| Theme token definitions (from theme-support-plan) | `@haliphax-openclaw/a2ui-sdk/theme` | CSS custom property contract (`--a2ui-primary`, `--a2ui-text`, etc.) as documented constants |
 
 ### 2.2 What stays internal
 
@@ -150,8 +103,8 @@ External component authors need to import types and composables from the platfor
 ### 2.3 SDK package structure
 
 ```
-packages/sdk/
-  package.json          ← name: @openclaw-canvas-web/sdk
+packages/a2ui-sdk/
+  package.json          ← name: @haliphax-openclaw/a2ui-sdk
   src/
     types.ts            ← A2UISurfaceState, DataSource, FieldFilter, AggregateSpec, ComponentRegistration
     composables/
@@ -168,14 +121,14 @@ packages/sdk/
 
 ### 2.4 Internal codebase migration
 
-After extraction, the main app imports from `@openclaw-canvas-web/sdk` instead of relative paths. This is a refactor — no behavior change. Use TypeScript path aliases during development so the monorepo resolves locally.
+After extraction, the main app imports from `@haliphax-openclaw/a2ui-sdk` instead of relative paths. This is a refactor — no behavior change. Use TypeScript path aliases during development so the monorepo resolves locally.
 
 ### 2.5 Component registration contract
 
 External packages export a `PackageDefinition`:
 
 ```typescript
-// @openclaw-canvas-web/sdk/types.ts
+// @haliphax-openclaw/a2ui-sdk/types.ts
 import type { Component } from 'vue'
 
 export interface ComponentRegistration {
@@ -223,7 +176,7 @@ External catalog packages declare themselves via an `openclaw-canvas-web` field 
   },
   "peerDependencies": {
     "vue": "^3.5.0",
-    "@openclaw-canvas-web/sdk": "^0.1.0"
+    "@haliphax-openclaw/a2ui-sdk": "^0.1.0"
   }
 }
 ```
@@ -240,8 +193,8 @@ Catalog packages don't need to be published to npm. For local development and fi
 ```json
 {
   "dependencies": {
-    "@openclaw-canvas-web/sdk": "file:./packages/sdk",
-    "@openclaw-canvas-web/extended": "file:./packages/extended"
+    "@haliphax-openclaw/a2ui-sdk": "file:./packages/a2ui-sdk",
+    "@haliphax-openclaw/a2ui-catalog-extended": "file:./packages/a2ui-catalog-extended"
   }
 }
 ```
@@ -295,15 +248,15 @@ Returns the list of available catalogs and their component names. Used by agents
 {
   "catalogs": [
     {
-      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/basic",
+      "catalogId": "@haliphax-openclaw/a2ui-catalog-basic",
       "components": ["Column", "Row", "Text", "Button", "Image", "Select", "MultiSelect", "Checkbox", "Slider", "Divider", "Tabs"]
     },
     {
-      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/extended",
+      "catalogId": "@haliphax-openclaw/a2ui-catalog-extended",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs"]
     },
     {
-      "catalogId": "https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all",
+      "catalogId": "@haliphax-openclaw/a2ui-catalog-all",
       "components": ["Column", "Row", "Text", "Button", "Image", "Stack", "Spacer", "Select", "MultiSelect", "Table", "Checkbox", "ProgressBar", "Slider", "Badge", "Divider", "Repeat", "Accordion", "Tabs", "BarChart", "LineChart", "PieChart"]
     }
   ]
@@ -371,9 +324,9 @@ const resolvedComponent = computed(() => {
 
 The `createSurface` command already stores `catalogId` on the surface (from the v0.9 upgrade plan §5.2). The resolution logic uses it:
 
-- `catalogId` omitted → defaults to `https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all` (all installed components)
+- `catalogId` omitted → defaults to `@haliphax-openclaw/a2ui-catalog-all` (all installed components)
 - `catalogId` set to a specific URI → only components assigned to that catalog by server config
-- `catalogId` set to `https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all` → all installed components available (useful for development)
+- `catalogId` set to `@haliphax-openclaw/a2ui-catalog-all` → all installed components available (useful for development)
 
 This is stored in Vuex on `A2UISurfaceState`:
 
@@ -491,7 +444,7 @@ A valid A2UI catalog component is a Vue 3 component that:
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource } from '@openclaw-canvas-web/sdk'
+import { useDataSource } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UIBarChart',
@@ -528,7 +481,7 @@ export default defineComponent({
 
 ```typescript
 // index.ts — the entry point referenced in package.json openclaw-canvas-web.entry
-import type { PackageDefinition } from '@openclaw-canvas-web/sdk'
+import type { PackageDefinition } from '@haliphax-openclaw/a2ui-sdk'
 import BarChart from './BarChart.vue'
 import LineChart from './LineChart.vue'
 
@@ -644,11 +597,11 @@ The following components are custom extensions (not in the A2UI basic catalog) a
 
 ### Step 1: Create SDK package skeleton
 
-Create `packages/sdk/` with `package.json`, `tsconfig.json`, and barrel exports. Copy types and composables from the main app. Set up TypeScript path aliases so the main app can import from `@openclaw-canvas-web/sdk` during development.
+Create `packages/a2ui-sdk/` with `package.json`, `tsconfig.json`, and barrel exports. Copy types and composables from the main app. Set up TypeScript path aliases so the main app can import from `@haliphax-openclaw/a2ui-sdk` during development.
 
 ### Step 2: Migrate internal imports
 
-Update all built-in components and composables to import from `@openclaw-canvas-web/sdk` instead of relative paths. Verify no behavior change.
+Update all built-in components and composables to import from `@haliphax-openclaw/a2ui-sdk` instead of relative paths. Verify no behavior change.
 
 ### Step 3: Implement catalog discovery
 
@@ -668,7 +621,7 @@ Add `catalogId` to `A2UISurfaceState`. Update `createSurface` handling in the se
 
 ### Step 7: Extract Badge as test catalog
 
-Create a test package `packages/test-catalog/` that exports Badge as a component package using the SDK. Install it locally. Add it to a test catalog via server config. Verify it renders correctly when referenced from a surface with the matching `catalogId`.
+Create a test package `packages/a2ui-catalog-extended/` that exports Badge as a component package using the SDK. Install it locally. Add it to a test catalog via server config. Verify it renders correctly when referenced from a surface with the matching `catalogId`.
 
 ### Step 8: Extract Table as complex test
 
@@ -689,13 +642,13 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 
 | File | Change |
 |---|---|
-| `packages/sdk/` | New — SDK package |
-| `packages/sdk/package.json` | New |
-| `packages/sdk/src/types.ts` | New — extracted from `store/a2ui.ts` + new `PackageDefinition` |
-| `packages/sdk/src/composables/*.ts` | New — extracted from `src/client/composables/` |
-| `packages/sdk/src/filters.ts` | New — extracted from `services/filter-engine.ts` |
-| `packages/sdk/src/ws.ts` | New — thin event sender wrapper |
-| `packages/sdk/src/theme.ts` | New — token constants |
+| `packages/a2ui-sdk/` | New — SDK package |
+| `packages/a2ui-sdk/package.json` | New |
+| `packages/a2ui-sdk/src/types.ts` | New — extracted from `store/a2ui.ts` + new `PackageDefinition` |
+| `packages/a2ui-sdk/src/composables/*.ts` | New — extracted from `src/client/composables/` |
+| `packages/a2ui-sdk/src/filters.ts` | New — extracted from `services/filter-engine.ts` |
+| `packages/a2ui-sdk/src/ws.ts` | New — thin event sender wrapper |
+| `packages/a2ui-sdk/src/theme.ts` | New — token constants |
 | `src/server/services/catalog-registry.ts` | New — discovery mechanism |
 | `src/build/vite-plugin-catalogs.ts` | New — Vite virtual module plugin |
 | `vite.config.ts` | Modified — add catalog plugin |
@@ -706,7 +659,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 | `src/client/composables/*.ts` | Modified — re-export from SDK |
 | `src/client/services/filter-engine.ts` | Modified — re-export from SDK |
 | `src/server/routes/catalogs.ts` | New — `/api/catalogs` endpoint |
-| `packages/test-catalog/` | New — test extraction package |
+| `packages/a2ui-catalog-extended/` | New — test extraction package |
 
 ---
 
@@ -717,7 +670,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 - Inline catalogs from clients (spec feature, not needed for our use case)
 - Validation loop (`VALIDATION_FAILED` error feedback) — separate effort per v0.9 upgrade spec §5.4
 - ~~`formatString` interpolation — separate effort per v0.9 upgrade spec §5.5~~ ✅
-- Publishing `@openclaw-canvas-web/sdk` to npm (future — start with local monorepo)
+- Publishing `@haliphax-openclaw/a2ui-sdk` to npm (future — start with local monorepo)
 
 ---
 
@@ -726,7 +679,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 | Risk | Likelihood | Mitigation |
 |---|---|---|
 | SDK extraction breaks internal components | Medium | Step 2 is a pure refactor — run full test suite before proceeding |
-| External components break when SDK changes | Medium | Semver the SDK; peer dependency on `@openclaw-canvas-web/sdk` |
+| External components break when SDK changes | Medium | Semver the SDK; peer dependency on `@haliphax-openclaw/a2ui-sdk` |
 | Vite virtual module doesn't work with HMR | Low | Virtual modules are well-supported in Vite; fallback to static codegen |
 | Component name collisions across catalogs | Low | Built-in always wins; `catalogId` restriction disambiguates; warn at startup |
 | External components access Vuex directly instead of via SDK | Medium | Document the contract clearly; SDK composables are the supported API |
