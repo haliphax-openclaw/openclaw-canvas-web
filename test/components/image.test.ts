@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils'
 
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import A2UIImage from '../packages/a2ui-catalog-basic/src/A2UIImage.vue'
+import A2UIImage from '../../packages/a2ui-catalog-basic/src/A2UIImage.vue'
 
 describe('A2UIImage', () => {
   it('renders img with src and alt', () => {

@@ -1,13 +1,13 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest'
 
-vi.mock('../src/client/services/ws-client', () => ({
+vi.mock('../../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
 vi.mock('virtual:openclaw-catalogs', async () => {
-  const A2UIText = (await import('../packages/a2ui-catalog-basic/src/A2UIText.vue')).default
-  const A2UIButton = (await import('../packages/a2ui-catalog-basic/src/A2UIButton.vue')).default
-  const A2UISelect = (await import('../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue')).default
+  const A2UIText = (await import('../../packages/a2ui-catalog-basic/src/A2UIText.vue')).default
+  const A2UIButton = (await import('../../packages/a2ui-catalog-basic/src/A2UIButton.vue')).default
+  const A2UISelect = (await import('../../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue')).default
   return {
     catalogComponents: {
       Text: { component: A2UIText },
@@ -16,7 +16,7 @@ vi.mock('virtual:openclaw-catalogs', async () => {
     },
   }
 })
-vi.mock('../src/client/services/deep-link', () => ({
+vi.mock('../../src/client/services/deep-link', () => ({
   parseOpenclawUrl: vi.fn(),
   executeDeepLink: vi.fn().mockResolvedValue({ ok: true }),
   fetchCanvasConfig: vi.fn().mockResolvedValue({ skipConfirmation: false, agents: ['main', 'dev'], allowedAgentIds: [] }),
@@ -25,11 +25,11 @@ vi.mock('../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import A2UIText from '../packages/a2ui-catalog-basic/src/A2UIText.vue'
-import A2UIButton from '../packages/a2ui-catalog-basic/src/A2UIButton.vue'
-import A2UISelect from '../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
-import A2UINode from '../src/client/components/A2UINode.vue'
-import { mountWith } from './__helpers__/mount'
+import A2UIText from '../../packages/a2ui-catalog-basic/src/A2UIText.vue'
+import A2UIButton from '../../packages/a2ui-catalog-basic/src/A2UIButton.vue'
+import A2UISelect from '../../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
+import A2UINode from '../../src/client/components/A2UINode.vue'
+import { mountWith } from '../__helpers__/mount'
 
 describe('A2UINode', () => {
   it('resolves Text component from store', () => {

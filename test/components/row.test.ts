@@ -2,18 +2,18 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 
-vi.mock('../src/client/services/ws-client', () => ({
+vi.mock('../../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
 vi.mock('virtual:openclaw-catalogs', async () => {
-  const A2UIText = (await import('../packages/a2ui-catalog-basic/src/A2UIText.vue')).default
+  const A2UIText = (await import('../../packages/a2ui-catalog-basic/src/A2UIText.vue')).default
   return {
     catalogComponents: {
       Text: { component: A2UIText },
     },
   }
 })
-vi.mock('../src/client/services/deep-link', () => ({
+vi.mock('../../src/client/services/deep-link', () => ({
   parseOpenclawUrl: vi.fn(),
   executeDeepLink: vi.fn().mockResolvedValue({ ok: true }),
   fetchCanvasConfig: vi.fn().mockResolvedValue({ skipConfirmation: false, agents: ['main', 'dev'], allowedAgentIds: [] }),
@@ -22,9 +22,9 @@ vi.mock('../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import A2UIStack from '../packages/a2ui-catalog-extended/src/A2UIStack.vue'
-import A2UINode from '../src/client/components/A2UINode.vue'
-import { makeStore } from './__helpers__/mount'
+import A2UIRow from '../../packages/a2ui-catalog-basic/src/A2UIRow.vue'
+import A2UINode from '../../src/client/components/A2UINode.vue'
+import { makeStore } from '../__helpers__/mount'
 
 const surfaces = {
   s1: {
@@ -36,14 +36,14 @@ const surfaces = {
   },
 }
 
-describe('A2UIStack', () => {
+describe('A2UIRow', () => {
   it('renders children', () => {
     const store = makeStore(surfaces)
-    const w = mount(A2UIStack, {
+    const w = mount(A2UIRow, {
       props: { def: { children: ['t1'] }, surfaceId: 's1' },
       global: { plugins: [store], components: { A2UINode } },
     })
-    expect(w.find('.stack').exists()).toBe(true)
+    expect(w.find('.a2ui-row').exists()).toBe(true)
     expect(w.findAll('p')).toHaveLength(1)
   })
 })

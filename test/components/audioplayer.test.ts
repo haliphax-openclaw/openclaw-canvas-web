@@ -2,10 +2,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 
-vi.mock('../src/client/services/ws-client', () => ({
+vi.mock('../../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
-vi.mock('../src/client/services/deep-link', () => ({
+vi.mock('../../src/client/services/deep-link', () => ({
   parseOpenclawUrl: vi.fn(),
   executeDeepLink: vi.fn().mockResolvedValue({ ok: true }),
   fetchCanvasConfig: vi.fn().mockResolvedValue({ skipConfirmation: false, agents: ['main'], allowedAgentIds: [] }),
@@ -14,11 +14,11 @@ vi.mock('../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import { wsClient } from '../src/client/services/ws-client'
+import { wsClient } from '../../src/client/services/ws-client'
 import { registerWsSend } from '@haliphax-openclaw/a2ui-sdk'
 registerWsSend(wsClient.send.bind(wsClient))
 
-import A2UIAudioPlayer from '../packages/a2ui-catalog-basic/src/A2UIAudioPlayer.vue'
+import A2UIAudioPlayer from '../../packages/a2ui-catalog-basic/src/A2UIAudioPlayer.vue'
 
 describe('A2UIAudioPlayer', () => {
   it('renders audio element with src', () => {

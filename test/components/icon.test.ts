@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import A2UIIcon from '../packages/a2ui-catalog-basic/src/A2UIIcon.vue'
+import A2UIIcon from '../../packages/a2ui-catalog-basic/src/A2UIIcon.vue'
 
 describe('A2UIIcon', () => {
   it('renders SVG with correct path from icon map', () => {

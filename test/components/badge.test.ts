@@ -1,12 +1,12 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest'
-import A2UIBadge from '../packages/a2ui-catalog-extended/src/A2UIBadge.vue'
-import { mountWith } from './__helpers__/mount'
+import A2UIBadge from '../../packages/a2ui-catalog-extended/src/A2UIBadge.vue'
+import { mountWith } from '../__helpers__/mount'
 
-vi.mock('../src/client/services/ws-client', () => ({
+vi.mock('../../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
-vi.mock('../src/client/services/deep-link', () => ({
+vi.mock('../../src/client/services/deep-link', () => ({
   parseOpenclawUrl: vi.fn(),
   executeDeepLink: vi.fn().mockResolvedValue({ ok: true }),
   fetchCanvasConfig: vi.fn().mockResolvedValue({ skipConfirmation: false, agents: ['main'], allowedAgentIds: [] }),
