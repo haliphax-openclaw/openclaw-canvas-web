@@ -2,53 +2,6 @@
 
 A cross-platform canvas server for OpenClaw. Serves HTML content, renders A2UI v0.9 surfaces, and provides a WebSocket gateway for agent-driven UI control.
 
-## MCP Server
-
-The canvas server registers as an OpenClaw gateway node, exposing an MCP-compatible tool interface that agents can invoke via `mcporter`. On startup, it connects to the gateway WebSocket, authenticates with Ed25519 signatures, and advertises the following commands:
-
-| Command | Description |
-|---------|-------------|
-| `canvas.present` | Show/present canvas content |
-| `canvas.hide` | Hide the canvas panel |
-| `canvas.navigate` | Navigate to a canvas session/path or external URL |
-| `canvas.eval` | Execute JavaScript in the canvas context |
-| `canvas.snapshot` | Capture the current canvas as a base64 PNG |
-| `canvas.a2ui.push` | Push A2UI surface commands (structured) |
-| `canvas.a2ui.pushJSONL` | Push A2UI JSONL payload (string) |
-| `canvas.a2ui.reset` | Clear A2UI surface state |
-
-Node identity (Ed25519 keypair and device ID) is generated on first run and stored at `~/.openclaw-canvas/node-identity.json`. The gateway URL and auth token are read from environment variables or `openclaw.json`.
-
-## Agent Skill
-
-A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server.
-
-## Monorepo Structure
-
-This project uses npm workspaces. All packages live in `packages/`:
-
-| Package | Description |
-|---------|-------------|
-| `@haliphax-openclaw/a2ui-sdk` | Component SDK — types, composables, filters, event helpers |
-| `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — Badge, Table (proof-of-concept extraction) |
-
-Install all dependencies (including workspace packages) from the repo root:
-
-```bash
-npm install
-```
-
-npm automatically symlinks workspace packages into `node_modules/`, so cross-package imports resolve locally during development.
-
-### Adding a new catalog package
-
-1. Create a directory under `packages/` (e.g., `packages/a2ui-my-catalog/`)
-2. Add a `package.json` with the `openclaw-canvas-web` field pointing to your `catalog.json` and entry module
-3. Run `npm install` at the root to link the new workspace
-4. Restart the dev server — the Vite catalog plugin discovers it automatically
-
-See [docs/creating-catalog-packages.md](docs/creating-catalog-packages.md) for the full guide on authoring catalog packages.
-
 ## Quick Start
 
 ```bash
@@ -58,44 +11,6 @@ OPENCLAW_CANVAS_PORT=9999 npm start
 ```
 
 Open `http://localhost:9999` in a browser.
-
-## Canvas Session URLs
-
-Each canvas session is accessed via its session ID in the URL path:
-
-```
-http://<host>:<port>/<sessionId>/
-```
-
-For example:
-- `http://localhost:3456/main/` — the default `main` session
-- `http://localhost:3456/developer/` — the `developer` session
-
-When running behind a reverse proxy with a base path (e.g., `OPENCLAW_CANVAS_BASE_PATH=/canvas`):
-- `https://example.com/canvas/developer/`
-
-The root path (`/`) redirects to `/main/` by default.
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Run server + Vite dev server concurrently |
-| `npm run build` | Build the Vue SPA to `dist/client/` |
-| `npm start` | Start the production server |
-| `npm test` | Run tests (vitest) |
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENCLAW_CANVAS_HOST` | `0.0.0.0` | Bind address |
-| `OPENCLAW_CANVAS_PORT` | `3456` | Listen port |
-| `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
-| `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
-| `OPENCLAW_CANVAS_A2UI_DB` | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence |
-| `OPENCLAW_GATEWAY_WS_URL` | `ws://127.0.0.1:18789` | Gateway WebSocket URL for deep link and file-spawn proxying |
-| `OPENCLAW_GATEWAY_TOKEN` | *(from openclaw.json)* | Gateway auth token for agent deep links and file-spawn (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
 
 ## Architecture
 
@@ -136,6 +51,93 @@ src/
 │   └── url-schemes.ts        # Shared URL scheme parser (openclaw://, openclaw-fileprompt://, openclaw-canvas://)
 test/                          # vitest tests
 ```
+
+## MCP Server
+
+The canvas server registers as an OpenClaw gateway node, exposing an MCP-compatible tool interface that agents can invoke via `mcporter`. On startup, it connects to the gateway WebSocket, authenticates with Ed25519 signatures, and advertises the following commands:
+
+| Command | Description |
+|---------|-------------|
+| `canvas.present` | Show/present canvas content |
+| `canvas.hide` | Hide the canvas panel |
+| `canvas.navigate` | Navigate to a canvas session/path or external URL |
+| `canvas.eval` | Execute JavaScript in the canvas context |
+| `canvas.snapshot` | Capture the current canvas as a base64 PNG |
+| `canvas.a2ui.push` | Push A2UI surface commands (structured) |
+| `canvas.a2ui.pushJSONL` | Push A2UI JSONL payload (string) |
+| `canvas.a2ui.reset` | Clear A2UI surface state |
+
+Node identity (Ed25519 keypair and device ID) is generated on first run and stored at `~/.openclaw-canvas/node-identity.json`. The gateway URL and auth token are read from environment variables or `openclaw.json`.
+
+## Agent Skill
+
+A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server.
+
+## Monorepo Structure
+
+This project uses npm workspaces. All packages live in `packages/`:
+
+| Package | Description |
+|---------|-------------|
+| `@haliphax-openclaw/a2ui-sdk` | Component SDK — types, composables, filters, event helpers |
+| `@haliphax-openclaw/a2ui-catalog-basic` | Basic catalog — Column, Row, Text, Button, Image, Tabs, Divider, Slider, Checkbox, ChoicePicker |
+| `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — Badge, Table, Stack, Spacer, ProgressBar, Repeat, Accordion |
+| `@haliphax-openclaw/a2ui-catalog-all` | All catalog — re-exports basic + extended |
+
+Install all dependencies (including workspace packages) from the repo root:
+
+```bash
+npm install
+```
+
+npm automatically symlinks workspace packages into `node_modules/`, so cross-package imports resolve locally during development.
+
+### Adding a new catalog package
+
+1. Create a directory under `packages/` (e.g., `packages/a2ui-my-catalog/`)
+2. Add a `package.json` with the `openclaw-canvas-web` field pointing to your `catalog.json` and entry module
+3. Run `npm install` at the root to link the new workspace
+4. Restart the dev server — the Vite catalog plugin discovers it automatically
+
+See [docs/creating-catalog-packages.md](docs/creating-catalog-packages.md) for the full guide on authoring catalog packages.
+
+## Canvas Session URLs
+
+Each canvas session is accessed via its session ID in the URL path:
+
+```
+http://<host>:<port>/<sessionId>/
+```
+
+For example:
+- `http://localhost:3456/main/` — the default `main` session
+- `http://localhost:3456/developer/` — the `developer` session
+
+When running behind a reverse proxy with a base path (e.g., `OPENCLAW_CANVAS_BASE_PATH=/canvas`):
+- `https://example.com/canvas/developer/`
+
+The root path (`/`) redirects to `/main/` by default.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Run server + Vite dev server concurrently |
+| `npm run build` | Build the Vue SPA to `dist/client/` |
+| `npm start` | Start the production server |
+| `npm test` | Run tests (vitest) |
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENCLAW_CANVAS_HOST` | `0.0.0.0` | Bind address |
+| `OPENCLAW_CANVAS_PORT` | `3456` | Listen port |
+| `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
+| `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
+| `OPENCLAW_CANVAS_A2UI_DB` | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence |
+| `OPENCLAW_GATEWAY_WS_URL` | `ws://127.0.0.1:18789` | Gateway WebSocket URL for deep link and file-spawn proxying |
+| `OPENCLAW_GATEWAY_TOKEN` | *(from openclaw.json)* | Gateway auth token for agent deep links and file-spawn (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
 
 ## Gateway Protocol
 
