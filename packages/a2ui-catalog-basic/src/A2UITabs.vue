@@ -65,12 +65,7 @@ export default defineComponent({
         child: t.child ?? (Array.isArray(t.children) ? t.children[0] : null),
       }))
     })
-    const pos = computed(() => {
-      const p = (props.def as any).position ?? 'top'
-      // left/right removed from catalog; coerce legacy payloads
-      if (p === 'left' || p === 'right') return 'top'
-      return p
-    })
+    const pos = computed(() => (props.def as any).position ?? 'top')
     const height = computed(() => (props.def as any).height ?? 'auto')
     const activeIndex = ref((props.def as any).active ?? 0)
 
