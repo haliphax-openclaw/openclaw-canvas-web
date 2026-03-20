@@ -1,9 +1,14 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
+import { catalogPlugin } from './src/build/vite-plugin-catalogs.js'
 
 export default defineConfig({
-  plugins: [tailwindcss(), vue()],
+  plugins: [
+    tailwindcss(),
+    vue(),
+    catalogPlugin({ projectRoot: __dirname }),
+  ],
   base: process.env.VITE_BASE || '/',
   root: 'src/client',
   build: {
