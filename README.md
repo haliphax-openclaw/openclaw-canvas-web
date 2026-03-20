@@ -28,12 +28,12 @@ packages/
 │   ├── catalog.json              # JSON Schema catalog definition
 │   └── src/
 │       ├── index.ts              # PackageDefinition (Column, Row, Text, Button, Image, Tabs, Divider, Slider, Checkbox, ChoicePicker)
-│       └── A2UI*.vue             # Component implementations
+│       └── *.vue                 # Component implementations
 ├── a2ui-catalog-extended/        # @haliphax-openclaw/a2ui-catalog-extended
 │   ├── catalog.json
 │   └── src/
 │       ├── index.ts              # PackageDefinition (Badge, Table, Stack, Spacer, ProgressBar, Repeat, Accordion)
-│       └── A2UI*.vue
+│       └── *.vue
 ├── a2ui-catalog-all/             # @haliphax-openclaw/a2ui-catalog-all
 │   ├── catalog.json
 │   └── src/
@@ -69,29 +69,29 @@ src/
 │       ├── file-spawn.ts         # POST /api/file-spawn → read prompt → sessions_spawn
 │       └── scaffold.ts           # GET /scaffold
 ├── client/
-│   ├── main.ts                   # Vue app entry
+│   ├── main.ts                   # Vue app entry, wires registerWsSend
 │   ├── router.ts                 # Vue Router
 │   ├── virtual-openclaw-catalogs.d.ts  # Type declaration for virtual module
 │   ├── views/
 │   │   ├── CanvasView.vue        # Main canvas — iframe, A2UI, external URLs
 │   │   └── ScaffoldView.vue      # Placeholder when no index.html
 │   ├── components/
-│   │   ├── A2UINode.vue          # Component resolver (catalog-based, two-tier lookup)
+│   │   ├── A2UINode.vue          # Component resolver (catalog-based two-tier lookup)
 │   │   ├── A2UIRenderer.vue      # Surface renderer (DaisyUI theming via data-theme)
-│   │   ├── DeepLinkConfirm.vue   # Deep link confirmation dialog
-│   │   └── A2UI*.vue             # Legacy component copies (to be cleaned up)
+│   │   └── DeepLinkConfirm.vue   # Deep link confirmation dialog
 │   ├── store/
 │   │   ├── index.ts              # Vuex root
 │   │   └── a2ui.ts               # A2UI surface state (surfaces, components, dataModel, theme, catalogId)
-│   ├── composables/              # Re-exports from @haliphax-openclaw/a2ui-sdk
 │   ├── services/
 │   │   ├── ws-client.ts          # Browser WebSocket client
 │   │   ├── url-rewriter.ts       # openclaw-canvas:// URL rewriter
-│   │   ├── filter-engine.ts      # Re-exports from SDK
-│   │   └── deep-link.ts
+│   │   └── deep-link.ts          # Deep link handling
+│   ├── utils/
+│   │   ├── format-string.ts      # String formatting utilities
+│   │   └── url-schemes.ts        # URL scheme parser (openclaw://, openclaw-fileprompt://, openclaw-canvas://)
 │   └── styles/
 │       └── tailwind.css          # Tailwind + DaisyUI (all themes)
-test/                             # vitest tests
+test/                             # vitest tests (427 tests across 41 files)
 ```
 
 ## Monorepo Structure
