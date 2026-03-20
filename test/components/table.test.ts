@@ -147,3 +147,60 @@ describe('A2UITable sorting', () => {
     expect(valsDesc).toEqual(['3', '1', ''])
   })
 })
+
+describe('A2UITable static sorting', () => {
+  it('sorts static rows ascending by clicking a column header', async () => {
+    const w = mountWith(A2UITable, {
+      def: { headers: ['Name', 'Score'], rows: [['Charlie', 30], ['Alice', 25], ['Bob', 35]], sortable: true },
+      surfaceId: 's1', componentId: 't1',
+    })
+
+    // Initially unsorted
+    expect(w.findAll('tbody tr td:first-child').map(td => td.text())).toEqual(['Charlie', 'Alice', 'Bob'])
+
+    // Click Name header → ascending
+    await w.findAll('th')[0].trigger('click')
+    expect(w.findAll('th')[0].text()).toContain('⬆')
+    expect(w.findAll('tbody tr td:first-child').map(td => td.text())).toEqual(['Alice', 'Bob', 'Charlie'])
+  })
+
+  it('cycles static sort: unsorted → asc → desc → unsorted', async () => {
+    const w = mountWith(A2UITable, {
+      def: { headers: ['Name', 'Score'], rows: [['Charlie', 30], ['Alice', 25], ['Bob', 35]], sortable: true },
+      surfaceId: 's1', componentId: 't1',
+    })
+
+    // Click Score header → ascending
+    await w.findAll('th')[1].trigger('click')
+    expect(w.findAll('tbody tr td:nth-child(2)').map(td => td.text())).toEqual(['25', '30', '35'])
+
+    // Click again → descending
+    await w.findAll('th')[1].trigger('click')
+    expect(w.findAll('tbody tr td:nth-child(2)').map(td => td.text())).toEqual(['35', '30', '25'])
+
+    // Click again → unsorted (original order)
+    await w.findAll('th')[1].trigger('click')
+    expect(w.findAll('tbody tr td:nth-child(2)').map(td => td.text())).toEqual(['30', '25', '35'])
+  })
+
+  it('does not sort static rows when sortable is false', async () => {
+    const w = mountWith(A2UITable, {
+      def: { headers: ['Name'], rows: [['Charlie'], ['Alice'], ['Bob']], sortable: false },
+      surfaceId: 's1', componentId: 't1',
+    })
+
+    await w.findAll('th')[0].trigger('click')
+    // Should remain in original order
+    expect(w.findAll('tbody tr td').map(td => td.text())).toEqual(['Charlie', 'Alice', 'Bob'])
+  })
+
+  it('sorts static numeric values numerically, not lexicographically', async () => {
+    const w = mountWith(A2UITable, {
+      def: { headers: ['Val'], rows: [[9], [100], [20]], sortable: true },
+      surfaceId: 's1', componentId: 't1',
+    })
+
+    await w.findAll('th')[0].trigger('click') // asc
+    expect(w.findAll('tbody tr td').map(td => td.text())).toEqual(['9', '20', '100'])
+  })
+})

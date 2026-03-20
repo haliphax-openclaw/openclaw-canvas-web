@@ -47,6 +47,15 @@ export default defineComponent({
       if (binding.value && filteredRows.value) {
         return filteredRows.value as Record<string, unknown>[]
       }
+      // Static mode: convert array-of-arrays to array-of-objects using headers as keys
+      const staticRows = (props.def as any).rows as unknown[][] | undefined
+      if (staticRows?.length && headers.value.length) {
+        return staticRows.map((row: unknown[]) => {
+          const obj: Record<string, unknown> = {}
+          headers.value.forEach((h: string, i: number) => { obj[h] = row[i] })
+          return obj
+        })
+      }
       return [] as Record<string, unknown>[]
     })
 
@@ -59,9 +68,12 @@ export default defineComponent({
     }
 
     const displayRows = computed(() => {
-      if (binding.value && filteredRows.value) {
-        const cols = headers.value
+      const cols = headers.value
+      if (cols.length && sortedRows.value.length) {
         return sortedRows.value.map((r: any) => cols.map((c: string) => formatCell(c, r[c])))
+      }
+      if (binding.value && filteredRows.value) {
+        return []
       }
       return (props.def as any).rows ?? []
     })

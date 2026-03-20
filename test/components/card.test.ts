@@ -9,9 +9,11 @@ vi.mock('../../src/client/services/ws-client', () => ({
 }))
 vi.mock('virtual:openclaw-catalogs', async () => {
   const A2UIText = (await import('../../packages/a2ui-catalog-basic/src/A2UIText.vue')).default
+  const A2UIButton = (await import('../../packages/a2ui-catalog-basic/src/A2UIButton.vue')).default
   return {
     catalogComponents: {
       Text: { component: A2UIText },
+      Button: { component: A2UIButton },
     },
   }
 })
@@ -38,48 +40,102 @@ function makeStore(surfaces: Record<string, any> = {}) {
   })
 }
 
+const baseSurface = { root: null, dataModel: {}, sources: {}, filters: {} }
+
+function mountCard(def: Record<string, any>, components: Record<string, any> = {}) {
+  const surfaces = { s1: { ...baseSurface, components } }
+  const store = makeStore(surfaces)
+  return mount(A2UICard, {
+    props: { def, surfaceId: 's1', componentId: 'card1' },
+    global: { plugins: [store], components: { A2UINode } },
+  })
+}
+
 describe('A2UICard', () => {
   it('renders card wrapper', () => {
-    const surfaces = {
-      s1: {
-        components: { t1: { component: 'Text', text: 'Card content' } },
-        root: null, dataModel: {}, sources: {}, filters: {},
-      },
-    }
-    const store = makeStore(surfaces)
-    const w = mount(A2UICard, {
-      props: { def: { child: 't1' }, surfaceId: 's1', componentId: 'card1' },
-      global: { plugins: [store], components: { A2UINode } },
-    })
+    const w = mountCard({ child: 't1' }, { t1: { component: 'Text', text: 'Card content' } })
     expect(w.find('.a2ui-card').exists()).toBe(true)
     expect(w.find('.card-body').exists()).toBe(true)
   })
 
   it('renders child component inside card body', () => {
-    const surfaces = {
-      s1: {
-        components: { t1: { component: 'Text', text: 'Hello Card' } },
-        root: null, dataModel: {}, sources: {}, filters: {},
-      },
-    }
-    const store = makeStore(surfaces)
-    const w = mount(A2UICard, {
-      props: { def: { child: 't1' }, surfaceId: 's1', componentId: 'card1' },
-      global: { plugins: [store], components: { A2UINode } },
-    })
+    const w = mountCard({ child: 't1' }, { t1: { component: 'Text', text: 'Hello Card' } })
     expect(w.text()).toContain('Hello Card')
   })
 
   it('renders empty card body when no child', () => {
-    const surfaces = {
-      s1: { components: {}, root: null, dataModel: {}, sources: {}, filters: {} },
-    }
-    const store = makeStore(surfaces)
-    const w = mount(A2UICard, {
-      props: { def: {}, surfaceId: 's1', componentId: 'card1' },
-      global: { plugins: [store], components: { A2UINode } },
-    })
+    const w = mountCard({})
     expect(w.find('.card-body').exists()).toBe(true)
     expect(w.find('.card-body').text()).toBe('')
+  })
+
+  it('renders card with default shadow-sm class', () => {
+    const w = mountCard({})
+    expect(w.find('.card').classes()).toContain('shadow-sm')
+  })
+
+  it('renders card-title when title prop is provided', () => {
+    const w = mountCard({ title: 'My Title' })
+    const h2 = w.find('h2.card-title')
+    expect(h2.exists()).toBe(true)
+    expect(h2.text()).toBe('My Title')
+  })
+
+  it('does not render card-title when title is omitted', () => {
+    const w = mountCard({})
+    expect(w.find('h2.card-title').exists()).toBe(false)
+  })
+
+  it('renders figure with image when image prop is provided', () => {
+    const w = mountCard({ image: 'https://example.com/img.png', imageAlt: 'Test image' })
+    expect(w.find('figure').exists()).toBe(true)
+    const img = w.find('figure img')
+    expect(img.exists()).toBe(true)
+    expect(img.attributes('src')).toBe('https://example.com/img.png')
+    expect(img.attributes('alt')).toBe('Test image')
+  })
+
+  it('does not render figure when image is omitted', () => {
+    const w = mountCard({})
+    expect(w.find('figure').exists()).toBe(false)
+  })
+
+  it('renders actions in card-actions div', () => {
+    const w = mountCard(
+      { actions: ['b1', 'b2'] },
+      {
+        b1: { component: 'Button', label: 'OK' },
+        b2: { component: 'Button', label: 'Cancel' },
+      },
+    )
+    const actionsDiv = w.find('.card-actions.justify-end')
+    expect(actionsDiv.exists()).toBe(true)
+    expect(actionsDiv.text()).toContain('OK')
+    expect(actionsDiv.text()).toContain('Cancel')
+  })
+
+  it('applies variant classes (neutral)', () => {
+    const w = mountCard({ variant: 'neutral' })
+    const card = w.find('.card')
+    expect(card.classes()).toContain('bg-neutral')
+    expect(card.classes()).toContain('text-neutral-content')
+  })
+
+  it('applies lg:card-side class when side is true', () => {
+    const w = mountCard({ side: true })
+    expect(w.find('.card').classes()).toContain('lg:card-side')
+  })
+
+  it('applies card-compact class when compact is true', () => {
+    const w = mountCard({ compact: true })
+    expect(w.find('.card').classes()).toContain('card-compact')
+  })
+
+  it('applies correct shadow class', () => {
+    const none = mountCard({ shadow: 'none' })
+    expect(none.find('.card').classes()).toContain('shadow-none')
+
+    const xl = mountCard({ shadow: 'xl' })
+    expect(xl.find('.card').classes()).toContain('shadow-xl')
   })
 })
