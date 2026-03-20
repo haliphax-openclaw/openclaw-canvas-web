@@ -17,6 +17,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
 import A2UIText from '../packages/a2ui-catalog-basic/src/A2UIText.vue'
+import { mountWith } from './__helpers__/mount'
 
 function makeStore(surfaces: Record<string, any> = {}) {
   return createStore({
@@ -38,6 +39,28 @@ const baseSurface = (rows: Record<string, unknown>[]) => ({
     sources: { items: { fields: ['name', 'amount'], rows } },
     filters: {},
   },
+})
+
+describe('A2UIText', () => {
+  it('renders text in a p tag by default', () => {
+    const w = mountWith(A2UIText, { def: { text: 'Hello' }, surfaceId: 's1', componentId: 'c1' })
+    expect(w.find('p').text()).toBe('Hello')
+  })
+
+  it('renders literalString form', () => {
+    const w = mountWith(A2UIText, { def: { text: { literalString: 'Lit' } }, surfaceId: 's1', componentId: 'c1' })
+    expect(w.find('p').text()).toBe('Lit')
+  })
+
+  it('uses variant to pick tag', () => {
+    const w = mountWith(A2UIText, { def: { text: 'Title', variant: 'h1' }, surfaceId: 's1', componentId: 'c1' })
+    expect(w.find('h1').text()).toBe('Title')
+  })
+
+  it('maps label hint to span', () => {
+    const w = mountWith(A2UIText, { def: { text: 'lbl', variant: 'label' }, surfaceId: 's1', componentId: 'c1' })
+    expect(w.find('span').text()).toBe('lbl')
+  })
 })
 
 describe('A2UIText data binding', () => {

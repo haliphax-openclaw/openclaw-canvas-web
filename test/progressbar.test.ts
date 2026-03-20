@@ -17,6 +17,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
 import A2UIProgressBar from '../packages/a2ui-catalog-extended/src/A2UIProgressBar.vue'
+import { mountWith } from './__helpers__/mount'
 
 function makeStore(surfaces: Record<string, any> = {}) {
   return createStore({
@@ -38,6 +39,19 @@ const baseSurface = (rows: Record<string, unknown>[]) => ({
     sources: { content: { fields: ['progress_label', 'progress_value'], rows } },
     filters: {},
   },
+})
+
+describe('A2UIProgressBar', () => {
+  it('renders with clamped width', () => {
+    const w = mountWith(A2UIProgressBar, { def: { value: 75, label: 'Loading' }, surfaceId: 's1', componentId: 'pb1' })
+    expect(w.find('progress').attributes('value')).toBe('75')
+    expect(w.find('.a2ui-progress-label').text()).toBe('Loading')
+  })
+
+  it('clamps value to 0-100', () => {
+    const w = mountWith(A2UIProgressBar, { def: { value: 150 }, surfaceId: 's1', componentId: 'pb1' })
+    expect(w.find('progress').attributes('value')).toBe('100')
+  })
 })
 
 describe('A2UIProgressBar data binding', () => {

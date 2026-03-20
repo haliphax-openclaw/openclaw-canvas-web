@@ -1,8 +1,5 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { createStore } from 'vuex'
-import { a2uiModule } from '../src/client/store/a2ui'
 
 vi.mock('../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
@@ -17,19 +14,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
 import A2UITable from '../packages/a2ui-catalog-extended/src/A2UITable.vue'
-import A2UIRepeat from '../packages/a2ui-catalog-extended/src/A2UIRepeat.vue'
-import A2UIText from '../packages/a2ui-catalog-basic/src/A2UIText.vue'
-
-function makeStore(surfaces: Record<string, any> = {}) {
-  return createStore({
-    state: { session: { active: 'main', sessions: ['main'] }, panel: { visible: true } },
-    modules: { a2ui: { ...a2uiModule, state: () => ({ surfaces }) } },
-  })
-}
-
-function mountWith(component: any, props: Record<string, any>, surfaces: Record<string, any> = {}) {
-  return mount(component, { props, global: { plugins: [makeStore(surfaces)] } })
-}
+import { mountWith } from './__helpers__/mount'
 
 const tableSurfaces = {
   s1: {
@@ -49,6 +34,24 @@ const tableSurfaces = {
     filters: {},
   },
 }
+
+describe('A2UITable', () => {
+  it('renders headers and rows', () => {
+    const w = mountWith(A2UITable, {
+      def: { headers: ['Name', 'Age'], rows: [['Alice', '30'], ['Bob', '25']] },
+      surfaceId: 's1', componentId: 't1',
+    })
+    expect(w.findAll('th')).toHaveLength(2)
+    expect(w.findAll('tbody tr')).toHaveLength(2)
+    expect(w.findAll('td')[0].text()).toBe('Alice')
+  })
+
+  it('renders empty table when no data', () => {
+    const w = mountWith(A2UITable, { def: {}, surfaceId: 's1', componentId: 't1' })
+    expect(w.findAll('th')).toHaveLength(0)
+    expect(w.findAll('tbody tr')).toHaveLength(0)
+  })
+})
 
 describe('A2UITable sorting', () => {
   it('does not show sort indicators when sortable is false', () => {
@@ -142,81 +145,5 @@ describe('A2UITable sorting', () => {
     await w.findAll('th')[0].trigger('click') // desc
     const valsDesc = w.findAll('tbody tr td').map(td => td.text())
     expect(valsDesc).toEqual(['3', '1', ''])
-  })
-})
-
-describe('A2UIRepeat sorting', () => {
-  const repeatSurfaces = {
-    s1: {
-      components: {}, root: null, dataModel: {},
-      sources: {
-        items: {
-          fields: ['name', 'score'],
-          rows: [
-            { name: 'Charlie', score: 80 },
-            { name: 'Alice', score: 95 },
-            { name: 'Bob', score: 70 },
-          ],
-        },
-      },
-      filters: {},
-    },
-  }
-
-  it('does not show sort dropdown when sortable is false', () => {
-    const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } } },
-      surfaceId: 's1', componentId: 'r1',
-    }, repeatSurfaces)
-    expect(w.find('.a2ui-repeat-sort').exists()).toBe(false)
-  })
-
-  it('shows sort dropdown when sortable is true', () => {
-    const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
-      surfaceId: 's1', componentId: 'r1',
-    }, repeatSurfaces)
-    expect(w.find('.a2ui-repeat-sort select').exists()).toBe(true)
-    const options = w.findAll('.a2ui-repeat-sort select option')
-    expect(options.map(o => o.text())).toEqual(['Unsorted', 'Ascending', 'Descending'])
-  })
-
-  it('sorts items ascending by sortField', async () => {
-    const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
-      surfaceId: 's1', componentId: 'r1',
-    }, repeatSurfaces)
-
-    // Initially unsorted
-    let texts = w.findAllComponents(A2UIText)
-    expect(texts.map(t => t.text())).toEqual(['Charlie', 'Alice', 'Bob'])
-
-    // Select ascending
-    await w.find('.a2ui-repeat-sort select').setValue('asc')
-    texts = w.findAllComponents(A2UIText)
-    expect(texts.map(t => t.text())).toEqual(['Bob', 'Charlie', 'Alice'])
-  })
-
-  it('sorts items descending by sortField', async () => {
-    const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
-      surfaceId: 's1', componentId: 'r1',
-    }, repeatSurfaces)
-
-    await w.find('.a2ui-repeat-sort select').setValue('desc')
-    const texts = w.findAllComponents(A2UIText)
-    expect(texts.map(t => t.text())).toEqual(['Alice', 'Charlie', 'Bob'])
-  })
-
-  it('returns to unsorted when selecting Unsorted', async () => {
-    const w = mountWith(A2UIRepeat, {
-      def: { dataSource: { source: 'items' }, template: { Text: { text: '${name}' } }, sortable: true, sortField: 'score' },
-      surfaceId: 's1', componentId: 'r1',
-    }, repeatSurfaces)
-
-    await w.find('.a2ui-repeat-sort select').setValue('asc')
-    await w.find('.a2ui-repeat-sort select').setValue('')
-    const texts = w.findAllComponents(A2UIText)
-    expect(texts.map(t => t.text())).toEqual(['Charlie', 'Alice', 'Bob'])
   })
 })

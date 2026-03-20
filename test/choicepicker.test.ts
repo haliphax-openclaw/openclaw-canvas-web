@@ -7,23 +7,23 @@ import { a2uiModule } from '../src/client/store/a2ui'
 vi.mock('../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
-
 vi.mock('../src/client/services/deep-link', () => ({
   parseOpenclawUrl: vi.fn(),
   executeDeepLink: vi.fn().mockResolvedValue({ ok: true }),
+  fetchCanvasConfig: vi.fn().mockResolvedValue({ skipConfirmation: false, agents: ['main', 'dev'], allowedAgentIds: [] }),
+  truncateMessage: (msg: string) => msg.length > 200 ? msg.slice(0, 200) + '…' : msg,
+  isOpenclawDeepLink: (url: string) => url.startsWith('openclaw://'),
 }))
-
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
 import { wsClient } from '../src/client/services/ws-client'
-import A2UISelect from '../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
+import { registerWsSend } from '@haliphax-openclaw/a2ui-sdk'
+registerWsSend(wsClient.send.bind(wsClient))
 
-function makeStore(surfaces: Record<string, any> = {}) {
-  return createStore({
-    state: { session: { active: 'main', sessions: ['main'] }, panel: { visible: true } },
-    modules: { a2ui: { ...a2uiModule, state: () => ({ surfaces }) } },
-  })
-}
+import A2UISelect from '../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
+import { mountWith, makeStore } from './__helpers__/mount'
+
+beforeEach(() => { vi.mocked(wsClient.send).mockClear() })
 
 function mountSelect(def: any, surfaces: Record<string, any> = {}) {
   const store = makeStore(surfaces)
@@ -40,7 +40,25 @@ const teamSurface = (rows: any[]) => ({
   },
 })
 
-beforeEach(() => { vi.mocked(wsClient.send).mockClear() })
+describe('A2UISelect', () => {
+  const opts = [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta' }]
+
+  it('renders options', () => {
+    const w = mountWith(A2UISelect, { def: { options: opts, selected: 'a' }, surfaceId: 's1', componentId: 'sel1' })
+    expect(w.findAll('option')).toHaveLength(2)
+  })
+
+  it('sends selectChange on change', async () => {
+    const w = mountWith(A2UISelect, { def: { options: opts, selected: 'a' }, surfaceId: 's1', componentId: 'sel1' })
+    await w.find('select').setValue('b')
+    expect(wsClient.send).toHaveBeenCalledWith(expect.objectContaining({ type: 'a2ui.selectChange', componentId: 'sel1', value: 'b' }))
+  })
+
+  it('renders multi-select when multi is true', () => {
+    const w = mountWith(A2UISelect, { def: { options: opts, multi: true, selected: ['a'] }, surfaceId: 's1', componentId: 'sel2' })
+    expect(w.find('select').attributes('multiple')).toBeDefined()
+  })
+})
 
 describe('A2UISelect optionsFrom', () => {
   describe('static options (backward compat)', () => {
