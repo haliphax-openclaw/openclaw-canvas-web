@@ -356,6 +356,17 @@ Aligned with [A2UI v0.9 basic catalog](https://a2ui.org/specification/v0_9/basic
 {"TextField": {"label": "Code", "value": "", "checks": [{"condition": {"path": "/form/codeValid"}, "message": "Invalid code"}]}}
 ```
 
+**`variant` (v0.9):** `shortText` (default single-line), `longText` (multiline `<textarea>`), `number`, `obscured` (password). Use **`variant`**, not legacy `textFieldType` or a `multiline` flag. For dates/times use **`DateTimeInput`**, not TextField.
+
+**Flat `updateComponents` examples (one field per variant):**
+
+```json
+{"id": "tf1", "component": "TextField", "label": "shortText", "variant": "shortText", "value": ""}
+{"id": "tf2", "component": "TextField", "label": "longText", "variant": "longText", "value": ""}
+{"id": "tf3", "component": "TextField", "label": "number", "variant": "number", "value": "42"}
+{"id": "tf4", "component": "TextField", "label": "obscured", "variant": "obscured", "value": ""}
+```
+
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `label` | `string` \| `{ literalString }` \| `{ path }` | Yes | Visible label; `path` reads from surface `dataModel` |
