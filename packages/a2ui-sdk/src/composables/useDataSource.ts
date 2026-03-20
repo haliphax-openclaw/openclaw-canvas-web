@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { computeAggregate, applyFilters, formatCompact } from '../filters'
-import { formatString, hasTemplateExpressions } from '../utils/format-string'
+import { formatString } from '../utils/format-string'
 
 export function useDataSource(props: { def: Record<string, unknown>; surfaceId: string }) {
   const store = useStore()
@@ -43,7 +43,7 @@ export function useDataSource(props: { def: Record<string, unknown>; surfaceId: 
     const aggs = compoundAggregates.value
     const result: Record<string, unknown> = {}
     for (const [prop, template] of Object.entries(binding.value.map)) {
-      if (hasTemplateExpressions(template)) {
+      if (template.includes('${')) {
         const allKeys: Record<string, unknown> = { ...aggs }
         if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
         const row = filteredRows.value && filteredRows.value.length > 0 ? filteredRows.value[0] : null

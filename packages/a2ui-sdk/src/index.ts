@@ -16,6 +16,6 @@ export type { SortDirection } from './composables/useSortable'
 export { sendEvent, registerWsSend } from './ws'
 
 // Utilities
-export { formatString, hasTemplateExpressions } from './utils/format-string'
+export { formatString } from './utils/format-string'
 export type { FormatStringOptions } from './utils/format-string'
 export { getDataModelValue, resolveDynamicString, resolveDynamicBoolean } from './utils/data-model-resolve'

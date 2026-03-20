@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource, formatString, hasTemplateExpressions } from '@haliphax-openclaw/a2ui-sdk'
+import { useDataSource, formatString } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UIProgressBar',
@@ -21,7 +21,7 @@ export default defineComponent({
 
     function resolveTemplate(raw: unknown): string {
       const str = typeof raw === 'string' ? raw : String(raw ?? '')
-      if (!binding.value || !hasTemplateExpressions(str)) return str
+      if (!binding.value || !str.includes('${')) return str
       const aggs = compoundAggregates.value
       const allKeys: Record<string, unknown> = { ...aggs }
       if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
@@ -33,7 +33,7 @@ export default defineComponent({
 
     const clampedValue = computed(() => {
       const raw = (props.def as any).value
-      const resolved = binding.value && typeof raw === 'string' && hasTemplateExpressions(raw) ? resolveTemplate(raw) : raw
+      const resolved = binding.value && typeof raw === 'string' && raw.includes('${') ? resolveTemplate(raw) : raw
       return Math.min(100, Math.max(0, Number(resolved) || 0))
     })
 

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource, formatString, hasTemplateExpressions } from '@haliphax-openclaw/a2ui-sdk'
+import { useDataSource, formatString } from '@haliphax-openclaw/a2ui-sdk'
 
 const hintMap: Record<string, string> = { h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4', h5: 'h5', h6: 'h6', body: 'p', label: 'span' }
 
@@ -24,7 +24,7 @@ export default defineComponent({
         if (mappedProps.value.text != null) return mappedProps.value.text
         const t = (props.def as any).text
         const raw = t?.literalString ?? t ?? ''
-        if (typeof raw === 'string' && hasTemplateExpressions(raw)) {
+        if (typeof raw === 'string' && raw.includes('${')) {
           const aggs = compoundAggregates.value
           const allKeys: Record<string, unknown> = { ...aggs }
           if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value

@@ -1,29 +1,17 @@
 import { describe, it, expect } from 'vitest'
-import { formatString } from '../packages/a2ui-sdk/src/utils/format-string'
+import { formatString } from '../src/client/utils/format-string'
 
 describe('formatString', () => {
   it('substitutes basic fields', () => {
     expect(formatString('Hello ${name}!', { name: 'Alice' })).toBe('Hello Alice!')
   })
 
-  it('substitutes mustache-style {{field}}', () => {
-    expect(formatString('Hello {{name}}!', { name: 'Alice' })).toBe('Hello Alice!')
-  })
-
   it('substitutes multiple fields', () => {
     expect(formatString('${a} and ${b}', { a: 1, b: 2 })).toBe('1 and 2')
   })
 
-  it('substitutes multiple mustache fields', () => {
-    expect(formatString('{{a}} and {{b}}', { a: 1, b: 2 })).toBe('1 and 2')
-  })
-
   it('handles dollar-prefixed keys', () => {
     expect(formatString('${$value} / ${$count}', { $value: 42, $count: 10 })).toBe('42 / 10')
-  })
-
-  it('handles dollar-prefixed keys in mustache form', () => {
-    expect(formatString('{{$value}} / {{$count}}', { $value: 42, $count: 10 })).toBe('42 / 10')
   })
 
   it('supports pipe transforms (percentOfMax)', () => {
@@ -35,21 +23,8 @@ describe('formatString', () => {
     expect(result).toBe('50')
   })
 
-  it('supports pipe transforms in mustache form', () => {
-    const rows = [{ points: 50 }, { points: 100 }]
-    const result = formatString('{{points | percentOfMax}}', { points: 50 }, {
-      transforms: { percentOfMax: { fn: 'percentOfMax' } },
-      allRows: rows,
-    })
-    expect(result).toBe('50')
-  })
-
   it('resolves JSON Pointer paths', () => {
     expect(formatString('${/data/name}', { data: { name: 'Bob' } })).toBe('Bob')
-  })
-
-  it('resolves JSON Pointer paths in mustache form', () => {
-    expect(formatString('{{/data/name}}', { data: { name: 'Bob' } })).toBe('Bob')
   })
 
   it('resolves nested JSON Pointer paths', () => {
@@ -58,10 +33,6 @@ describe('formatString', () => {
 
   it('leaves unresolved expressions as-is', () => {
     expect(formatString('${missing}', {})).toBe('${missing}')
-  })
-
-  it('leaves unresolved mustache as-is', () => {
-    expect(formatString('{{missing}}', {})).toBe('{{missing}}')
   })
 
   it('leaves unresolved JSON Pointer as-is', () => {
@@ -90,9 +61,5 @@ describe('formatString', () => {
 
   it('handles mixed resolved and unresolved', () => {
     expect(formatString('${a} ${b}', { a: 'yes' })).toBe('yes ${b}')
-  })
-
-  it('interpolates mixed ${} and {{}} in one template', () => {
-    expect(formatString('${a}+{{b}}', { a: 1, b: 2 })).toBe('1+2')
   })
 })
