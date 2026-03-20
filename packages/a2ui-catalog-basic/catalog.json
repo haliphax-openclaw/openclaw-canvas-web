@@ -262,6 +262,135 @@
           }
         }
       }
+    },
+    {
+      "name": "List",
+      "description": "A layout component that renders a list of child components",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "description": "Child component IDs"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "vertical",
+              "horizontal"
+            ],
+            "default": "vertical",
+            "description": "The direction in which the list items are laid out"
+          },
+          "align": {
+            "type": "string",
+            "enum": [
+              "start",
+              "center",
+              "end",
+              "stretch"
+            ],
+            "default": "stretch",
+            "description": "Alignment of children along the cross axis"
+          }
+        }
+      }
+    },
+    {
+      "name": "Card",
+      "description": "A container component that wraps a single child in a card layout",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "child": {
+            "type": "string",
+            "description": "The ID of the single child component to render inside the card"
+          }
+        }
+      }
+    },
+    {
+      "name": "Modal",
+      "description": "A dialog/modal overlay with a trigger component and content",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "description": "The ID of the component that opens the modal when interacted with"
+          },
+          "content": {
+            "type": "string",
+            "description": "The ID of the component to display inside the modal"
+          }
+        }
+      }
+    },
+    {
+      "name": "TextField",
+      "description": "A text input field with label, variant, and data binding support",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The text label for the input field"
+          },
+          "value": {
+            "type": "string",
+            "description": "The value of the text field"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "shortText",
+              "longText",
+              "number",
+              "obscured"
+            ],
+            "default": "shortText",
+            "description": "The type of input field to display"
+          },
+          "validationRegexp": {
+            "type": "string",
+            "description": "A regular expression used for client-side validation"
+          }
+        }
+      }
+    },
+    {
+      "name": "DateTimeInput",
+      "description": "A date/time picker input with ISO 8601 value binding",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The selected date/time value in ISO 8601 format"
+          },
+          "enableDate": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, allows the user to select a date"
+          },
+          "enableTime": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, allows the user to select a time"
+          },
+          "min": {
+            "type": "string",
+            "description": "The minimum allowed date/time in ISO 8601 format"
+          },
+          "max": {
+            "type": "string",
+            "description": "The maximum allowed date/time in ISO 8601 format"
+          },
+          "label": {
+            "type": "string",
+            "description": "The text label for the input field"
+          }
+        }
+      }
     }
   ]
 }

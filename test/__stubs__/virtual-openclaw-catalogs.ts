@@ -9,6 +9,11 @@ import A2UIDivider from '../../packages/a2ui-catalog-basic/src/A2UIDivider.vue'
 import A2UISlider from '../../packages/a2ui-catalog-basic/src/A2UISlider.vue'
 import A2UICheckbox from '../../packages/a2ui-catalog-basic/src/A2UICheckbox.vue'
 import A2UIChoicePicker from '../../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
+import A2UIList from '../../packages/a2ui-catalog-basic/src/A2UIList.vue'
+import A2UICard from '../../packages/a2ui-catalog-basic/src/A2UICard.vue'
+import A2UIModal from '../../packages/a2ui-catalog-basic/src/A2UIModal.vue'
+import A2UITextField from '../../packages/a2ui-catalog-basic/src/A2UITextField.vue'
+import A2UIDateTimeInput from '../../packages/a2ui-catalog-basic/src/A2UIDateTimeInput.vue'
 import A2UIBadge from '../../packages/a2ui-catalog-extended/src/A2UIBadge.vue'
 import A2UITable from '../../packages/a2ui-catalog-extended/src/A2UITable.vue'
 import A2UIStack from '../../packages/a2ui-catalog-extended/src/A2UIStack.vue'
@@ -28,6 +33,11 @@ export const catalogComponents: Record<string, { component: unknown }> = {
   Slider: { component: A2UISlider },
   Checkbox: { component: A2UICheckbox },
   ChoicePicker: { component: A2UIChoicePicker },
+  List: { component: A2UIList },
+  Card: { component: A2UICard },
+  Modal: { component: A2UIModal },
+  TextField: { component: A2UITextField },
+  DateTimeInput: { component: A2UIDateTimeInput },
   Badge: { component: A2UIBadge },
   Table: { component: A2UITable },
   Stack: { component: A2UIStack },

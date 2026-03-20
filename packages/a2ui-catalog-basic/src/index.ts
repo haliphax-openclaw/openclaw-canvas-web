@@ -9,6 +9,11 @@ import A2UIDivider from './A2UIDivider.vue'
 import A2UISlider from './A2UISlider.vue'
 import A2UICheckbox from './A2UICheckbox.vue'
 import A2UIChoicePicker from './A2UIChoicePicker.vue'
+import A2UIList from './A2UIList.vue'
+import A2UICard from './A2UICard.vue'
+import A2UIModal from './A2UIModal.vue'
+import A2UITextField from './A2UITextField.vue'
+import A2UIDateTimeInput from './A2UIDateTimeInput.vue'
 
 const definition: PackageDefinition = {
   components: [
@@ -22,6 +27,11 @@ const definition: PackageDefinition = {
     { name: 'Slider', component: A2UISlider },
     { name: 'Checkbox', component: A2UICheckbox },
     { name: 'ChoicePicker', component: A2UIChoicePicker },
+    { name: 'List', component: A2UIList },
+    { name: 'Card', component: A2UICard },
+    { name: 'Modal', component: A2UIModal },
+    { name: 'TextField', component: A2UITextField },
+    { name: 'DateTimeInput', component: A2UIDateTimeInput },
   ],
 }
 
