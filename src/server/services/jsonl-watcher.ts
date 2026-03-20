@@ -3,6 +3,7 @@ import path from 'node:path'
 import type { Gateway } from './gateway.js'
 import type { A2UIManager } from './a2ui-manager.js'
 import { processA2UICommand } from './a2ui-commands.js'
+import type { SchemaResolver } from './a2ui-component-schemas.js'
 
 export interface JSONLWatcherOptions {
   debounceMs?: number
@@ -16,13 +17,16 @@ export class JSONLWatcher {
   private watchers = new Map<string, fs.FSWatcher>()
   private debounceTimers = new Map<string, ReturnType<typeof setTimeout>>()
   private debounceMs: number
+  private resolveSchema?: SchemaResolver
 
   constructor(
     private sessionPathMap: Map<string, string>,
     private gateway: Gateway,
     private a2uiManager: A2UIManager,
     options: JSONLWatcherOptions = {},
+    resolveSchema?: SchemaResolver,
   ) {
+    this.resolveSchema = resolveSchema
     this.debounceMs = options.debounceMs ?? 300
 
     for (const [session, canvasDir] of sessionPathMap) {
@@ -71,7 +75,7 @@ export class JSONLWatcher {
         continue
       }
 
-      processA2UICommand(session, parsed, this.a2uiManager, this.gateway)
+      processA2UICommand(session, parsed, this.a2uiManager, this.gateway, this.resolveSchema)
     }
   }
 

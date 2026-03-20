@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { processPipelineCommand, processBatch, processA2UICommand, type ValidationResult } from '../../src/server/services/a2ui-pipeline.js'
+import type { SchemaResolver } from '../../src/server/services/a2ui-component-schemas.js'
+
+const noopResolver: SchemaResolver = () => undefined
 
 function makeMocks() {
   const a2uiManager = {
@@ -20,8 +23,10 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       updateComponents: { surfaceId: 's1', components: [{ id: 'c1', component: 'Text', text: 'hi' }] },
-    }, 0, a2uiManager as any, gateway as any)
-    expect(result).toEqual({ ok: true, command: 'updateComponents', index: 0 })
+    }, 0, a2uiManager as any, gateway as any, noopResolver)
+    expect(result.ok).toBe(true)
+    expect(result.command).toBe('updateComponents')
+    expect(result.index).toBe(0)
     expect(a2uiManager.upsertSurface).toHaveBeenCalled()
   })
 
@@ -29,7 +34,7 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       updateComponents: { components: [] },
-    }, 3, a2uiManager as any, gateway as any)
+    }, 3, a2uiManager as any, gateway as any, noopResolver)
     expect(result.ok).toBe(false)
     expect(result.command).toBe('updateComponents')
     expect(result.index).toBe(3)
@@ -41,7 +46,7 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       updateComponents: { surfaceId: 's1', components: 'not-array' },
-    }, 0, a2uiManager as any, gateway as any)
+    }, 0, a2uiManager as any, gateway as any, noopResolver)
     expect(result.ok).toBe(false)
     expect(result.error).toMatch(/components must be an array/)
   })
@@ -50,7 +55,7 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       createSurface: { surfaceId: 's1', root: 'myRoot' },
-    }, 1, a2uiManager as any, gateway as any)
+    }, 1, a2uiManager as any, gateway as any, noopResolver)
     expect(result).toEqual({ ok: true, command: 'createSurface', index: 1 })
   })
 
@@ -58,7 +63,7 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       createSurface: {},
-    }, 0, a2uiManager as any, gateway as any)
+    }, 0, a2uiManager as any, gateway as any, noopResolver)
     expect(result.ok).toBe(false)
     expect(result.error).toMatch(/missing surfaceId/)
   })
@@ -67,14 +72,14 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       deleteSurface: {},
-    }, 0, a2uiManager as any, gateway as any)
+    }, 0, a2uiManager as any, gateway as any, noopResolver)
     expect(result.ok).toBe(false)
     expect(result.error).toMatch(/missing surfaceId/)
   })
 
   it('returns error for unrecognized command', () => {
     const { a2uiManager, gateway } = makeMocks()
-    const result = processPipelineCommand('dev', { bogus: {} }, 5, a2uiManager as any, gateway as any)
+    const result = processPipelineCommand('dev', { bogus: {} }, 5, a2uiManager as any, gateway as any, noopResolver)
     expect(result).toEqual({ ok: false, command: 'unknown', index: 5, error: 'Unrecognized command' })
   })
 
@@ -82,7 +87,7 @@ describe('processPipelineCommand', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processPipelineCommand('dev', {
       updateDataModel: { surfaceId: 's1', data: { x: 1 } },
-    }, 42, a2uiManager as any, gateway as any)
+    }, 42, a2uiManager as any, gateway as any, noopResolver)
     expect(result.index).toBe(42)
   })
 })
@@ -96,9 +101,10 @@ describe('processBatch', () => {
       JSON.stringify({ updateDataModel: { surfaceId: 's1', data: { count: 5 } } }),
     ].join('\n')
 
-    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any)
+    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any, noopResolver)
     expect(results).toHaveLength(3)
-    expect(results[0]).toEqual({ ok: true, command: 'updateComponents', index: 0 })
+    expect(results[0].ok).toBe(true)
+    expect(results[0].command).toBe('updateComponents')
     expect(results[1]).toEqual({ ok: true, command: 'createSurface', index: 1 })
     expect(results[2]).toEqual({ ok: true, command: 'updateDataModel', index: 2 })
   })
@@ -110,7 +116,7 @@ describe('processBatch', () => {
       JSON.stringify({ updateComponents: { surfaceId: 's1', components: [{ id: 'c1', component: 'Text' }] } }),
     ].join('\n')
 
-    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any)
+    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any, noopResolver)
     expect(results).toHaveLength(2)
     expect(results[0].ok).toBe(false)
     expect(results[0].command).toBe('parse')
@@ -123,11 +129,11 @@ describe('processBatch', () => {
     const { a2uiManager, gateway } = makeMocks()
     const jsonl = [
       JSON.stringify({ updateComponents: { surfaceId: 's1', components: [{ id: 'c1', component: 'Text' }] } }),
-      JSON.stringify({ updateComponents: { components: [] } }), // missing surfaceId
+      JSON.stringify({ updateComponents: { components: [] } }),
       JSON.stringify({ deleteSurface: { surfaceId: 's1' } }),
     ].join('\n')
 
-    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any)
+    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any, noopResolver)
     expect(results[0].ok).toBe(true)
     expect(results[1].ok).toBe(false)
     expect(results[1].error).toMatch(/missing surfaceId/)
@@ -137,14 +143,14 @@ describe('processBatch', () => {
   it('skips blank lines', () => {
     const { a2uiManager, gateway } = makeMocks()
     const jsonl = '\n' + JSON.stringify({ createSurface: { surfaceId: 's1' } }) + '\n\n'
-    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any)
+    const results = processBatch('main', jsonl, a2uiManager as any, gateway as any, noopResolver)
     expect(results).toHaveLength(1)
     expect(results[0].ok).toBe(true)
   })
 
   it('returns empty array for empty input', () => {
     const { a2uiManager, gateway } = makeMocks()
-    const results = processBatch('main', '', a2uiManager as any, gateway as any)
+    const results = processBatch('main', '', a2uiManager as any, gateway as any, noopResolver)
     expect(results).toEqual([])
   })
 })
@@ -154,13 +160,13 @@ describe('processA2UICommand backward compat', () => {
     const { a2uiManager, gateway } = makeMocks()
     const result = processA2UICommand('dev', {
       updateComponents: { surfaceId: 's1', components: [{ id: 'c1', component: 'Text' }] },
-    }, a2uiManager as any, gateway as any)
+    }, a2uiManager as any, gateway as any, noopResolver)
     expect(result).toBe(true)
   })
 
   it('returns false for invalid commands', () => {
     const { a2uiManager, gateway } = makeMocks()
-    const result = processA2UICommand('dev', { bogus: {} }, a2uiManager as any, gateway as any)
+    const result = processA2UICommand('dev', { bogus: {} }, a2uiManager as any, gateway as any, noopResolver)
     expect(result).toBe(false)
   })
 })

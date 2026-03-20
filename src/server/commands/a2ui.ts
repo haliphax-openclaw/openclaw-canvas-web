@@ -1,8 +1,9 @@
 import type { Gateway } from '../services/gateway.js'
 import type { A2UIManager } from '../services/a2ui-manager.js'
 import { processBatch } from '../services/a2ui-pipeline.js'
+import type { SchemaResolver } from '../services/a2ui-component-schemas.js'
 
-export function registerA2UICommands(gateway: Gateway, a2uiManager: A2UIManager) {
+export function registerA2UICommands(gateway: Gateway, a2uiManager: A2UIManager, resolveSchema?: SchemaResolver) {
   gateway.on('a2ui.push', (msg, reply) => {
     const payload = msg.payload
     if (typeof payload !== 'string' || !payload) {
@@ -10,7 +11,7 @@ export function registerA2UICommands(gateway: Gateway, a2uiManager: A2UIManager)
       return
     }
     const session = (msg.session as string) || 'main'
-    const results = processBatch(session, payload, a2uiManager, gateway)
+    const results = processBatch(session, payload, a2uiManager, gateway, resolveSchema)
     const errors = results.filter(r => !r.ok)
     reply({ ok: true, results, errors })
   })

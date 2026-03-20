@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 import type { Server } from 'node:http'
 import type { A2UIManager } from './a2ui-manager.js'
 import { processPipelineCommand, type ValidationResult } from './a2ui-pipeline.js'
+import type { SchemaResolver } from './a2ui-component-schemas.js'
 
 export interface GatewayMessage {
   id?: string
@@ -24,6 +25,7 @@ export class Gateway {
   private spaConnectListeners: Array<(ws: WebSocket) => void> = []
   private a2uiManager: A2UIManager | null = null
   private a2uiStreamClients = new Set<WebSocket>()
+  private resolveSchema: SchemaResolver = () => undefined
 
   constructor(server: Server) {
     this.wss = new WebSocketServer({ noServer: true })
@@ -152,13 +154,17 @@ export class Gateway {
       return
     }
 
-    const result = processPipelineCommand(session, parsed, 0, this.a2uiManager, this)
+    const result = processPipelineCommand(session, parsed, 0, this.a2uiManager, this, this.resolveSchema)
     ws.send(JSON.stringify(result))
   }
 
   /** Set the A2UI manager for streaming interface. */
   setA2UIManager(manager: A2UIManager) {
     this.a2uiManager = manager
+  }
+
+  setSchemaResolver(resolver: SchemaResolver) {
+    this.resolveSchema = resolver
   }
 
   on(command: string, handler: CommandHandler) {

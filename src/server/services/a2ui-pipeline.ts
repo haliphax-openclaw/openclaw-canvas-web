@@ -1,5 +1,6 @@
 import type { Gateway } from './gateway.js'
 import type { A2UIManager } from './a2ui-manager.js'
+import { validateComponent, type ComponentValidationResult, type SchemaResolver } from './a2ui-component-schemas.js'
 
 /** Default catalog URI when none is provided by createSurface */
 const DEFAULT_CATALOG_ID = '@haliphax-openclaw/a2ui-catalog-all'
@@ -22,6 +23,8 @@ export interface ValidationResult {
   command: string
   index: number
   error?: string
+  componentErrors?: ComponentValidationResult[]
+  componentWarnings?: ComponentValidationResult[]
 }
 
 /**
@@ -116,6 +119,7 @@ export function processPipelineCommand(
   index: number,
   a2uiManager: A2UIManager,
   gateway: Gateway,
+  resolveSchema?: SchemaResolver,
 ): ValidationResult {
   const command = detectCommand(parsed)
   if (!command) {
@@ -130,9 +134,36 @@ export function processPipelineCommand(
       if (error) break
       const su = parsed[command] as { surfaceId: string; components: Array<{ id: string; component: unknown; [key: string]: unknown }> }
       const normalized = su.components.map(normalizeComponent)
-      a2uiManager.upsertSurface(session, su.surfaceId, normalized as any)
-      gateway.broadcastSpaSession(session, { type: 'a2ui.updateComponents', surfaceId: su.surfaceId, components: normalized })
-      break
+
+      // Validate individual component props
+      const validComponents: typeof normalized = []
+      const compErrors: ComponentValidationResult[] = []
+      const compWarnings: ComponentValidationResult[] = []
+
+      for (const comp of normalized) {
+        if (typeof comp.component !== 'string') {
+          validComponents.push(comp)
+          continue
+        }
+        const vr = validateComponent(comp as { id: string; component: string; [key: string]: unknown }, resolveSchema ?? (() => undefined))
+        if (vr.warnings.length) compWarnings.push(vr)
+        if (vr.errors.length) {
+          compErrors.push(vr)
+        } else {
+          validComponents.push(comp)
+        }
+      }
+
+      // Process valid components even if some failed
+      if (validComponents.length) {
+        a2uiManager.upsertSurface(session, su.surfaceId, validComponents as any)
+        gateway.broadcastSpaSession(session, { type: 'a2ui.updateComponents', surfaceId: su.surfaceId, components: validComponents })
+      }
+
+      if (compErrors.length) {
+        return { ok: false, command, index, error: `ValidationFailed: ${compErrors.map(e => `${e.id}: ${e.errors.join('; ')}`).join(' | ')}`, componentErrors: compErrors, componentWarnings: compWarnings.length ? compWarnings : undefined }
+      }
+      return { ok: true, command, index, componentWarnings: compWarnings.length ? compWarnings : undefined }
     }
     case 'createSurface': {
       error = validateCreateSurface(parsed[command])
@@ -186,6 +217,7 @@ export function processBatch(
   jsonl: string,
   a2uiManager: A2UIManager,
   gateway: Gateway,
+  resolveSchema?: SchemaResolver,
 ): ValidationResult[] {
   const lines = jsonl.split('\n').filter(l => l.trim())
   const results: ValidationResult[] = []
@@ -198,7 +230,7 @@ export function processBatch(
       results.push({ ok: false, command: 'parse', index: i, error: `Invalid JSON: ${lines[i].slice(0, 100)}` })
       continue
     }
-    results.push(processPipelineCommand(session, parsed, i, a2uiManager, gateway))
+    results.push(processPipelineCommand(session, parsed, i, a2uiManager, gateway, resolveSchema))
   }
 
   return results
@@ -213,7 +245,8 @@ export function processA2UICommand(
   parsed: Record<string, unknown>,
   a2uiManager: A2UIManager,
   gateway: Gateway,
+  resolveSchema?: SchemaResolver,
 ): boolean {
-  const result = processPipelineCommand(session, parsed, 0, a2uiManager, gateway)
+  const result = processPipelineCommand(session, parsed, 0, a2uiManager, gateway, resolveSchema)
   return result.ok
 }

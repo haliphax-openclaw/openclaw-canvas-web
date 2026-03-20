@@ -111,9 +111,11 @@ const server = app.listen(PORT, HOST, () => {
 const gateway = new Gateway(server)
 const a2uiStore = new A2UIStore()
 const a2uiManager = new A2UIManager(a2uiStore)
+const resolveSchema = catalogRegistry.getComponentSchema.bind(catalogRegistry)
 gateway.setA2UIManager(a2uiManager)
+gateway.setSchemaResolver(resolveSchema)
 registerCanvasCommands(gateway, sessionManager)
-registerA2UICommands(gateway, a2uiManager)
+registerA2UICommands(gateway, a2uiManager, resolveSchema)
 
 // Replay cached A2UI state to newly connected SPA clients
 gateway.onSpaConnect((ws) => {
@@ -139,7 +141,7 @@ for (const [agentId, canvasDir] of agentWorkspaceMap) {
 }
 const CANVAS_IGNORE_DIRS = (process.env.OPENCLAW_CANVAS_IGNORE_DIRS ?? 'tmp,jsonl').split(',').map(s => s.trim()).filter(Boolean)
 const fileWatcher = new FileWatcher(sessionPathMap, gateway, { ignoreDirs: CANVAS_IGNORE_DIRS })
-const jsonlWatcher = new JSONLWatcher(sessionPathMap, gateway, a2uiManager)
+const jsonlWatcher = new JSONLWatcher(sessionPathMap, gateway, a2uiManager, {}, resolveSchema)
 
 // Connect to OpenClaw gateway as a node
 let nodeClient: NodeClient | null = null
@@ -149,7 +151,8 @@ if (GATEWAY_TOKEN) {
     token: GATEWAY_TOKEN,
     gateway,
     a2uiManager,
-    sessionManager
+    sessionManager,
+    resolveSchema,
   })
   nodeClient.start()
   console.log(`Node client connecting to ${GATEWAY_WS_URL}`)

@@ -107,6 +107,7 @@
       "description": "Image display with canvas URL rewriting",
       "schema": {
         "type": "object",
+        "required": ["src"],
         "properties": {
           "src": {
             "type": "string",

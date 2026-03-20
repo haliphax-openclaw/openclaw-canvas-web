@@ -7,6 +7,7 @@ import { injectDeepLinkIntoDataUrl } from '../shared/deep-link-script.js'
 import { injectSnapshotIntoDataUrl } from '../shared/snapshot-script.js'
 import type { A2UIManager } from './a2ui-manager.js'
 import { processBatch } from './a2ui-pipeline.js'
+import type { SchemaResolver } from './a2ui-component-schemas.js'
 import type { SessionManager } from './session-manager.js'
 
 const IDENTITY_PATH = path.join(
@@ -83,6 +84,7 @@ export class NodeClient {
   private gateway: Gateway
   private a2uiManager: A2UIManager
   private sessionManager: SessionManager
+  private resolveSchema?: SchemaResolver
   private pendingRequests = new Map<string, { resolve: (v: any) => void; reject: (e: Error) => void }>()
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private closed = false
@@ -94,11 +96,13 @@ export class NodeClient {
     gateway: Gateway
     a2uiManager: A2UIManager
     sessionManager: SessionManager
+    resolveSchema?: SchemaResolver
   }) {
     this.gatewayUrl = opts.gatewayUrl
     this.token = opts.token
     this.gateway = opts.gateway
     this.a2uiManager = opts.a2uiManager
+    this.resolveSchema = opts.resolveSchema
     this.sessionManager = opts.sessionManager
     this.identity = loadOrCreateIdentity()
     this.nodeId = this.identity.deviceId
@@ -292,7 +296,7 @@ export class NodeClient {
         if (!jsonl) throw new Error('payload required')
         const session = params.session ?? 'main'
         const payload = typeof jsonl === 'string' ? jsonl : JSON.stringify(jsonl)
-        const results = processBatch(session, payload, this.a2uiManager, this.gateway)
+        const results = processBatch(session, payload, this.a2uiManager, this.gateway, this.resolveSchema)
         const errors = results.filter(r => !r.ok)
         return { ok: true, results, errors }
       }
