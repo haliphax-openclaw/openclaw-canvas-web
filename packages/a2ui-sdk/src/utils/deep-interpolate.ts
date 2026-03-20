@@ -1,4 +1,4 @@
-import { toRaw } from 'vue'
+import { isProxy, toRaw } from 'vue'
 import { formatString, type FormatStringOptions } from './format-string'
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -17,6 +17,10 @@ export function deepInterpolate(
   row: Record<string, unknown>,
   options?: FormatStringOptions,
 ): unknown {
+  if (value !== null && value !== undefined && typeof value === 'object' && isProxy(value)) {
+    return deepInterpolate(toRaw(value), row, options)
+  }
+
   const plainRow = toRaw(row) as Record<string, unknown>
   const plainOpts =
     options?.allRows != null

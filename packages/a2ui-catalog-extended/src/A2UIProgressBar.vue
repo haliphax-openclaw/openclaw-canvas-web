@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
-import { useDataSource, formatString } from '@haliphax-openclaw/a2ui-sdk'
+import { defineComponent, computed, inject, type ComputedRef } from 'vue'
+import { useDataSource, formatString, A2UI_REPEAT_FMT_KEY, type RepeatFmtContext } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UIProgressBar',
@@ -17,11 +17,20 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
+    const repeatFmtRef = inject(A2UI_REPEAT_FMT_KEY, undefined) as ComputedRef<RepeatFmtContext> | undefined
     const { aggregatedValue, compoundAggregates, filteredRows, binding } = useDataSource(props as any)
 
     function resolveTemplate(raw: unknown): string {
       const str = typeof raw === 'string' ? raw : String(raw ?? '')
-      if (!binding.value || !str.includes('${')) return str
+      if (!str.includes('${')) return str
+
+      const repeatCtx = repeatFmtRef?.value
+      if (repeatCtx) {
+        return formatString(str, { ...repeatCtx.row }, { transforms: repeatCtx.transforms, allRows: repeatCtx.allRows })
+      }
+
+      if (!binding.value) return str
+
       const aggs = compoundAggregates.value
       const allKeys: Record<string, unknown> = { ...aggs }
       if (aggregatedValue.value != null) allKeys['$value'] = aggregatedValue.value
@@ -33,7 +42,11 @@ export default defineComponent({
 
     const clampedValue = computed(() => {
       const raw = (props.def as any).value
-      const resolved = binding.value && typeof raw === 'string' && raw.includes('${') ? resolveTemplate(raw) : raw
+      const needs =
+        typeof raw === 'string' &&
+        raw.includes('${') &&
+        (binding.value || repeatFmtRef?.value)
+      const resolved = needs ? resolveTemplate(raw) : raw
       return Math.min(100, Math.max(0, Number(resolved) || 0))
     })
 

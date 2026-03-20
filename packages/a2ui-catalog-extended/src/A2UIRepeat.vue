@@ -8,12 +8,15 @@
       </select>
     </div>
     <div v-if="resolvedItems.length" class="a2ui-repeat-items">
-      <component
+      <A2UIRepeatItem
         v-for="(item, idx) in resolvedItems"
         :key="idx"
-        :is="item.component"
-        :def="item.def"
-        :component-id="componentId + ':' + idx"
+        :item-component="item.component"
+        :item-def="item.def"
+        :row="item.row"
+        :repeat-transforms="item.transforms"
+        :repeat-all-rows="item.allRows"
+        :child-component-id="componentId + ':' + idx"
         :surface-id="surfaceId"
       />
     </div>
@@ -27,6 +30,7 @@ import { useDataSource, useSortable, deepInterpolate, formatString, type SortDir
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'
+import A2UIRepeatItem from './A2UIRepeatItem.vue'
 
 const templateComponents: Record<string, ReturnType<typeof defineComponent>> = {
   ProgressBar: A2UIProgressBar,
@@ -36,6 +40,7 @@ const templateComponents: Record<string, ReturnType<typeof defineComponent>> = {
 
 export default defineComponent({
   name: 'A2UIRepeat',
+  components: { A2UIRepeatItem },
   props: {
     def: { type: Object, required: true },
     surfaceId: { type: String, required: true },
@@ -62,7 +67,8 @@ export default defineComponent({
       const typeName = Object.keys(template)[0]
       const comp = templateComponents[typeName]
       if (!comp) return []
-      const innerDef = template[typeName]
+      const rawTemplate = toRaw(template) as Record<string, unknown>
+      const innerDef = rawTemplate[typeName]
       const fmtOpts = { transforms, allRows: rows.map((r) => ({ ...toRaw(r) })) }
       return rows.map((row: Record<string, unknown>) => {
         const plainRow = { ...toRaw(row) }
@@ -74,6 +80,9 @@ export default defineComponent({
           }
         }
         return {
+          row: plainRow,
+          transforms,
+          allRows: fmtOpts.allRows,
           component: comp,
           def: interpolated,
         }
