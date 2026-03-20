@@ -214,7 +214,7 @@ Spec: [a2ui-v09-upgrade-spec.md §5.5](2026-03-18-a2ui-v09-upgrade-spec.md)
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/6
 Plan: [theme-support-plan.md](done/2026-03-19-theme-support-plan.md)
 
-### Catalog support
+### ~~Catalog support~~ ✅
 
 Issue: https://github.com/haliphax-openclaw/openclaw-canvas-web/issues/7
 Plan: [catalog-support-plan.md](2026-03-19-catalog-support-plan.md)
