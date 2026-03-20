@@ -107,12 +107,12 @@ Container that organizes child components into switchable tabbed panels.
 |------|------|-------------|
 | `tabs` | `{ label: string, child: string }[]` | Tab definitions — `label` is the tab header text, `child` is the component ID to render |
 | `active` | `number` | 0-based index of the initially active tab (default: `0`) |
-| `position` | `string` | Tab bar placement: `"top"` (default), `"bottom"`, `"left"`, `"right"`, or `"hidden"` |
+| `position` | `string` | Tab bar placement: `"top"` (default), `"bottom"` (uses DaisyUI `tabs-bottom`), or `"hidden"` |
 | `height` | `string` | Content panel height. `"auto"` (default) sizes to the tallest child; a CSS value (e.g. `"300px"`, `"50vh"`) sets a fixed height with `overflow: auto` |
 
 When `height` is `"auto"`, all tab panels remain in the DOM (inactive panels use `visibility: hidden; position: absolute`) so the content area grows to accommodate the tallest child. When `position` is `"hidden"`, the tab bar is not rendered — useful when tab switching is driven programmatically via surface updates.
 
-The `active` prop reacts to surface updates, allowing agents to switch tabs programmatically. Top/bottom tab bars wrap labels to the next line when they overflow. Left/right tab bars size to their widest label, capped at 33% of the viewport.
+The `active` prop reacts to surface updates, allowing agents to switch tabs programmatically. Tab labels wrap to the next line when they overflow.
 
 ---
 

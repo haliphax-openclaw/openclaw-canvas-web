@@ -1,6 +1,11 @@
 <template>
-  <div class="a2ui-tabs" :class="`a2ui-tabs--${pos}`">
-    <div v-if="pos !== 'hidden'" class="tabs tabs-border a2ui-tabs-bar" :class="`a2ui-tabs-bar--${pos}`" role="tablist">
+  <div class="a2ui-tabs">
+    <div
+      v-if="pos !== 'hidden'"
+      class="tabs tabs-border"
+      :class="pos === 'bottom' ? 'tabs-bottom' : 'tabs-top'"
+      role="tablist"
+    >
       <a
         v-for="(tab, i) in tabs"
         :key="i"
@@ -9,8 +14,27 @@
         :class="{ 'tab-active': i === activeIndex }"
         @click="activeIndex = i"
       >{{ tab.label }}</a>
+      <div
+        class="tab-content a2ui-tabs-content"
+        :class="{ 'a2ui-tabs-content--fixed': height !== 'auto' }"
+        :style="height !== 'auto' ? `--tabs-content-height: ${height}` : undefined"
+      >
+        <div
+          v-for="(tab, i) in tabs"
+          :key="i"
+          class="a2ui-tabs-panel"
+          :class="{ 'a2ui-tabs-panel--hidden': i !== activeIndex }"
+        >
+          <A2UINode :component-id="tab.child" :surface-id="surfaceId" />
+        </div>
+      </div>
     </div>
-    <div class="a2ui-tabs-content" :class="{ 'a2ui-tabs-content--fixed': height !== 'auto' }" :style="height !== 'auto' ? `--tabs-content-height: ${height}` : undefined">
+    <div
+      v-else
+      class="a2ui-tabs-content"
+      :class="{ 'a2ui-tabs-content--fixed': height !== 'auto' }"
+      :style="height !== 'auto' ? `--tabs-content-height: ${height}` : undefined"
+    >
       <div
         v-for="(tab, i) in tabs"
         :key="i"
@@ -41,7 +65,12 @@ export default defineComponent({
         child: t.child ?? (Array.isArray(t.children) ? t.children[0] : null),
       }))
     })
-    const pos = computed(() => (props.def as any).position ?? 'top')
+    const pos = computed(() => {
+      const p = (props.def as any).position ?? 'top'
+      // left/right removed from catalog; coerce legacy payloads
+      if (p === 'left' || p === 'right') return 'top'
+      return p
+    })
     const height = computed(() => (props.def as any).height ?? 'auto')
     const activeIndex = ref((props.def as any).active ?? 0)
 
@@ -51,14 +80,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-tabs { display: flex; flex-direction: column; gap: 12px; }
-.a2ui-tabs--left { flex-direction: row; }
-.a2ui-tabs--right { flex-direction: row-reverse; }
-.a2ui-tabs--bottom { flex-direction: column-reverse; }
-
-.a2ui-tabs-bar--left,
-.a2ui-tabs-bar--right { flex-direction: column; flex-wrap: nowrap; width: fit-content; max-width: 33%; flex-shrink: 0; }
-
 .a2ui-tabs-content { position: relative; display: grid; }
 .a2ui-tabs-content--fixed { height: var(--tabs-content-height); overflow: auto; }
 .a2ui-tabs-panel { grid-area: 1 / 1; }

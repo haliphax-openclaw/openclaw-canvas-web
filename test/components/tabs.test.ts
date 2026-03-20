@@ -36,8 +36,8 @@ describe('A2UITabs logic', () => {
     expect(t.position).toBe('top')
   })
 
-  it('accepts all position values', () => {
-    for (const pos of ['top', 'bottom', 'left', 'right', 'hidden']) {
+  it('accepts top, bottom, and hidden position values', () => {
+    for (const pos of ['top', 'bottom', 'hidden']) {
       const t = createTabs({ tabs: [], position: pos })
       expect(t.position).toBe(pos)
     }

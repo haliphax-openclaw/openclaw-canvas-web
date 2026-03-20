@@ -9,7 +9,7 @@
     { "name": "Text", "description": "Text display with variant styling and data binding" },
     { "name": "Button", "description": "Clickable button with variant styling and action support" },
     { "name": "Image", "description": "Image display with canvas URL rewriting" },
-    { "name": "Tabs", "description": "Tabbed container with configurable position" },
+    { "name": "Tabs", "description": "Tabbed container (top, bottom, or hidden tab bar)" },
     { "name": "Divider", "description": "Visual horizontal divider" },
     { "name": "Slider", "description": "Range slider input with filter binding" },
     { "name": "Checkbox", "description": "Checkbox input with filter binding" },

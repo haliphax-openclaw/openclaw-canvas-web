@@ -122,7 +122,7 @@
     },
     {
       "name": "Tabs",
-      "description": "Tabbed container with configurable position",
+      "description": "Tabbed container (top, bottom, or hidden tab bar)",
       "schema": {
         "type": "object",
         "properties": {
@@ -146,12 +146,10 @@
             "enum": [
               "top",
               "bottom",
-              "left",
-              "right",
               "hidden"
             ],
             "default": "top",
-            "description": "Tab bar position"
+            "description": "Tab bar position (DaisyUI tabs-top / tabs-bottom)"
           },
           "height": {
             "type": "string",
