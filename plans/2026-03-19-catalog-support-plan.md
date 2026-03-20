@@ -26,7 +26,7 @@ The `openclaw-canvas-web` repo releases multiple packages:
 | `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — all first-party components |
 | `@haliphax-openclaw/a2ui-catalog-all` | All catalog — all first-party + installed third-party |
 
-During development, all packages live in `packages/` and are referenced via `file:` protocol. Publishing to npm is a future step.
+During development, all packages live in `packages/` and are resolved locally via npm workspaces. Publishing to npm is a future step.
 
 ### Catalog IDs
 
@@ -46,9 +46,8 @@ The default `catalogId` when omitted from `createSurface` is `@haliphax-openclaw
 ```
 ┌─────────────────────────────────────────────────────┐
 │  npm install @example/a2ui-charts                   │
-│  — or —                                             │
-│  "dependencies": { "@example/a2ui-charts":          │
-│    "file:../packages/a2ui-charts" }                 │
+│  — or (monorepo workspace) —                        │
+│  packages/a2ui-charts/ with package.json            │
 │                                                     │
 │  node_modules/@example/a2ui-charts/                 │
 │    package.json  ← declares openclaw-canvas-web field   │
@@ -121,7 +120,7 @@ packages/a2ui-sdk/
 
 ### 2.4 Internal codebase migration
 
-After extraction, the main app imports from `@haliphax-openclaw/a2ui-sdk` instead of relative paths. This is a refactor — no behavior change. Use TypeScript path aliases during development so the monorepo resolves locally.
+After extraction, the main app imports from `@haliphax-openclaw/a2ui-sdk` instead of relative paths. This is a refactor — no behavior change. npm workspaces resolve the import to the local package automatically.
 
 ### 2.5 Component registration contract
 
@@ -186,26 +185,37 @@ Fields:
 
 Packages advertise component IDs only. Catalog membership is determined by the server's local configuration.
 
-### 3.2 Local packages via `file:` protocol
+### 3.2 npm workspaces
 
-Catalog packages don't need to be published to npm. For local development and first-party extensions, use `file:` references in `package.json`:
+The monorepo uses npm workspaces to resolve local packages during development. The root `package.json` declares:
+
+```json
+{
+  "workspaces": ["packages/*"]
+}
+```
+
+Each package in `packages/` has its own `package.json` with its own name and version. `npm install` at the root symlinks all workspace packages into `node_modules/` automatically.
+
+Other packages reference them by name with a normal version range:
 
 ```json
 {
   "dependencies": {
-    "@haliphax-openclaw/a2ui-sdk": "file:./packages/a2ui-sdk",
-    "@haliphax-openclaw/a2ui-catalog-extended": "file:./packages/a2ui-catalog-extended"
+    "@haliphax-openclaw/a2ui-sdk": "^0.1.0"
   }
 }
 ```
 
-`npm install` resolves `file:` dependencies via symlink into `node_modules/`. The Vite build and Node module resolution treat them identically to registry packages. This enables:
+During development, npm resolves to the local symlink. When published, the same version range resolves from the npm registry. No dependency rewriting needed.
 
-- **Monorepo development**: SDK and catalog packages live in `packages/` alongside the main app
-- **Third-party validation**: Split extended components into their own `file:` package to validate the SDK contract before external authors try it
-- **No registry required**: Everything works locally without publishing
+This enables:
 
-The server-side discovery (§3.3) scans `node_modules/` regardless of how packages were installed — `file:`, `npm install`, or `npm link` all work.
+- **Monorepo development**: SDK, components, and catalog packages all live in `packages/` and resolve locally
+- **Third-party validation**: Split extended components into their own workspace package to validate the SDK contract before external authors try it
+- **Seamless publishing**: Same `package.json` works for local dev and published packages
+
+The server-side discovery (§3.3) scans `node_modules/` regardless of how packages were installed — workspaces, `npm install`, or `npm link` all work.
 
 ### 3.3 Server-side discovery
 
@@ -670,7 +680,7 @@ Write a `docs/creating-catalog-packages.md` guide covering:
 - Inline catalogs from clients (spec feature, not needed for our use case)
 - Validation loop (`VALIDATION_FAILED` error feedback) — separate effort per v0.9 upgrade spec §5.4
 - ~~`formatString` interpolation — separate effort per v0.9 upgrade spec §5.5~~ ✅
-- Publishing `@haliphax-openclaw/a2ui-sdk` to npm (future — start with local monorepo)
+- Publishing `@haliphax-openclaw/a2ui-sdk` to npm (future — start with workspaces)
 
 ---
 
