@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchFilter, applyFilters, formatCompact, computeAggregate, type FieldFilter } from '../src/client/services/filter-engine'
+import { matchFilter, applyFilters, formatCompact, computeAggregate, type FieldFilter } from '@haliphax-openclaw/a2ui-sdk'
 
 const base: Omit<FieldFilter, 'op' | 'value' | 'field'> = { nullValue: '', isNull: false, componentId: 'c1' }
 

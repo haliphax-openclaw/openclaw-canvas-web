@@ -16,7 +16,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
 import { wsClient } from '../src/client/services/ws-client'
-import A2UISelect from '../src/client/components/A2UISelect.vue'
+import A2UISelect from '../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
 
 function makeStore(surfaces: Record<string, any> = {}) {
   return createStore({

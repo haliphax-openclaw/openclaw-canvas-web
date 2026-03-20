@@ -16,7 +16,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import A2UIProgressBar from '../src/client/components/A2UIProgressBar.vue'
+import A2UIProgressBar from '../packages/a2ui-catalog-extended/src/A2UIProgressBar.vue'
 
 function makeStore(surfaces: Record<string, any> = {}) {
   return createStore({

@@ -16,7 +16,7 @@ vi.mock('../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
-import A2UIText from '../src/client/components/A2UIText.vue'
+import A2UIText from '../packages/a2ui-catalog-basic/src/A2UIText.vue'
 
 function makeStore(surfaces: Record<string, any> = {}) {
   return createStore({

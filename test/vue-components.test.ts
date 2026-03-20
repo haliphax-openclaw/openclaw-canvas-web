@@ -11,21 +11,21 @@ vi.mock('../src/client/services/ws-client', () => ({
 
 // Mock the virtual catalog module — all components now resolve through catalogs
 vi.mock('virtual:openclaw-catalogs', async () => {
-  const A2UIText = (await import('../src/client/components/A2UIText.vue')).default
-  const A2UIButton = (await import('../src/client/components/A2UIButton.vue')).default
-  const A2UIImage = (await import('../src/client/components/A2UIImage.vue')).default
-  const A2UIColumn = (await import('../src/client/components/A2UIColumn.vue')).default
-  const A2UIRow = (await import('../src/client/components/A2UIRow.vue')).default
-  const A2UIStack = (await import('../src/client/components/A2UIStack.vue')).default
-  const A2UISpacer = (await import('../src/client/components/A2UISpacer.vue')).default
-  const A2UISelect = (await import('../src/client/components/A2UISelect.vue')).default
-  const A2UICheckbox = (await import('../src/client/components/A2UICheckbox.vue')).default
-  const A2UIProgressBar = (await import('../src/client/components/A2UIProgressBar.vue')).default
-  const A2UISlider = (await import('../src/client/components/A2UISlider.vue')).default
-  const A2UIDivider = (await import('../src/client/components/A2UIDivider.vue')).default
-  const A2UIRepeat = (await import('../src/client/components/A2UIRepeat.vue')).default
-  const A2UIAccordion = (await import('../src/client/components/A2UIAccordion.vue')).default
-  const A2UITabs = (await import('../src/client/components/A2UITabs.vue')).default
+  const A2UIText = (await import('../packages/a2ui-catalog-basic/src/A2UIText.vue')).default
+  const A2UIButton = (await import('../packages/a2ui-catalog-basic/src/A2UIButton.vue')).default
+  const A2UIImage = (await import('../packages/a2ui-catalog-basic/src/A2UIImage.vue')).default
+  const A2UIColumn = (await import('../packages/a2ui-catalog-basic/src/A2UIColumn.vue')).default
+  const A2UIRow = (await import('../packages/a2ui-catalog-basic/src/A2UIRow.vue')).default
+  const A2UIStack = (await import('../packages/a2ui-catalog-extended/src/A2UIStack.vue')).default
+  const A2UISpacer = (await import('../packages/a2ui-catalog-extended/src/A2UISpacer.vue')).default
+  const A2UISelect = (await import('../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue')).default
+  const A2UICheckbox = (await import('../packages/a2ui-catalog-basic/src/A2UICheckbox.vue')).default
+  const A2UIProgressBar = (await import('../packages/a2ui-catalog-extended/src/A2UIProgressBar.vue')).default
+  const A2UISlider = (await import('../packages/a2ui-catalog-basic/src/A2UISlider.vue')).default
+  const A2UIDivider = (await import('../packages/a2ui-catalog-basic/src/A2UIDivider.vue')).default
+  const A2UIRepeat = (await import('../packages/a2ui-catalog-extended/src/A2UIRepeat.vue')).default
+  const A2UIAccordion = (await import('../packages/a2ui-catalog-extended/src/A2UIAccordion.vue')).default
+  const A2UITabs = (await import('../packages/a2ui-catalog-basic/src/A2UITabs.vue')).default
   const A2UIBadge = (await import('../packages/a2ui-catalog-extended/src/A2UIBadge.vue')).default
   const A2UITable = (await import('../packages/a2ui-catalog-extended/src/A2UITable.vue')).default
   return {
@@ -69,23 +69,23 @@ import { registerWsSend } from '@haliphax-openclaw/a2ui-sdk'
 
 // Wire up the SDK's sendEvent to the mocked wsClient.send
 registerWsSend(wsClient.send.bind(wsClient))
-import A2UIDivider from '../src/client/components/A2UIDivider.vue'
-import A2UISpacer from '../src/client/components/A2UISpacer.vue'
-import A2UIText from '../src/client/components/A2UIText.vue'
-import A2UIButton from '../src/client/components/A2UIButton.vue'
-import A2UIImage from '../src/client/components/A2UIImage.vue'
+import A2UIDivider from '../packages/a2ui-catalog-basic/src/A2UIDivider.vue'
+import A2UISpacer from '../packages/a2ui-catalog-extended/src/A2UISpacer.vue'
+import A2UIText from '../packages/a2ui-catalog-basic/src/A2UIText.vue'
+import A2UIButton from '../packages/a2ui-catalog-basic/src/A2UIButton.vue'
+import A2UIImage from '../packages/a2ui-catalog-basic/src/A2UIImage.vue'
 import A2UIBadge from '../packages/a2ui-catalog-extended/src/A2UIBadge.vue'
-import A2UICheckbox from '../src/client/components/A2UICheckbox.vue'
-import A2UISlider from '../src/client/components/A2UISlider.vue'
-import A2UISelect from '../src/client/components/A2UISelect.vue'
-import A2UIProgressBar from '../src/client/components/A2UIProgressBar.vue'
+import A2UICheckbox from '../packages/a2ui-catalog-basic/src/A2UICheckbox.vue'
+import A2UISlider from '../packages/a2ui-catalog-basic/src/A2UISlider.vue'
+import A2UISelect from '../packages/a2ui-catalog-basic/src/A2UIChoicePicker.vue'
+import A2UIProgressBar from '../packages/a2ui-catalog-extended/src/A2UIProgressBar.vue'
 import A2UITable from '../packages/a2ui-catalog-extended/src/A2UITable.vue'
-import A2UIColumn from '../src/client/components/A2UIColumn.vue'
-import A2UIRow from '../src/client/components/A2UIRow.vue'
-import A2UIStack from '../src/client/components/A2UIStack.vue'
+import A2UIColumn from '../packages/a2ui-catalog-basic/src/A2UIColumn.vue'
+import A2UIRow from '../packages/a2ui-catalog-basic/src/A2UIRow.vue'
+import A2UIStack from '../packages/a2ui-catalog-extended/src/A2UIStack.vue'
 import A2UINode from '../src/client/components/A2UINode.vue'
 import A2UIRenderer from '../src/client/components/A2UIRenderer.vue'
-import A2UIRepeat from '../src/client/components/A2UIRepeat.vue'
+import A2UIRepeat from '../packages/a2ui-catalog-extended/src/A2UIRepeat.vue'
 import DeepLinkConfirm from '../src/client/components/DeepLinkConfirm.vue'
 
 function makeStore(surfaces: Record<string, any> = {}) {
