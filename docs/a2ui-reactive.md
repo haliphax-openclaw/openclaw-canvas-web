@@ -225,7 +225,7 @@ The following components support reactive data binding. See [components.md](comp
 - Table
 - Badge
 - Text
-- Repeat (iterates over rows, renders a template per row)
+- Repeat (iterates over rows; `dataSource` must use **`source`**, not `name`)
 
 **Repeat template targets** (renderable inside Repeat):
 - ProgressBar

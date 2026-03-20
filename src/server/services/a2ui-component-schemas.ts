@@ -64,5 +64,23 @@ export function validateComponent(
     }
   }
 
+  if (comp.component === 'Repeat') {
+    const ds = comp.dataSource
+    if (ds != null && typeof ds === 'object' && !Array.isArray(ds)) {
+      const o = ds as Record<string, unknown>
+      const src = o.source
+      if (typeof src !== 'string' || src.length === 0) {
+        if (typeof o.name === 'string' && o.name.length > 0) {
+          result.errors.push(`Repeat: use dataSource.source for the data source key, not dataSource.name`)
+        } else {
+          result.errors.push(`Repeat: dataSource.source must be a non-empty string`)
+        }
+      }
+      if (o.name !== undefined) {
+        result.warnings.push(`Repeat: dataSource.name is ignored; use dataSource.source`)
+      }
+    }
+  }
+
   return result
 }

@@ -114,8 +114,19 @@ describe('validateComponent', () => {
   })
 
   it('passes Repeat with required props', () => {
-    const r = validateComponent({ id: 'c1', component: 'Repeat', dataSource: { name: 'ds' }, template: { Text: { text: '${name}' } } }, resolve)
+    const r = validateComponent({ id: 'c1', component: 'Repeat', dataSource: { source: 'ds' }, template: { Text: { text: '${name}' } } }, resolve)
     expect(r.errors).toEqual([])
+  })
+
+  it('errors on Repeat dataSource using name instead of source', () => {
+    const r = validateComponent({ id: 'c1', component: 'Repeat', dataSource: { name: 'items' }, template: { Text: { text: '${x}' } } }, resolve)
+    expect(r.errors.some((e) => e.includes('dataSource.source') && e.includes('name'))).toBe(true)
+  })
+
+  it('warns when Repeat dataSource includes legacy name alongside source', () => {
+    const r = validateComponent({ id: 'c1', component: 'Repeat', dataSource: { source: 'items', name: 'legacy' }, template: { Text: { text: '${x}' } } }, resolve)
+    expect(r.errors).toEqual([])
+    expect(r.warnings.some((w) => w.includes('name') && w.includes('ignored'))).toBe(true)
   })
 
   it('errors on Repeat missing dataSource', () => {

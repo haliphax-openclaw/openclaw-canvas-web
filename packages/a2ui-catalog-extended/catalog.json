@@ -130,9 +130,22 @@
           },
           "dataSource": {
             "type": "object",
-            "description": "Data source binding"
+            "description": "Binding to a surface data source; use property \"source\" (string key), same as Table/Text/Badge — not \"name\".",
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Name of the data source (matches keys under dataSourcePush.sources / $sources)"
+              }
+            },
+            "required": [
+              "source"
+            ]
           }
-        }
+        },
+        "required": [
+          "template",
+          "dataSource"
+        ]
       }
     },
     {
