@@ -15,6 +15,7 @@ import A2UIModal from '../../packages/a2ui-catalog-basic/src/A2UIModal.vue'
 import A2UITextField from '../../packages/a2ui-catalog-basic/src/A2UITextField.vue'
 import A2UIDateTimeInput from '../../packages/a2ui-catalog-basic/src/A2UIDateTimeInput.vue'
 import A2UIIcon from '../../packages/a2ui-catalog-basic/src/A2UIIcon.vue'
+import A2UIAudioPlayer from '../../packages/a2ui-catalog-basic/src/A2UIAudioPlayer.vue'
 import A2UIBadge from '../../packages/a2ui-catalog-extended/src/A2UIBadge.vue'
 import A2UITable from '../../packages/a2ui-catalog-extended/src/A2UITable.vue'
 import A2UIStack from '../../packages/a2ui-catalog-extended/src/A2UIStack.vue'
@@ -40,6 +41,7 @@ export const catalogComponents: Record<string, { component: unknown }> = {
   TextField: { component: A2UITextField },
   DateTimeInput: { component: A2UIDateTimeInput },
   Icon: { component: A2UIIcon },
+  AudioPlayer: { component: A2UIAudioPlayer },
   Badge: { component: A2UIBadge },
   Table: { component: A2UITable },
   Stack: { component: A2UIStack },

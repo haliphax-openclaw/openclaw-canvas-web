@@ -15,6 +15,7 @@ import A2UIModal from './A2UIModal.vue'
 import A2UITextField from './A2UITextField.vue'
 import A2UIDateTimeInput from './A2UIDateTimeInput.vue'
 import A2UIIcon from './A2UIIcon.vue'
+import A2UIAudioPlayer from './A2UIAudioPlayer.vue'
 
 const definition: PackageDefinition = {
   components: [
@@ -34,6 +35,7 @@ const definition: PackageDefinition = {
     { name: 'TextField', component: A2UITextField },
     { name: 'DateTimeInput', component: A2UIDateTimeInput },
     { name: 'Icon', component: A2UIIcon },
+    { name: 'AudioPlayer', component: A2UIAudioPlayer },
   ],
 }
 

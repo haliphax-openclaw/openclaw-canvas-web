@@ -396,6 +396,38 @@
       }
     },
     {
+      "name": "AudioPlayer",
+      "description": "An audio player with custom controls for playback, seeking, and volume",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL of the audio to be played"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the audio, such as a title or summary"
+          },
+          "autoplay": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to start playing automatically"
+          },
+          "loop": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to loop the audio"
+          },
+          "muted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the audio is initially muted"
+          }
+        }
+      }
+    },
+    {
       "name": "DateTimeInput",
       "description": "A date/time picker input with ISO 8601 value binding",
       "schema": {
