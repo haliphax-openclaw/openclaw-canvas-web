@@ -126,9 +126,25 @@ describe('A2UICard', () => {
     expect(w.find('.card').classes()).toContain('lg:card-side')
   })
 
-  it('applies card-xs class when size is true', () => {
-    const w = mountCard({ size: "xs" })
-    expect(w.find('.card').classes()).toContain('card-xs')
+  it('applies card size class when size prop is set', () => {
+    const xs = mountCard({ size: 'xs' })
+    expect(xs.find('.card').classes()).toContain('card-xs')
+
+    const sm = mountCard({ size: 'sm' })
+    expect(sm.find('.card').classes()).toContain('card-sm')
+
+    const xl = mountCard({ size: 'xl' })
+    expect(xl.find('.card').classes()).toContain('card-xl')
+  })
+
+  it('does not apply size class when size is omitted', () => {
+    const w = mountCard({})
+    const classes = w.find('.card').classes()
+    expect(classes).not.toContain('card-xs')
+    expect(classes).not.toContain('card-sm')
+    expect(classes).not.toContain('card-md')
+    expect(classes).not.toContain('card-lg')
+    expect(classes).not.toContain('card-xl')
   })
 
   it('applies correct shadow class', () => {
