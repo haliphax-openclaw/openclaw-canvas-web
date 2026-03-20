@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A2UI All Components Catalog",
+  "description": "Meta-catalog combining all basic and extended A2UI components",
+  "type": "object",
+  "components": [
+    { "name": "Column", "description": "Vertical flex container for child components" },
+    { "name": "Row", "description": "Horizontal flex container for child components" },
+    { "name": "Text", "description": "Text display with variant styling and data binding" },
+    { "name": "Button", "description": "Clickable button with variant styling and action support" },
+    { "name": "Image", "description": "Image display with canvas URL rewriting" },
+    { "name": "Tabs", "description": "Tabbed container with configurable position" },
+    { "name": "Divider", "description": "Visual horizontal divider" },
+    { "name": "Slider", "description": "Range slider input with filter binding" },
+    { "name": "Checkbox", "description": "Checkbox input with filter binding" },
+    { "name": "Badge", "description": "Inline status badge with variant styling" },
+    { "name": "Table", "description": "Data table with sorting and formatting support" },
+    { "name": "Stack", "description": "Stacked container for overlapping child components" },
+    { "name": "Spacer", "description": "Flexible spacer that fills available space" },
+    { "name": "Select", "description": "Single-select dropdown" },
+    { "name": "MultiSelect", "description": "Multi-select dropdown" },
+    { "name": "ProgressBar", "description": "Progress bar with label and data binding support" },
+    { "name": "Repeat", "description": "Data-driven repeater that renders a template for each row" },
+    { "name": "Accordion", "description": "Collapsible accordion panels" }
+  ]
+}

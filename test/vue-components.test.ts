@@ -9,10 +9,48 @@ vi.mock('../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
 
-// Mock the virtual catalog module (no catalog packages in test)
-vi.mock('virtual:openclaw-catalogs', () => ({
-  catalogComponents: {},
-}))
+// Mock the virtual catalog module — all components now resolve through catalogs
+vi.mock('virtual:openclaw-catalogs', async () => {
+  const A2UIText = (await import('../src/client/components/A2UIText.vue')).default
+  const A2UIButton = (await import('../src/client/components/A2UIButton.vue')).default
+  const A2UIImage = (await import('../src/client/components/A2UIImage.vue')).default
+  const A2UIColumn = (await import('../src/client/components/A2UIColumn.vue')).default
+  const A2UIRow = (await import('../src/client/components/A2UIRow.vue')).default
+  const A2UIStack = (await import('../src/client/components/A2UIStack.vue')).default
+  const A2UISpacer = (await import('../src/client/components/A2UISpacer.vue')).default
+  const A2UISelect = (await import('../src/client/components/A2UISelect.vue')).default
+  const A2UICheckbox = (await import('../src/client/components/A2UICheckbox.vue')).default
+  const A2UIProgressBar = (await import('../src/client/components/A2UIProgressBar.vue')).default
+  const A2UISlider = (await import('../src/client/components/A2UISlider.vue')).default
+  const A2UIDivider = (await import('../src/client/components/A2UIDivider.vue')).default
+  const A2UIRepeat = (await import('../src/client/components/A2UIRepeat.vue')).default
+  const A2UIAccordion = (await import('../src/client/components/A2UIAccordion.vue')).default
+  const A2UITabs = (await import('../src/client/components/A2UITabs.vue')).default
+  const A2UIBadge = (await import('../packages/a2ui-catalog-extended/src/A2UIBadge.vue')).default
+  const A2UITable = (await import('../packages/a2ui-catalog-extended/src/A2UITable.vue')).default
+  return {
+    catalogComponents: {
+      Column: { component: A2UIColumn },
+      Row: { component: A2UIRow },
+      Text: { component: A2UIText },
+      Button: { component: A2UIButton },
+      Image: { component: A2UIImage },
+      Stack: { component: A2UIStack },
+      Spacer: { component: A2UISpacer },
+      Select: { component: A2UISelect },
+      MultiSelect: { component: A2UISelect },
+      Checkbox: { component: A2UICheckbox },
+      ProgressBar: { component: A2UIProgressBar },
+      Slider: { component: A2UISlider },
+      Divider: { component: A2UIDivider },
+      Repeat: { component: A2UIRepeat },
+      Accordion: { component: A2UIAccordion },
+      Tabs: { component: A2UITabs },
+      Badge: { component: A2UIBadge },
+      Table: { component: A2UITable },
+    },
+  }
+})
 
 // Mock deep-link for DeepLinkConfirm and composables
 vi.mock('../src/client/services/deep-link', () => ({

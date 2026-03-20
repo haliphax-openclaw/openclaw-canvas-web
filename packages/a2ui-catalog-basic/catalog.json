@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A2UI Basic Catalog",
+  "description": "Core first-party A2UI components",
+  "type": "object",
+  "components": [
+    {
+      "name": "Column",
+      "description": "Vertical flex container for child components",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Child component IDs"
+          }
+        }
+      }
+    },
+    {
+      "name": "Row",
+      "description": "Horizontal flex container for child components",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Child component IDs"
+          }
+        }
+      }
+    },
+    {
+      "name": "Text",
+      "description": "Text display with variant styling and data binding",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Display text (supports template interpolation)"
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["h1", "h2", "h3", "h4", "h5", "h6", "body", "label"],
+            "default": "body",
+            "description": "Text variant controlling the HTML tag"
+          },
+          "strokeWidth": {
+            "type": "string",
+            "description": "CSS text stroke width"
+          }
+        }
+      }
+    },
+    {
+      "name": "Button",
+      "description": "Clickable button with variant styling and action support",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Button label text"
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["default", "neutral", "primary", "secondary", "accent", "info", "success", "warning", "error", "borderless"],
+            "default": "default",
+            "description": "Visual variant"
+          },
+          "href": {
+            "type": "string",
+            "description": "OpenClaw scheme URL for button action"
+          }
+        }
+      }
+    },
+    {
+      "name": "Image",
+      "description": "Image display with canvas URL rewriting",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string",
+            "description": "Image source URL"
+          },
+          "alt": {
+            "type": "string",
+            "description": "Alt text for accessibility"
+          }
+        }
+      }
+    },
+    {
+      "name": "Tabs",
+      "description": "Tabbed container with configurable position",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "tabs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "child": { "type": "string" }
+              }
+            },
+            "description": "Tab definitions with labels and child component IDs"
+          },
+          "position": {
+            "type": "string",
+            "enum": ["top", "bottom", "left", "right", "hidden"],
+            "default": "top",
+            "description": "Tab bar position"
+          },
+          "height": {
+            "type": "string",
+            "default": "auto",
+            "description": "Fixed height for tab content area"
+          },
+          "active": {
+            "type": "integer",
+            "default": 0,
+            "description": "Initially active tab index"
+          }
+        }
+      }
+    },
+    {
+      "name": "Divider",
+      "description": "Visual horizontal divider",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "Slider",
+      "description": "Range slider input with filter binding",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "default": 0,
+            "description": "Minimum value"
+          },
+          "max": {
+            "type": "number",
+            "default": 100,
+            "description": "Maximum value"
+          },
+          "value": {
+            "type": "number",
+            "default": 0,
+            "description": "Current value"
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional label text"
+          }
+        }
+      }
+    },
+    {
+      "name": "Checkbox",
+      "description": "Checkbox input with filter binding",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Checkbox label text"
+          },
+          "checked": {
+            "type": "boolean",
+            "default": false,
+            "description": "Initial checked state"
+          }
+        }
+      }
+    }
+  ]
+}

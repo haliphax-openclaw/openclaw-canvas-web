@@ -7,41 +7,9 @@ import { defineComponent, computed } from 'vue'
 import type { Component } from 'vue'
 import { useStore } from 'vuex'
 import { catalogComponents } from 'virtual:openclaw-catalogs'
-import A2UIColumn from './A2UIColumn.vue'
-import A2UIRow from './A2UIRow.vue'
-import A2UIText from './A2UIText.vue'
-import A2UIButton from './A2UIButton.vue'
-import A2UIImage from './A2UIImage.vue'
-import A2UIStack from './A2UIStack.vue'
-import A2UISpacer from './A2UISpacer.vue'
-import A2UISelect from './A2UISelect.vue'
-import A2UICheckbox from './A2UICheckbox.vue'
-import A2UIProgressBar from './A2UIProgressBar.vue'
-import A2UISlider from './A2UISlider.vue'
-import A2UIDivider from './A2UIDivider.vue'
-import A2UIRepeat from './A2UIRepeat.vue'
-import A2UIAccordion from './A2UIAccordion.vue'
-import A2UITabs from './A2UITabs.vue'
 
-/** Built-in component map — highest priority in resolution */
-const builtinMap: Record<string, Component> = {
-  Column: A2UIColumn,
-  Row: A2UIRow,
-  Text: A2UIText,
-  Button: A2UIButton,
-  Image: A2UIImage,
-  Stack: A2UIStack,
-  Spacer: A2UISpacer,
-  Select: A2UISelect,
-  MultiSelect: A2UISelect,
-  Checkbox: A2UICheckbox,
-  ProgressBar: A2UIProgressBar,
-  Slider: A2UISlider,
-  Divider: A2UIDivider,
-  Repeat: A2UIRepeat,
-  Accordion: A2UIAccordion,
-  Tabs: A2UITabs,
-}
+/** Built-in component map — all components now resolve through the catalog system */
+const builtinMap: Record<string, Component> = {}
 
 /**
  * Resolve a component by name using two-tier lookup:

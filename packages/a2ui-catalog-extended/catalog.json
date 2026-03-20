@@ -54,6 +54,161 @@
           }
         }
       }
+    },
+    {
+      "name": "Stack",
+      "description": "Stacked container for overlapping child components",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Child component IDs"
+          }
+        }
+      }
+    },
+    {
+      "name": "Spacer",
+      "description": "Flexible spacer that fills available space",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "Select",
+      "description": "Single-select dropdown",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            },
+            "description": "Static option list"
+          },
+          "selected": {
+            "type": "string",
+            "description": "Currently selected value"
+          }
+        }
+      }
+    },
+    {
+      "name": "MultiSelect",
+      "description": "Multi-select dropdown (same component as Select with multi mode)",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            },
+            "description": "Static option list"
+          },
+          "selected": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Currently selected values"
+          },
+          "multi": {
+            "type": "boolean",
+            "const": true,
+            "description": "Always true for MultiSelect"
+          }
+        }
+      }
+    },
+    {
+      "name": "ProgressBar",
+      "description": "Progress bar with label and data binding support",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Progress value (0-100)"
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional label (supports template interpolation)"
+          }
+        }
+      }
+    },
+    {
+      "name": "Repeat",
+      "description": "Data-driven repeater that renders a template for each row",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "type": "object",
+            "description": "Component template to repeat for each data row"
+          },
+          "sortable": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable sort controls"
+          },
+          "sortField": {
+            "type": "string",
+            "description": "Field name to sort by"
+          },
+          "emptyText": {
+            "type": "string",
+            "description": "Text shown when no data rows exist"
+          },
+          "dataSource": {
+            "type": "object",
+            "description": "Data source binding"
+          }
+        }
+      }
+    },
+    {
+      "name": "Accordion",
+      "description": "Collapsible accordion panels",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "panels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "child": { "type": "string" },
+                "content": { "type": "string" }
+              }
+            },
+            "description": "Panel definitions"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["single", "multi"],
+            "default": "single",
+            "description": "Expansion mode"
+          },
+          "expanded": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "description": "Initially expanded panel indices"
+          }
+        }
+      }
     }
   ]
 }
