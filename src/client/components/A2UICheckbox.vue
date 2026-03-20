@@ -7,8 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { wsClient } from '../services/ws-client'
-import { useFilterBind } from '../composables/useFilterBind'
+import { sendEvent, useFilterBind } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UICheckbox',
@@ -23,7 +22,7 @@ export default defineComponent({
     const { updateFilter, maybeEmit } = useFilterBind(props as any, { op: 'eq', nullValue: false })
     const onChange = (e: Event) => {
       const val = (e.target as HTMLInputElement).checked
-      wsClient.send({ type: 'a2ui.checkboxChange', componentId: props.componentId, checked: val })
+      sendEvent('a2ui.checkboxChange', { componentId: props.componentId, checked: val })
       updateFilter(val)
       maybeEmit(val)
     }

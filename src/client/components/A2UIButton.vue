@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref } from 'vue'
-import { wsClient } from '../services/ws-client'
+import { sendEvent } from '@haliphax-openclaw/a2ui-sdk'
 import { parseOpenClawUrl } from '../utils/url-schemes'
 
 const variantClassMap: Record<string, string> = {
@@ -50,7 +50,7 @@ export default defineComponent({
     }
 
     const onClick = () => {
-      wsClient.send({ type: 'a2ui.buttonClick', componentId: props.componentId })
+      sendEvent('a2ui.buttonClick', { componentId: props.componentId })
       if (!href.value) return
       const parsed = parseOpenClawUrl(href.value)
       if (!parsed) return

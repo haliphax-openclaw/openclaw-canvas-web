@@ -7,8 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource } from '../composables/useDataSource'
-import { formatString } from '../utils/format-string'
+import { useDataSource, formatString } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UIProgressBar',

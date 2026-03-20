@@ -4,8 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource } from '../composables/useDataSource'
-import { formatString } from '../utils/format-string'
+import { useDataSource, formatString } from '@haliphax-openclaw/a2ui-sdk'
 
 const hintMap: Record<string, string> = { h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4', h5: 'h5', h6: 'h6', body: 'p', label: 'span' }
 

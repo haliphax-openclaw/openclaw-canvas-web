@@ -22,6 +22,10 @@ vi.mock('../src/client/services/deep-link', () => ({
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
 import { wsClient } from '../src/client/services/ws-client'
+import { registerWsSend } from '@haliphax-openclaw/a2ui-sdk'
+
+// Wire up the SDK's sendEvent to the mocked wsClient.send
+registerWsSend(wsClient.send.bind(wsClient))
 import A2UIDivider from '../src/client/components/A2UIDivider.vue'
 import A2UISpacer from '../src/client/components/A2UISpacer.vue'
 import A2UIText from '../src/client/components/A2UIText.vue'

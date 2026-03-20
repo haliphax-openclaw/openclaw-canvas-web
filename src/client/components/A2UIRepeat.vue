@@ -23,9 +23,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch } from 'vue'
-import { useDataSource } from '../composables/useDataSource'
-import { useSortable, type SortDirection } from '../composables/useSortable'
-import { formatString } from '../utils/format-string'
+import { useDataSource, useSortable, formatString, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'

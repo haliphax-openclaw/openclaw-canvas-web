@@ -7,8 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { wsClient } from '../services/ws-client'
-import { useFilterBind } from '../composables/useFilterBind'
+import { sendEvent, useFilterBind } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UISlider',
@@ -25,7 +24,7 @@ export default defineComponent({
     const { updateFilter, maybeEmit } = useFilterBind(props as any, { op: 'gte', get nullValue() { return min.value } })
     const onInput = (e: Event) => {
       const val = Number((e.target as HTMLInputElement).value)
-      wsClient.send({ type: 'a2ui.sliderChange', componentId: props.componentId, value: val })
+      sendEvent('a2ui.sliderChange', { componentId: props.componentId, value: val })
       updateFilter(val)
       maybeEmit(val)
     }

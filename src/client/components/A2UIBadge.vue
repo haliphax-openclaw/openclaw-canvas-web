@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource } from '../composables/useDataSource'
+import { useDataSource } from '@haliphax-openclaw/a2ui-sdk'
 
 const validVariants = ['success', 'warning', 'error', 'info']
 const variantClassMap: Record<string, string> = {

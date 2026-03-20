@@ -9,9 +9,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { wsClient } from '../services/ws-client'
-import { useFilterBind } from '../composables/useFilterBind'
-import { useOptionsFrom } from '../composables/useOptionsFrom'
+import { sendEvent, useFilterBind, useOptionsFrom } from '@haliphax-openclaw/a2ui-sdk'
 
 export default defineComponent({
   name: 'A2UISelect',
@@ -43,7 +41,7 @@ export default defineComponent({
 
     const onChange = (e: Event) => {
       const value = (e.target as HTMLSelectElement).value
-      wsClient.send({ type: 'a2ui.selectChange', componentId: props.componentId, value })
+      sendEvent('a2ui.selectChange', { componentId: props.componentId, value })
       updateFilter(value)
       maybeEmit(value)
     }
@@ -51,7 +49,7 @@ export default defineComponent({
     const onChangeMulti = (e: Event) => {
       const sel = e.target as HTMLSelectElement
       const values = Array.from(sel.selectedOptions, (o) => o.value)
-      wsClient.send({ type: 'a2ui.selectChange', componentId: props.componentId, values })
+      sendEvent('a2ui.selectChange', { componentId: props.componentId, values })
       updateFilter(values)
       maybeEmit(values)
     }

@@ -1,23 +1,9 @@
 import type { Module } from 'vuex'
 import type { RootState } from './index'
-import { applyFilters, type FieldFilter } from '../services/filter-engine'
+import { applyFilters } from '@haliphax-openclaw/a2ui-sdk'
+import type { A2UISurfaceState, DataSource, FieldFilter } from '@haliphax-openclaw/a2ui-sdk'
 
-export interface DataSource {
-  fields: string[]
-  rows: Record<string, unknown>[]
-  primaryKey?: string
-}
-
-export interface A2UISurfaceState {
-  components: Record<string, Record<string, unknown>>
-  root: string | null
-  dataModel: Record<string, unknown>
-  sources: Record<string, DataSource>
-  filters: Record<string, FieldFilter[]>
-  theme?: string
-  catalogId?: string
-  sendDataModel?: boolean
-}
+export type { A2UISurfaceState, DataSource, FieldFilter }
 
 export interface A2UIState {
   surfaces: Record<string, A2UISurfaceState>

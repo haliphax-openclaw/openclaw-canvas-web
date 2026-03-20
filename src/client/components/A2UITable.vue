@@ -17,8 +17,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { useDataSource } from '../composables/useDataSource'
-import { useSortable } from '../composables/useSortable'
+import { useDataSource, useSortable } from '@haliphax-openclaw/a2ui-sdk'
 
 const builtinFormatters: Record<string, (v: unknown) => string> = {
   boolean: (v) => v ? '✅' : '❌',
