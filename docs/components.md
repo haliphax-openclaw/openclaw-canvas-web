@@ -120,7 +120,7 @@ The `active` prop reacts to surface updates, allowing agents to switch tabs prog
 
 ### Text
 
-Text display component. Renders as `<p>` by default, or as heading/span based on `variant`. Supports reactive data binding with template interpolation.
+Text display component. Renders as `<p>` by default, or as heading/span based on `variant`. Supports reactive data binding via **`formatString`** interpolation: use **`${expression}`** (A2UI-style) or the equivalent **`{{expression}}`** — same rules for both (field names, `$value` / aggregate keys, JSON Pointer paths like `/segment/key`, and `| transformName` where transforms are defined, e.g. on `Repeat`).
 
 **Static mode:**
 
@@ -148,19 +148,19 @@ Text display component. Renders as `<p>` by default, or as heading/span based on
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `text` | `string \| { literalString: string }` | Static text content. Supports `{{field}}` placeholders when `dataSource` is set — resolves against the first filtered row. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
+| `text` | `string \| { literalString: string }` | Static text content. With `dataSource`, supports **`formatString`** placeholders (`${field}` or `{{field}}`) against the first filtered row, `${$value}` / `{{$value}}` for a single aggregate, and `${$key}` / `{{$key}}` for compound aggregates. |
 | `variant` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
 | `strokeWidth` | `string` | CSS text stroke width (e.g. `"1px"`). Renders a black outline for readability over images. |
 | `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
 
-Display priority: `mappedProps.text` > text with `{{}}` template interpolation > `aggregatedValue` > static `text`.
+Display priority: `mappedProps.text` > text with template interpolation (`${}` / `{{}}`) > `aggregatedValue` > static `text`.
 
-Template placeholders in `text` are resolved reactively — when the data source changes (new data pushed, filters applied), the text updates automatically. Placeholders resolve against:
-- `{{$value}}` — single aggregate result
-- `{{$key}}` — compound aggregate keys (e.g. `{{$count}}`, `{{$total}}`)
-- `{{field}}` — field from the first row of the filtered data source
+Template placeholders in `text` are resolved reactively — when the data source changes (new data pushed, filters applied), the text updates automatically. Each placeholder resolves against:
+- **`$value`** (e.g. `${$value}` or `{{$value}}`) — single aggregate result
+- **Compound aggregate keys** (e.g. `${$count}` / `{{$count}}`, `${$total}` / `{{$total}}`)
+- **Row fields** (e.g. `${name}` / `{{name}}`) — first row of the filtered data source
 
-Map templates (`dataSource.map`) also support `{{field}}` placeholders resolved against the first row, in addition to `{{$key}}` aggregate keys.
+Map templates (`dataSource.map`) use the same **`formatString`** rules: `${...}` or `{{...}}` against the first row plus aggregate keys.
 
 ### Badge
 
@@ -186,7 +186,7 @@ Inline badge with variant styling. Supports static text or data source binding w
 
 Display priority: `mappedProps.text` > `aggregatedValue` > static `text`.
 
-Map templates support `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates:
+Map templates use **`formatString`** (`${$value}` / `{{$value}}`, `${$key}` / `{{$key}}`, etc.):
 
 ```json
 {"Badge": {"variant": "success", "dataSource": {"source": "runs", "aggregates": {"$count": {"fn": "count", "where": {"field": "status", "op": "eq", "value": "pass"}}}, "map": {"text": "✓ {{$count}}"}}}}
@@ -229,14 +229,14 @@ Progress bar with optional reactive data binding. Commonly used inside Repeat te
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `value` | `number \| string` | Progress percentage (clamped 0–100). Supports `{{field}}` placeholders when `dataSource` is set — resolved value is parsed as a number. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
-| `label` | `string` | Optional label above the bar. Supports `{{field}}`, `{{$value}}`, and `{{$key}}` placeholders when `dataSource` is set. |
+| `value` | `number \| string` | Progress percentage (clamped 0–100). With `dataSource`, **`formatString`** on strings: `${field}` / `{{field}}`, aggregates (`$value`, `$key`), then parsed as a number. |
+| `label` | `string` | Optional label above the bar. With `dataSource`, same **`formatString`** rules as `value`. |
 | `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
 
-Template placeholders in both `label` and `value` are resolved reactively — when the data source changes (new data pushed, filters applied), the progress bar updates automatically. Placeholders resolve against:
-- `{{$value}}` — single aggregate result
-- `{{$key}}` — compound aggregate keys (e.g. `{{$count}}`, `{{$total}}`)
-- `{{field}}` — field from the first row of the filtered data source
+Template placeholders in both `label` and `value` use **`formatString`** and resolve reactively when the data source changes. They resolve against:
+- **`$value`** (`${$value}` / `{{$value}}`) — single aggregate result
+- **Compound keys** (`${$count}` / `{{$count}}`, etc.)
+- **Row fields** (`${field}` / `{{field}}`) — first filtered row
 
 Inside a Repeat template with transforms:
 
@@ -324,7 +324,7 @@ Data-driven iteration component. Renders a template component for each row in a 
 | Prop | Type | Description |
 |------|------|-------------|
 | `dataSource` | `DataSourceBinding` | Data source to iterate over |
-| `template` | `Record<string, object>` | Component template with `{{field}}` placeholders |
+| `template` | `Record<string, object>` | Component template; string props use **`formatString`** (`${field}` or `{{field}}`, optional `| transform`) |
 | `transforms` | `Record<string, { fn: string, field?: string }>` | Named transform definitions |
 | `emptyText` | `string` | Text shown when no rows match |
 | `sortable` | `boolean` | Enable a sort direction dropdown above repeated content |
