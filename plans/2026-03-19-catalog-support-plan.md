@@ -607,39 +607,39 @@ The following components are custom extensions (not in the A2UI basic catalog) a
 
 ## 9. Implementation Steps
 
-### Step 1: Create SDK package skeleton
+### ~~Step 1: Create SDK package skeleton~~ ✅
 
 Create `packages/a2ui-sdk/` with `package.json`, `tsconfig.json`, and barrel exports. Copy types and composables from the main app. Set up TypeScript path aliases so the main app can import from `@haliphax-openclaw/a2ui-sdk` during development.
 
-### Step 2: Migrate internal imports
+### ~~Step 2: Migrate internal imports~~ ✅
 
 Update all built-in components and composables to import from `@haliphax-openclaw/a2ui-sdk` instead of relative paths. Verify no behavior change.
 
-### Step 3: Implement catalog discovery
+### ~~Step 3: Implement catalog discovery~~ ✅
 
 Create `src/server/services/catalog-registry.ts`. Implement `node_modules` scanning for packages with the `openclaw-canvas-web` field. Add the `/api/catalogs` endpoint.
 
-### Step 4: Implement Vite plugin
+### ~~Step 4: Implement Vite plugin~~ ✅
 
 Create `src/build/vite-plugin-catalogs.ts`. Generate the `virtual:openclaw-catalogs` module from the registry. Wire it into `vite.config.ts`.
 
-### Step 5: Update A2UINode.vue resolution
+### ~~Step 5: Update A2UINode.vue resolution~~ ✅
 
 Replace the static `componentMap` with the two-tier lookup (built-in + catalog). Add `catalogId` filtering.
 
-### Step 6: Store catalogId on surfaces
+### ~~Step 6: Store catalogId on surfaces~~ ✅
 
 Add `catalogId` to `A2UISurfaceState`. Update `createSurface` handling in the server command processor and Vuex mutations.
 
-### Step 7: Extract Badge as test catalog
+### ~~Step 7: Extract Badge to extended catalog~~ ✅
 
-Create a test package `packages/a2ui-catalog-extended/` that exports Badge as a component package using the SDK. Install it locally. Add it to a test catalog via server config. Verify it renders correctly when referenced from a surface with the matching `catalogId`.
+Create `packages/a2ui-catalog-extended/` and extract Badge as the first component in the extended catalog package using the SDK. Install it locally via workspaces. Verify it renders correctly when referenced from a surface with the matching `catalogId`.
 
-### Step 8: Extract Table as complex test
+### ~~Step 8: Extract Table as complex test~~ ✅
 
-Move Table to the test catalog. Verify data binding, sorting, and formatters work through the SDK.
+Move Table to the extended catalog package. Verify data binding, sorting, and formatters work through the SDK.
 
-### Step 9: Documentation
+### ~~Step 9: Documentation~~ ✅
 
 Write a `docs/creating-catalog-packages.md` guide covering:
 - SDK installation
