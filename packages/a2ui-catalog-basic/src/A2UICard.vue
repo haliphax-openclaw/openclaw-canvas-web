@@ -37,6 +37,14 @@ const shadowMap: Record<string, string> = {
   xl: 'shadow-xl',
 }
 
+const sizeMap: Record<string, string> = {
+  xs: 'card-xs',
+  sm: 'card-sm',
+  md: 'card-md',
+  lg: 'card-lg',
+  xl: 'card-xl',
+}
+
 export default defineComponent({
   name: 'A2UICard',
   props: {
@@ -59,7 +67,7 @@ export default defineComponent({
       classes.push(shadowMap[shadow] ?? 'shadow-sm')
       if (variantMap[variant]) classes.push(variantMap[variant])
       if (d.side) classes.push('lg:card-side')
-      if (d.compact) classes.push('card-compact')
+      if (sizeMap[d.size]) classes.push(sizeMap[d.size])
       return classes
     })
     return { child, title, image, imageAlt, actions, resolvedImage, cardClasses }

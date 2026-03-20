@@ -126,9 +126,9 @@ describe('A2UICard', () => {
     expect(w.find('.card').classes()).toContain('lg:card-side')
   })
 
-  it('applies card-compact class when compact is true', () => {
-    const w = mountCard({ compact: true })
-    expect(w.find('.card').classes()).toContain('card-compact')
+  it('applies card-xs class when size is true', () => {
+    const w = mountCard({ size: "xs" })
+    expect(w.find('.card').classes()).toContain('card-xs')
   })
 
   it('applies correct shadow class', () => {
