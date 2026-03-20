@@ -428,6 +428,43 @@
       }
     },
     {
+      "name": "Video",
+      "description": "A video player with native controls and responsive sizing",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL of the video to display"
+          },
+          "autoplay": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to start playing automatically"
+          },
+          "loop": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to loop the video"
+          },
+          "muted": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the video is initially muted"
+          },
+          "controls": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to show playback controls"
+          },
+          "poster": {
+            "type": "string",
+            "description": "URL of the poster image to show before playback"
+          }
+        }
+      }
+    },
+    {
       "name": "DateTimeInput",
       "description": "A date/time picker input with ISO 8601 value binding",
       "schema": {
