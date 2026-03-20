@@ -46,6 +46,9 @@ Canvas HTML ──click openclaw://──▶ injected script ──postMessage�
 
 1. Create `src/client/components/A2UI<Name>.vue`.
 2. Add it to the `componentMap` in `A2UINode.vue`.
+3. Add the component entry (with `schema`) to the appropriate catalog's `catalog.json`.
+
+Component schemas in `catalog.json` are the single source of truth for JSONL validation. The server reads them at startup via `CatalogRegistry` and validates incoming component props against them. There is no separate hardcoded schema map — if a component isn't in a catalog, it passes through with an "unknown component" warning.
 
 ## File Layout
 

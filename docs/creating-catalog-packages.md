@@ -134,6 +134,34 @@ Each entry in `components` must have:
 - `description` — human-readable summary
 - `schema` — JSON Schema for the component's props (what goes in `def`)
 
+### Schema-driven validation
+
+The server reads component schemas from `catalog.json` at startup and uses them to validate incoming JSONL payloads. This means your catalog schemas are the single source of truth for prop validation — there is no separate hardcoded map.
+
+Validation behavior:
+- **Required props** — Use a top-level `"required"` array in the component's schema to mark mandatory props. Missing required props produce errors and the component is rejected.
+- **Type checking** — Prop values are checked against their declared `type`. Type mismatches produce errors.
+- **Unknown props** — Props not in the schema produce warnings but the component is still accepted.
+- **Unknown components** — Components not found in any registered catalog get an "unknown component" warning but pass through.
+
+Example with a required prop:
+
+```json
+{
+  "name": "BarChart",
+  "schema": {
+    "type": "object",
+    "required": ["dataSource"],
+    "properties": {
+      "dataSource": { "type": "object", "description": "Data source binding" },
+      "valueField": { "type": "string", "default": "value" }
+    }
+  }
+}
+```
+
+Meta-catalogs (like `a2ui-catalog-all`) that aggregate sub-catalogs don't need to duplicate schemas — the server resolves schemas from sub-catalog dependencies automatically.
+
 ## Entry Point
 
 The entry module default-exports a `PackageDefinition` containing a `ComponentRegistration` array:

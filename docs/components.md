@@ -187,10 +187,10 @@ Displays an image. Supports `openclaw-canvas://` URLs for canvas-relative paths.
 {"Image": {"src": "openclaw-canvas://chart.png", "alt": "Sales chart"}}
 ```
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `src` | `string` | Image URL (supports `openclaw-canvas://` for canvas file references) |
-| `alt` | `string` | Alt text for accessibility |
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `src` | `string` | Yes | Image URL (supports `openclaw-canvas://` for canvas file references) |
+| `alt` | `string` | No | Alt text for accessibility |
 
 ### ProgressBar
 
