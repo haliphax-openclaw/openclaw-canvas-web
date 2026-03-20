@@ -17,6 +17,8 @@ import { A2UIManager } from './services/a2ui-manager.js'
 import { A2UIStore } from './services/a2ui-store.js'
 import { NodeClient } from './services/node-client.js'
 import { JSONLWatcher } from './services/jsonl-watcher.js'
+import { CatalogRegistry } from './services/catalog-registry.js'
+import { catalogsRoute } from './routes/catalogs.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -67,6 +69,19 @@ if (fs.existsSync(clientDist)) {
 app.use(canvasRoute(fileResolver, BASE_PATH))
 app.use(scaffoldRoute())
 app.use(canvasConfigRoute())
+
+// Catalog discovery
+const catalogRegistry = new CatalogRegistry()
+const projectRoot = path.join(__dirname, '../..')
+catalogRegistry.discover(projectRoot).then(() => {
+  const catalogs = catalogRegistry.allCatalogs()
+  if (catalogs.length > 0) {
+    console.log(`Discovered ${catalogs.length} catalog(s): ${catalogs.map(c => c.catalogId).join(', ')}`)
+  }
+}).catch((err) => {
+  console.error('Catalog discovery failed:', err)
+})
+app.use(catalogsRoute(catalogRegistry))
 
 // Deep link proxy: openclaw://... → POST /api/agent → gateway /tools/invoke (sessions_spawn)
 if (GATEWAY_TOKEN) {
@@ -142,7 +157,7 @@ if (GATEWAY_TOKEN) {
   console.warn('No gateway token found — node registration disabled')
 }
 
-export { app, server, fileResolver, sessionManager, gateway, a2uiManager, nodeClient }
+export { app, server, fileResolver, sessionManager, gateway, a2uiManager, nodeClient, catalogRegistry }
 
 async function shutdown() {
   console.log('Shutting down…')
