@@ -17,7 +17,7 @@
     />
     <div class="a2ui-audio-controls">
       <button class="btn btn-sm btn-ghost" @click="togglePlay" :aria-label="isPlaying ? 'Pause' : 'Play'">
-        {{ isPlaying ? '⏸' : '▶' }}
+        {{ isPlaying ? iconPause : iconPlay }}
       </button>
       <span class="a2ui-audio-time">{{ formatTime(currentTime) }}</span>
       <input
@@ -52,6 +52,10 @@
 import { defineComponent, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { sendEvent } from '@haliphax-openclaw/a2ui-sdk'
 import { rewriteCanvasUrl } from './url-rewriter'
+
+/** Emoji presentation (U+FE0F) so play/pause match width/font with each other */
+const ICON_PLAY = '\u25B6\uFE0F'
+const ICON_PAUSE = '\u23F8\uFE0F'
 
 export default defineComponent({
   name: 'A2UIAudioPlayer',
@@ -152,6 +156,8 @@ export default defineComponent({
     }
 
     return {
+      iconPlay: ICON_PLAY,
+      iconPause: ICON_PAUSE,
       audioEl,
       resolvedUrl,
       description,
