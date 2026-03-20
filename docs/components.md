@@ -1,6 +1,6 @@
 # A2UI Component Reference
 
-Components are referenced by ID in the component tree. In v0.9, each component entry in an `updateComponents` command uses a flat shape:
+Components are referenced by ID in the component tree. Each component entry in an `updateComponents` command uses a flat shape:
 
 ```json
 {"id": "example", "component": "Text", "text": "Hello", "variant": "h1"}
@@ -373,7 +373,7 @@ Toggle checkbox with label. Sends an `a2ui.checkboxChange` WebSocket message wit
 
 ### TextField
 
-Aligned with [A2UI v0.9 basic catalog](https://a2ui.org/specification/v0_9/basic_catalog.json): text input with optional multiline (`longText` → `<textarea>`), validation regexp, Checkable `checks`, and `accessibility` hints.
+Per the [A2UI basic catalog](https://a2ui.org/specification/v0_9/basic_catalog.json): text input with optional multiline (`longText` → `<textarea>`), validation regexp, Checkable `checks`, and `accessibility` hints.
 
 ```json
 {"TextField": {"label": "Notes", "value": "", "variant": "longText"}}
@@ -391,7 +391,7 @@ Aligned with [A2UI v0.9 basic catalog](https://a2ui.org/specification/v0_9/basic
 {"TextField": {"label": "Code", "value": "", "checks": [{"condition": {"path": "/form/codeValid"}, "message": "Invalid code"}]}}
 ```
 
-**`variant` (v0.9):** `shortText` (default single-line), `longText` (multiline `<textarea>`), `number`, `obscured` (password). Use **`variant`**, not legacy `textFieldType` or a `multiline` flag. For dates/times use **`DateTimeInput`**, not TextField.
+**`variant`:** `shortText` (default single-line), `longText` (multiline `<textarea>`), `number`, `obscured` (password). **DateTimeInput** covers date and time picking.
 
 **Flat `updateComponents` examples (one field per variant):**
 
@@ -408,7 +408,7 @@ Aligned with [A2UI v0.9 basic catalog](https://a2ui.org/specification/v0_9/basic
 | `value` | `string` \| `{ literalString }` \| `{ path }` | No | Field value; `path` binds to `dataModel` |
 | `variant` | `string` | No | `shortText` (default), `longText` (textarea), `number`, `obscured` (password) |
 | `validationRegexp` | `string` | No | HTML `pattern` on single-line inputs (not on `longText`) |
-| `checks` | `{ condition, message }[]` | No | v0.9 Checkable: `condition` is boolean or `{ path }` to a boolean; failures show `message` |
+| `checks` | `{ condition, message }[]` | No | Checkable: `condition` is boolean or `{ path }` to a boolean; failures show `message` |
 | `accessibility` | `{ label?, description? }` | No | Extra assistive label and hint text (each DynamicString); description renders below the field |
 | `placeholder` | `string` | No | Optional placeholder (renderer extension) |
 
