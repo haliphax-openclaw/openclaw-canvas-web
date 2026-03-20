@@ -45,3 +45,63 @@ export function deepInterpolate(
   }
   return value
 }
+
+/**
+ * Second pass: any string still containing `${…}` (e.g. missed by a non-object branch) is sent through {@link formatString} again.
+ */
+export function sweepResidualTemplateStrings(
+  value: unknown,
+  row: Record<string, unknown>,
+  options?: FormatStringOptions,
+): unknown {
+  const plainRow = toRaw(row) as Record<string, unknown>
+  const plainOpts =
+    options?.allRows != null
+      ? { ...options, allRows: options.allRows.map((r) => toRaw(r) as Record<string, unknown>) }
+      : options
+
+  if (value !== null && value !== undefined && typeof value === 'object' && isProxy(value)) {
+    return sweepResidualTemplateStrings(toRaw(value), plainRow, plainOpts)
+  }
+
+  if (typeof value === 'string' && value.includes('${')) {
+    return formatString(value, plainRow, plainOpts)
+  }
+  if (value === null || value === undefined) {
+    return value
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => sweepResidualTemplateStrings(item, plainRow, plainOpts))
+  }
+  if (isPlainObject(value)) {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = sweepResidualTemplateStrings(v, plainRow, plainOpts)
+    }
+    return out
+  }
+  return value
+}
+
+/**
+ * Fully resolve a Repeat template inner def for one row. Repeat should pass the result as `def` to children so they need no repeat-specific logic.
+ */
+export function interpolateRepeatChildDef(
+  innerDef: unknown,
+  row: Record<string, unknown>,
+  options?: FormatStringOptions,
+): Record<string, unknown> {
+  let inner: unknown = innerDef
+  while (inner !== null && inner !== undefined && typeof inner === 'object' && isProxy(inner)) {
+    inner = toRaw(inner)
+  }
+
+  const plainRow = { ...toRaw(row) } as Record<string, unknown>
+  const plainOpts =
+    options?.allRows != null
+      ? { ...options, allRows: options.allRows.map((r) => ({ ...toRaw(r) } as Record<string, unknown>)) }
+      : options
+
+  const once = deepInterpolate(inner, plainRow, plainOpts)
+  return sweepResidualTemplateStrings(once, plainRow, plainOpts) as Record<string, unknown>
+}

@@ -18,6 +18,5 @@ export { sendEvent, registerWsSend } from './ws'
 // Utilities
 export { formatString } from './utils/format-string'
 export type { FormatStringOptions } from './utils/format-string'
-export { deepInterpolate } from './utils/deep-interpolate'
-export { A2UI_REPEAT_FMT_KEY, type RepeatFmtContext } from './repeat-context'
+export { deepInterpolate, sweepResidualTemplateStrings, interpolateRepeatChildDef } from './utils/deep-interpolate'
 export { getDataModelValue, resolveDynamicString, resolveDynamicBoolean } from './utils/data-model-resolve'

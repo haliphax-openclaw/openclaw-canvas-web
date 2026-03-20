@@ -8,15 +8,12 @@
       </select>
     </div>
     <div v-if="resolvedItems.length" class="a2ui-repeat-items">
-      <A2UIRepeatItem
+      <component
         v-for="(item, idx) in resolvedItems"
         :key="idx"
-        :item-component="item.component"
-        :item-def="item.def"
-        :row="item.row"
-        :repeat-transforms="item.transforms"
-        :repeat-all-rows="item.allRows"
-        :child-component-id="componentId + ':' + idx"
+        :is="item.component"
+        :def="item.def"
+        :component-id="componentId + ':' + idx"
         :surface-id="surfaceId"
       />
     </div>
@@ -26,11 +23,10 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, toRaw } from 'vue'
-import { useDataSource, useSortable, deepInterpolate, formatString, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
+import { useDataSource, useSortable, interpolateRepeatChildDef, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'
-import A2UIRepeatItem from './A2UIRepeatItem.vue'
 
 const templateComponents: Record<string, ReturnType<typeof defineComponent>> = {
   ProgressBar: A2UIProgressBar,
@@ -40,7 +36,6 @@ const templateComponents: Record<string, ReturnType<typeof defineComponent>> = {
 
 export default defineComponent({
   name: 'A2UIRepeat',
-  components: { A2UIRepeatItem },
   props: {
     def: { type: Object, required: true },
     surfaceId: { type: String, required: true },
@@ -72,19 +67,9 @@ export default defineComponent({
       const fmtOpts = { transforms, allRows: rows.map((r) => ({ ...toRaw(r) })) }
       return rows.map((row: Record<string, unknown>) => {
         const plainRow = { ...toRaw(row) }
-        const interpolated = deepInterpolate(innerDef, plainRow, fmtOpts) as Record<string, unknown>
-        for (const k of ['label', 'value', 'text'] as const) {
-          const v = interpolated[k]
-          if (typeof v === 'string' && v.includes('${')) {
-            interpolated[k] = formatString(v, plainRow, fmtOpts)
-          }
-        }
         return {
-          row: plainRow,
-          transforms,
-          allRows: fmtOpts.allRows,
           component: comp,
-          def: interpolated,
+          def: interpolateRepeatChildDef(innerDef, plainRow, fmtOpts),
         }
       })
     })

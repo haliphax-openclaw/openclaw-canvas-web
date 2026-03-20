@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, inject, type ComputedRef } from 'vue'
-import { useDataSource, formatString, A2UI_REPEAT_FMT_KEY, type RepeatFmtContext } from '@haliphax-openclaw/a2ui-sdk'
+import { defineComponent, computed } from 'vue'
+import { useDataSource, formatString } from '@haliphax-openclaw/a2ui-sdk'
 
 const hintMap: Record<string, string> = { h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4', h5: 'h5', h6: 'h6', body: 'p', label: 'span' }
 
@@ -16,7 +16,6 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const repeatFmtRef = inject(A2UI_REPEAT_FMT_KEY, undefined) as ComputedRef<RepeatFmtContext> | undefined
     const { aggregatedValue, compoundAggregates, filteredRows, mappedProps, binding } = useDataSource(props as any)
     const tag = computed(() => hintMap[(props.def as any).variant] ?? 'p')
     const strokeWidth = computed(() => (props.def as any).strokeWidth ?? null)
@@ -35,14 +34,7 @@ export default defineComponent({
         if (aggregatedValue.value != null) return aggregatedValue.value
       }
       const t = (props.def as any).text
-      const fallback = t?.literalString ?? t ?? ''
-      if (typeof fallback === 'string' && fallback.includes('${')) {
-        const repeatCtx = repeatFmtRef?.value
-        if (repeatCtx) {
-          return formatString(fallback, { ...repeatCtx.row }, { transforms: repeatCtx.transforms, allRows: repeatCtx.allRows })
-        }
-      }
-      return fallback
+      return t?.literalString ?? t ?? ''
     })
     return { tag, displayText, strokeWidth }
   },
