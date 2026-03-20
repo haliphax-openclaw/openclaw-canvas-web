@@ -358,6 +358,44 @@
       }
     },
     {
+      "name": "Icon",
+      "description": "Displays a named icon or custom SVG path",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The icon name (string) or an object with a custom SVG path ({ path: string })",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "accountCircle", "add", "arrowBack", "arrowForward", "attachFile",
+                  "calendarToday", "call", "camera", "check", "close",
+                  "delete", "download", "edit", "event", "error",
+                  "fastForward", "favorite", "favoriteOff", "folder", "help",
+                  "home", "info", "locationOn", "lock", "lockOpen",
+                  "mail", "menu", "moreVert", "moreHoriz", "notificationsOff",
+                  "notifications", "pause", "payment", "person", "phone",
+                  "photo", "play", "print", "refresh", "rewind",
+                  "search", "send", "settings", "share", "shoppingCart",
+                  "skipNext", "skipPrevious", "star", "starHalf", "starOff",
+                  "stop", "upload", "visibility", "visibilityOff", "volumeDown",
+                  "volumeMute", "volumeOff", "volumeUp", "warning"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" }
+                },
+                "required": ["path"]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
       "name": "DateTimeInput",
       "description": "A date/time picker input with ISO 8601 value binding",
       "schema": {

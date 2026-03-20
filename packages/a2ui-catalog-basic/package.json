@@ -9,7 +9,10 @@
     "entry": "./src/index.ts"
   },
   "peerDependencies": {
-    "vue": "^3.5.0",
-    "@haliphax-openclaw/a2ui-sdk": "^0.1.0"
+    "@haliphax-openclaw/a2ui-sdk": "^0.1.0",
+    "vue": "^3.5.0"
+  },
+  "dependencies": {
+    "@mdi/js": "^7.4.47"
   }
 }
