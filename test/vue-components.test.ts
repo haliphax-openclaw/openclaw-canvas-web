@@ -37,8 +37,8 @@ vi.mock('virtual:openclaw-catalogs', async () => {
       Image: { component: A2UIImage },
       Stack: { component: A2UIStack },
       Spacer: { component: A2UISpacer },
-      Select: { component: A2UISelect },
-      MultiSelect: { component: A2UISelect },
+      ChoicePicker: { component: A2UISelect },
+      MultiChoicePicker: { component: A2UISelect },
       Checkbox: { component: A2UICheckbox },
       ProgressBar: { component: A2UIProgressBar },
       Slider: { component: A2UISlider },
@@ -351,16 +351,15 @@ describe('A2UINode', () => {
     expect(w.html()).toBe('<!--v-if-->')
   })
 
-  it('resolves MultiSelect as Select with multi: true', () => {
+  it('resolves ChoicePicker', () => {
     const surfaces = {
       s1: {
-        components: { ms1: { component: 'MultiSelect', options: [{ value: 'a', label: 'A' }], selected: ['a'] } },
+        components: { ms1: { component: 'ChoicePicker', options: [{ value: 'a', label: 'A' }], selected: ['a'] } },
         root: 'ms1', dataModel: {}, sources: {}, filters: {},
       },
     }
     const w = mountWith(A2UINode, { componentId: 'ms1', surfaceId: 's1' }, surfaces)
     expect(w.findComponent(A2UISelect).exists()).toBe(true)
-    expect(w.find('select').attributes('multiple')).toBeDefined()
   })
 })
 

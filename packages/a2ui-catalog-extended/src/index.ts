@@ -3,7 +3,6 @@ import A2UIBadge from './A2UIBadge.vue'
 import A2UITable from './A2UITable.vue'
 import A2UIStack from './A2UIStack.vue'
 import A2UISpacer from './A2UISpacer.vue'
-import A2UISelect from './A2UISelect.vue'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIRepeat from './A2UIRepeat.vue'
 import A2UIAccordion from './A2UIAccordion.vue'
@@ -14,8 +13,6 @@ const definition: PackageDefinition = {
     { name: 'Table', component: A2UITable },
     { name: 'Stack', component: A2UIStack },
     { name: 'Spacer', component: A2UISpacer },
-    { name: 'Select', component: A2UISelect },
-    { name: 'MultiSelect', component: A2UISelect },
     { name: 'ProgressBar', component: A2UIProgressBar },
     { name: 'Repeat', component: A2UIRepeat },
     { name: 'Accordion', component: A2UIAccordion },

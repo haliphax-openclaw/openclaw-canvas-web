@@ -8,6 +8,7 @@ import A2UITabs from './A2UITabs.vue'
 import A2UIDivider from './A2UIDivider.vue'
 import A2UISlider from './A2UISlider.vue'
 import A2UICheckbox from './A2UICheckbox.vue'
+import A2UIChoicePicker from './A2UIChoicePicker.vue'
 
 const definition: PackageDefinition = {
   components: [
@@ -20,6 +21,7 @@ const definition: PackageDefinition = {
     { name: 'Divider', component: A2UIDivider },
     { name: 'Slider', component: A2UISlider },
     { name: 'Checkbox', component: A2UICheckbox },
+    { name: 'ChoicePicker', component: A2UIChoicePicker },
   ],
 }
 

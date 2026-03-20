@@ -12,7 +12,9 @@
         "properties": {
           "children": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "Child component IDs"
           }
         }
@@ -26,7 +28,9 @@
         "properties": {
           "children": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "Child component IDs"
           }
         }
@@ -44,7 +48,16 @@
           },
           "variant": {
             "type": "string",
-            "enum": ["h1", "h2", "h3", "h4", "h5", "h6", "body", "label"],
+            "enum": [
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+              "body",
+              "label"
+            ],
             "default": "body",
             "description": "Text variant controlling the HTML tag"
           },
@@ -67,7 +80,18 @@
           },
           "variant": {
             "type": "string",
-            "enum": ["default", "neutral", "primary", "secondary", "accent", "info", "success", "warning", "error", "borderless"],
+            "enum": [
+              "default",
+              "neutral",
+              "primary",
+              "secondary",
+              "accent",
+              "info",
+              "success",
+              "warning",
+              "error",
+              "borderless"
+            ],
             "default": "default",
             "description": "Visual variant"
           },
@@ -106,15 +130,25 @@
             "items": {
               "type": "object",
               "properties": {
-                "label": { "type": "string" },
-                "child": { "type": "string" }
+                "label": {
+                  "type": "string"
+                },
+                "child": {
+                  "type": "string"
+                }
               }
             },
             "description": "Tab definitions with labels and child component IDs"
           },
           "position": {
             "type": "string",
-            "enum": ["top", "bottom", "left", "right", "hidden"],
+            "enum": [
+              "top",
+              "bottom",
+              "left",
+              "right",
+              "hidden"
+            ],
             "default": "top",
             "description": "Tab bar position"
           },
@@ -181,6 +215,50 @@
             "type": "boolean",
             "default": false,
             "description": "Initial checked state"
+          }
+        }
+      }
+    },
+    {
+      "name": "ChoicePicker",
+      "description": "A component that allows selecting one or more options from a list",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The label for the group of options"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "multipleSelection",
+              "mutuallyExclusive"
+            ],
+            "default": "mutuallyExclusive",
+            "description": "Selection mode"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "value": {
+            "description": "The list of currently selected values"
+          },
+          "filterable": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, displays a search input to filter options"
           }
         }
       }
