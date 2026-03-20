@@ -15,41 +15,83 @@ Open `http://localhost:9999` in a browser.
 ## Architecture
 
 ```
+packages/
+├── a2ui-sdk/                     # @haliphax-openclaw/a2ui-sdk
+│   └── src/
+│       ├── index.ts              # Barrel exports
+│       ├── types.ts              # Shared types (A2UISurfaceState, DataSource, PackageDefinition, etc.)
+│       ├── filters.ts            # applyFilters, computeAggregate, formatCompact
+│       ├── ws.ts                 # sendEvent / registerWsSend
+│       ├── composables/          # useDataSource, useFilterBind, useOptionsFrom, useSortable
+│       └── utils/                # format-string, deep-link
+├── a2ui-catalog-basic/           # @haliphax-openclaw/a2ui-catalog-basic
+│   ├── catalog.json              # JSON Schema catalog definition
+│   └── src/
+│       ├── index.ts              # PackageDefinition (Column, Row, Text, Button, Image, Tabs, Divider, Slider, Checkbox, ChoicePicker)
+│       └── A2UI*.vue             # Component implementations
+├── a2ui-catalog-extended/        # @haliphax-openclaw/a2ui-catalog-extended
+│   ├── catalog.json
+│   └── src/
+│       ├── index.ts              # PackageDefinition (Badge, Table, Stack, Spacer, ProgressBar, Repeat, Accordion)
+│       └── A2UI*.vue
+├── a2ui-catalog-all/             # @haliphax-openclaw/a2ui-catalog-all
+│   ├── catalog.json
+│   └── src/
+│       └── index.ts              # Meta-catalog — re-exports basic + extended
 src/
+├── build/
+│   └── vite-plugin-catalogs.ts   # Vite plugin — discovers catalogs, generates virtual:openclaw-catalogs
 ├── server/
-│   ├── index.ts              # Express server, startup, shutdown
+│   ├── index.ts                  # Express server, startup, shutdown
 │   ├── services/
-│   │   ├── gateway.ts        # WebSocket server (/gateway for agents, /ws for SPA)
+│   │   ├── gateway.ts            # WebSocket server (/gateway for agents, /ws for SPA)
 │   │   ├── session-manager.ts
-│   │   ├── file-resolver.ts  # Path resolution with traversal guard
-│   │   ├── file-watcher.ts   # chokidar live reload
-│   │   ├── node-client.ts    # OpenClaw gateway node registration (Ed25519 auth, invoke handling)
-│   │   ├── a2ui-manager.ts   # A2UI surface state (in-memory cache, backed by a2ui-store)
-│   │   └── a2ui-store.ts     # SQLite persistence for A2UI surfaces (better-sqlite3)
+│   │   ├── file-resolver.ts      # Path resolution with traversal guard
+│   │   ├── file-watcher.ts       # chokidar live reload
+│   │   ├── jsonl-watcher.ts      # JSONL file watcher for A2UI auto-push
+│   │   ├── node-client.ts        # OpenClaw gateway node registration (Ed25519 auth, invoke handling)
+│   │   ├── a2ui-manager.ts       # A2UI surface state (in-memory cache, backed by a2ui-store)
+│   │   ├── a2ui-store.ts         # SQLite persistence for A2UI surfaces (better-sqlite3)
+│   │   ├── a2ui-pipeline.ts      # A2UI command processing pipeline
+│   │   ├── a2ui-commands.ts      # v0.8 → v0.9 normalization layer
+│   │   └── catalog-registry.ts   # Discovers catalog packages in node_modules/
 │   ├── shared/
-│   │   ├── deep-link-script.ts  # Injected script for openclaw:// deep links
-│   │   └── snapshot-script.ts   # Injected script for canvas snapshots (inlines dom-to-image-more)
+│   │   ├── deep-link-script.ts   # Injected script for openclaw:// deep links
+│   │   └── snapshot-script.ts    # Injected script for canvas snapshots
 │   ├── commands/
-│   │   ├── canvas.ts         # show, hide, navigate, navigateExternal, eval, snapshot
-│   │   └── a2ui.ts           # push (JSONL), reset
+│   │   ├── canvas.ts             # show, hide, navigate, navigateExternal, eval, snapshot
+│   │   └── a2ui.ts               # push (JSONL), reset
 │   └── routes/
-│       ├── canvas.ts         # GET /:session/:path
-│       ├── agent-proxy.ts    # POST /api/agent → gateway /tools/invoke (sessions_spawn)
-│       ├── file-spawn.ts    # POST /api/file-spawn → read prompt file → gateway /tools/invoke (sessions_spawn)
-│       └── scaffold.ts       # GET /scaffold
+│       ├── canvas.ts             # GET /:session/:path
+│       ├── catalogs.ts           # GET /api/catalogs
+│       ├── canvas-config.ts      # GET /api/canvas-config
+│       ├── agent-proxy.ts        # POST /api/agent → gateway /tools/invoke
+│       ├── file-spawn.ts         # POST /api/file-spawn → read prompt → sessions_spawn
+│       └── scaffold.ts           # GET /scaffold
 ├── client/
-│   ├── main.ts               # Vue app entry
+│   ├── main.ts                   # Vue app entry
+│   ├── router.ts                 # Vue Router
+│   ├── virtual-openclaw-catalogs.d.ts  # Type declaration for virtual module
 │   ├── views/
-│   │   ├── CanvasView.vue    # Main canvas — iframe, A2UI, external URLs
-│   │   └── ScaffoldView.vue  # Placeholder when no index.html
-│   ├── components/           # A2UI renderers (Column, Row, Text, Button, Image, Stack, Spacer, Badge, Checkbox, Divider, ProgressBar, Select, Slider, Table, Accordion, Tabs)
-│   ├── store/                # Vuex (session, panel visibility, a2ui surfaces)
-│   └── services/
-│       ├── ws-client.ts      # Browser WebSocket client
-│       └── url-rewriter.ts   # openclaw-canvas:// URL rewriter
-├── utils/
-│   └── url-schemes.ts        # Shared URL scheme parser (openclaw://, openclaw-fileprompt://, openclaw-canvas://)
-test/                          # vitest tests
+│   │   ├── CanvasView.vue        # Main canvas — iframe, A2UI, external URLs
+│   │   └── ScaffoldView.vue      # Placeholder when no index.html
+│   ├── components/
+│   │   ├── A2UINode.vue          # Component resolver (catalog-based, two-tier lookup)
+│   │   ├── A2UIRenderer.vue      # Surface renderer (DaisyUI theming via data-theme)
+│   │   ├── DeepLinkConfirm.vue   # Deep link confirmation dialog
+│   │   └── A2UI*.vue             # Legacy component copies (to be cleaned up)
+│   ├── store/
+│   │   ├── index.ts              # Vuex root
+│   │   └── a2ui.ts               # A2UI surface state (surfaces, components, dataModel, theme, catalogId)
+│   ├── composables/              # Re-exports from @haliphax-openclaw/a2ui-sdk
+│   ├── services/
+│   │   ├── ws-client.ts          # Browser WebSocket client
+│   │   ├── url-rewriter.ts       # openclaw-canvas:// URL rewriter
+│   │   ├── filter-engine.ts      # Re-exports from SDK
+│   │   └── deep-link.ts
+│   └── styles/
+│       └── tailwind.css          # Tailwind + DaisyUI (all themes)
+test/                             # vitest tests
 ```
 
 ## Monorepo Structure
