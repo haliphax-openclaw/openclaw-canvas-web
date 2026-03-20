@@ -120,7 +120,7 @@ The `active` prop reacts to surface updates, allowing agents to switch tabs prog
 
 ### Text
 
-Text display component. Renders as `<p>` by default, or as heading/span based on `variant`. Supports reactive data binding with template interpolation.
+Text display component. Renders as `<p>` by default, or as heading/span based on `variant`. Supports reactive data binding via **`formatString`**: use **`${expression}`** in strings (not `{{expression}}`).
 
 **Static mode:**
 
@@ -137,30 +137,30 @@ Text display component. Renders as `<p>` by default, or as heading/span based on
 **Data source mode (template interpolation in text):**
 
 ```json
-{"Text": {"text": "Total: {{$value}} across {{$count}} orders", "variant": "h2", "dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total"}, "aggregates": {"$count": {"fn": "count"}}}}}
+{"Text": {"text": "Total: ${$value} across ${$count} orders", "variant": "h2", "dataSource": {"source": "orders", "aggregate": {"fn": "sum", "field": "total"}, "aggregates": {"$count": {"fn": "count"}}}}}
 ```
 
 **Data source mode (row field interpolation):**
 
 ```json
-{"Text": {"text": "Top customer: {{name}} ({{revenue}})", "dataSource": {"source": "customers"}}}
+{"Text": {"text": "Top customer: ${name} (${revenue})", "dataSource": {"source": "customers"}}}
 ```
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `text` | `string \| { literalString: string }` | Static text content. Supports `{{field}}` placeholders when `dataSource` is set — resolves against the first filtered row. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
+| `text` | `string \| { literalString: string }` | Static text content. Supports `${field}` placeholders when `dataSource` is set — resolves against the first filtered row. Also supports `${$value}` for single aggregates and `${$key}` for compound aggregates. |
 | `variant` | `string` | HTML tag hint: `h1`–`h6`, `body` (→ `<p>`), `label` (→ `<span>`) |
 | `strokeWidth` | `string` | CSS text stroke width (e.g. `"1px"`). Renders a black outline for readability over images. |
 | `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
 
-Display priority: `mappedProps.text` > text with `{{}}` template interpolation > `aggregatedValue` > static `text`.
+Display priority: `mappedProps.text` > text with **`formatString`** (`${...}`) interpolation > `aggregatedValue` > static `text`.
 
 Template placeholders in `text` are resolved reactively — when the data source changes (new data pushed, filters applied), the text updates automatically. Placeholders resolve against:
-- `{{$value}}` — single aggregate result
-- `{{$key}}` — compound aggregate keys (e.g. `{{$count}}`, `{{$total}}`)
-- `{{field}}` — field from the first row of the filtered data source
+- `${$value}` — single aggregate result
+- `${$key}` — compound aggregate keys (e.g. `${$count}`, `${$total}`)
+- `${field}` — field from the first row of the filtered data source
 
-Map templates (`dataSource.map`) also support `{{field}}` placeholders resolved against the first row, in addition to `{{$key}}` aggregate keys.
+Map templates (`dataSource.map`) also support `${field}` placeholders resolved against the first row, in addition to `${$key}` aggregate keys.
 
 ### Badge
 
@@ -175,7 +175,7 @@ Inline badge with variant styling. Supports static text or data source binding w
 **Data source mode:**
 
 ```json
-{"Badge": {"variant": "info", "dataSource": {"source": "users", "aggregate": {"fn": "count"}, "map": {"text": "{{$value}} users"}}}}
+{"Badge": {"variant": "info", "dataSource": {"source": "users", "aggregate": {"fn": "count"}, "map": {"text": "${$value} users"}}}}
 ```
 
 | Prop | Type | Description |
@@ -186,10 +186,10 @@ Inline badge with variant styling. Supports static text or data source binding w
 
 Display priority: `mappedProps.text` > `aggregatedValue` > static `text`.
 
-Map templates support `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates:
+Map templates support `${$value}` for single aggregates and `${$key}` for compound aggregates:
 
 ```json
-{"Badge": {"variant": "success", "dataSource": {"source": "runs", "aggregates": {"$count": {"fn": "count", "where": {"field": "status", "op": "eq", "value": "pass"}}}, "map": {"text": "✓ {{$count}}"}}}}
+{"Badge": {"variant": "success", "dataSource": {"source": "runs", "aggregates": {"$count": {"fn": "count", "where": {"field": "status", "op": "eq", "value": "pass"}}}, "map": {"text": "✓ ${$count}"}}}}
 ```
 
 ### Image
@@ -218,30 +218,30 @@ Progress bar with optional reactive data binding. Commonly used inside Repeat te
 **Data source mode (template interpolation):**
 
 ```json
-{"ProgressBar": {"label": "{{progress_label}}", "value": "{{progress_value}}", "dataSource": {"source": "content"}}}
+{"ProgressBar": {"label": "${progress_label}", "value": "${progress_value}", "dataSource": {"source": "content"}}}
 ```
 
 **Data source mode (aggregate in label):**
 
 ```json
-{"ProgressBar": {"label": "{{$count}} tasks done", "value": "{{$value}}", "dataSource": {"source": "tasks", "aggregate": {"fn": "avg", "field": "completion"}, "aggregates": {"$count": {"fn": "count"}}}}}
+{"ProgressBar": {"label": "${$count} tasks done", "value": "${$value}", "dataSource": {"source": "tasks", "aggregate": {"fn": "avg", "field": "completion"}, "aggregates": {"$count": {"fn": "count"}}}}}
 ```
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `value` | `number \| string` | Progress percentage (clamped 0–100). Supports `{{field}}` placeholders when `dataSource` is set — resolved value is parsed as a number. Also supports `{{$value}}` for single aggregates and `{{$key}}` for compound aggregates. |
-| `label` | `string` | Optional label above the bar. Supports `{{field}}`, `{{$value}}`, and `{{$key}}` placeholders when `dataSource` is set. |
+| `value` | `number \| string` | Progress percentage (clamped 0–100). Supports `${field}` placeholders when `dataSource` is set — resolved value is parsed as a number. Also supports `${$value}` for single aggregates and `${$key}` for compound aggregates. |
+| `label` | `string` | Optional label above the bar. Supports `${field}`, `${$value}`, and `${$key}` placeholders when `dataSource` is set. |
 | `dataSource` | `DataSourceBinding` | Bind to a data source for reactive updates |
 
 Template placeholders in both `label` and `value` are resolved reactively — when the data source changes (new data pushed, filters applied), the progress bar updates automatically. Placeholders resolve against:
-- `{{$value}}` — single aggregate result
-- `{{$key}}` — compound aggregate keys (e.g. `{{$count}}`, `{{$total}}`)
-- `{{field}}` — field from the first row of the filtered data source
+- `${$value}` — single aggregate result
+- `${$key}` — compound aggregate keys (e.g. `${$count}`, `${$total}`)
+- `${field}` — field from the first row of the filtered data source
 
 Inside a Repeat template with transforms:
 
 ```json
-{"Repeat": {"dataSource": {"source": "scores"}, "transforms": {"percentOfMax": {"fn": "percentOfMax"}}, "template": {"ProgressBar": {"label": "{{name}}: {{score}}", "value": "{{score | percentOfMax}}"}}}}
+{"Repeat": {"dataSource": {"source": "scores"}, "transforms": {"percentOfMax": {"fn": "percentOfMax"}}, "template": {"ProgressBar": {"label": "${name}: ${score}", "value": "${score | percentOfMax}"}}}}
 ```
 
 ### AudioPlayer
@@ -318,13 +318,13 @@ When using `dataSource`, if `columns` is omitted, all keys from the first row ar
 Data-driven iteration component. Renders a template component for each row in a filtered data source.
 
 ```json
-{"Repeat": {"dataSource": {"source": "scores"}, "template": {"ProgressBar": {"label": "{{name}}", "value": "{{score | percentOfMax}}"}}, "sortable": true, "sortField": "score"}}
+{"Repeat": {"dataSource": {"source": "scores"}, "template": {"ProgressBar": {"label": "${name}", "value": "${score | percentOfMax}"}}, "sortable": true, "sortField": "score"}}
 ```
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `dataSource` | `DataSourceBinding` | Data source to iterate over |
-| `template` | `Record<string, object>` | Component template with `{{field}}` placeholders |
+| `template` | `Record<string, object>` | Component template with `${field}` placeholders |
 | `transforms` | `Record<string, { fn: string, field?: string }>` | Named transform definitions |
 | `emptyText` | `string` | Text shown when no rows match |
 | `sortable` | `boolean` | Enable a sort direction dropdown above repeated content |

@@ -2,6 +2,12 @@
 
 The A2UI reactive layer lets agents push structured data sources to the canvas and bind UI components to that data. Filters, aggregates, and repeating templates update automatically as data or selections change.
 
+## `formatString` interpolation
+
+Interpolated strings in JSONL (e.g. `Text.text`, `ProgressBar` `label`/`value`, `Badge` `map`, `Repeat` templates) use **`${expression}`** syntax — **not** `{{expression}}`. Examples: `${name}`, `${$value}`, `${$count}`, `${field | percentOfMax}` inside a Repeat that defines that transform.
+
+**Exception:** optional **`emitTo`** URLs on filter inputs use the literal placeholder **`{{value}}`** for the current control value (client substitution, not formatString).
+
 ## Data Sources
 
 A data source is a named collection of rows with typed fields, stored in the Vuex A2UI store per surface.
@@ -180,7 +186,7 @@ Multiple named aggregates can be computed with optional `where` clauses for inli
       "$total": { "fn": "sum", "field": "amount", "format": "compact" },
       "$pending": { "fn": "count", "where": { "field": "status", "op": "eq", "value": "pending" } }
     },
-    "map": { "text": "Total: {{$total}} ({{$pending}} pending)" }
+    "map": { "text": "Total: ${$total} (${$pending} pending)" }
   }
 }
 ```
@@ -190,7 +196,7 @@ Multiple named aggregates can be computed with optional `where` clauses for inli
 The `map` property maps computed values to component props:
 
 - `{ "text": "$value" }` — maps the single `aggregate` result to the `text` prop
-- `{ "text": "{{$total}}" }` — interpolates named compound aggregate keys
+- `{ "text": "${$total}" }` — interpolates named compound aggregate keys
 - `{ "text": "fieldName" }` — maps a field from the first filtered row to the `text` prop
 
 ### Compact number formatting
