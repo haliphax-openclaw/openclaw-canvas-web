@@ -23,6 +23,32 @@ Node identity (Ed25519 keypair and device ID) is generated on first run and stor
 
 A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server.
 
+## Monorepo Structure
+
+This project uses npm workspaces. All packages live in `packages/`:
+
+| Package | Description |
+|---------|-------------|
+| `@haliphax-openclaw/a2ui-sdk` | Component SDK — types, composables, filters, event helpers |
+| `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — Badge, Table (proof-of-concept extraction) |
+
+Install all dependencies (including workspace packages) from the repo root:
+
+```bash
+npm install
+```
+
+npm automatically symlinks workspace packages into `node_modules/`, so cross-package imports resolve locally during development.
+
+### Adding a new catalog package
+
+1. Create a directory under `packages/` (e.g., `packages/a2ui-my-catalog/`)
+2. Add a `package.json` with the `openclaw-canvas-web` field pointing to your `catalog.json` and entry module
+3. Run `npm install` at the root to link the new workspace
+4. Restart the dev server — the Vite catalog plugin discovers it automatically
+
+See [docs/creating-catalog-packages.md](docs/creating-catalog-packages.md) for the full guide on authoring catalog packages.
+
 ## Quick Start
 
 ```bash
