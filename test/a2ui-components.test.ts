@@ -110,7 +110,7 @@ describe('A2UISlider interaction', () => {
 
 // --- Component registration ---
 describe('A2UINode componentMap', () => {
-  it('registers all 14 component types', async () => {
+  it('registers all 13 built-in component types', async () => {
     // Read the compiled A2UINode to verify the componentMap keys
     const mod = await import('../src/client/components/A2UINode.vue')
     const comp = (mod.default as any)
@@ -118,13 +118,13 @@ describe('A2UINode componentMap', () => {
     // by checking the setup resolves known type names
     const expectedTypes = [
       'Column', 'Row', 'Text', 'Button', 'Image', 'Stack', 'Spacer',
-      'Select', 'Table', 'Checkbox', 'ProgressBar', 'Slider', 'Badge', 'Divider',
+      'Select', 'Table', 'Checkbox', 'ProgressBar', 'Slider', 'Divider',
     ]
     // Verify the component was imported successfully (it has a setup function)
     expect(comp.setup).toBeDefined()
     expect(comp.name).toBe('A2UINode')
     // We can't easily inspect the closure, but we verify the file imports all components
     // by checking the module loaded without errors
-    expect(expectedTypes.length).toBe(14)
+    expect(expectedTypes.length).toBe(13)
   })
 })

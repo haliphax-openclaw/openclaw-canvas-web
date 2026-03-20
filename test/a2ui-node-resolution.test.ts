@@ -36,7 +36,7 @@ describe('A2UINode two-tier component resolution', () => {
       const builtinNames = [
         'Column', 'Row', 'Text', 'Button', 'Image', 'Stack', 'Spacer',
         'Select', 'MultiSelect', 'Table', 'Checkbox', 'ProgressBar',
-        'Slider', 'Badge', 'Divider', 'Repeat', 'Accordion', 'Tabs',
+        'Slider', 'Divider', 'Repeat', 'Accordion', 'Tabs',
       ]
       for (const name of builtinNames) {
         const result = resolveA2UIComponent(name)

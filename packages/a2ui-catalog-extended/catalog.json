@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A2UI Extended Catalog",
+  "description": "Extended first-party A2UI components",
+  "type": "object",
+  "components": [
+    {
+      "name": "Badge",
+      "description": "Inline status badge with variant styling",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Display text for the badge"
+          },
+          "variant": {
+            "type": "string",
+            "enum": ["info", "success", "warning", "error"],
+            "default": "info",
+            "description": "Visual variant"
+          }
+        }
+      }
+    }
+  ]
+}
