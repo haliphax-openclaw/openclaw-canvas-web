@@ -35,6 +35,26 @@ describe('A2UIManager', () => {
     expect(mgr.getSurface('main', 's1')!.root).toBe('c1')
   })
 
+  it('setRoot stores catalogId on surface', () => {
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Empty' }])
+    mgr.setRoot('main', 's1', 'c1', { catalogId: '@haliphax-openclaw/a2ui-catalog-all' })
+    expect(mgr.getSurface('main', 's1')!.catalogId).toBe('@haliphax-openclaw/a2ui-catalog-all')
+  })
+
+  it('setRoot stores theme on surface', () => {
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Empty' }])
+    mgr.setRoot('main', 's1', 'c1', { theme: 'cyberpunk' })
+    expect(mgr.getSurface('main', 's1')!.theme).toBe('cyberpunk')
+  })
+
+  it('setRoot stores both catalogId and theme', () => {
+    mgr.upsertSurface('main', 's1', [{ id: 'c1', component: 'Empty' }])
+    mgr.setRoot('main', 's1', 'c1', { catalogId: '@test/catalog', theme: 'dark' })
+    const s = mgr.getSurface('main', 's1')!
+    expect(s.catalogId).toBe('@test/catalog')
+    expect(s.theme).toBe('dark')
+  })
+
   it('setRoot is no-op for missing surface', () => {
     mgr.setRoot('main', 'nope', 'c1') // should not throw
     expect(mgr.getSurface('main', 'nope')).toBeUndefined()

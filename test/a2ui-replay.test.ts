@@ -41,7 +41,10 @@ function wireReplay(gateway: Gateway, mgr: A2UIManager) {
       const components = Array.from(surface.components.entries()).map(([id, comp]) => ({ id, ...comp }))
       gateway.sendToSpa(ws, { type: 'a2ui.updateComponents', session, surfaceId: surface.surfaceId, components })
       if (surface.root) {
-        gateway.sendToSpa(ws, { type: 'a2ui.createSurface', session, surfaceId: surface.surfaceId, root: surface.root })
+        const msg: Record<string, unknown> = { type: 'a2ui.createSurface', session, surfaceId: surface.surfaceId, root: surface.root }
+        if (surface.catalogId) msg.catalogId = surface.catalogId
+        if (surface.theme) msg.theme = surface.theme
+        gateway.sendToSpa(ws, msg)
       }
     }
   })
@@ -161,5 +164,18 @@ describe('A2UI state replay on SPA connect', () => {
     const { ws: wsOther, msgs: otherMsgs } = await connectAndCollect(2, 'other')
     expect(otherMsgs.every(m => m.surfaceId === 's2')).toBe(true)
     wsOther.close()
+  })
+
+  it('replays catalogId and theme in createSurface message', async () => {
+    mgr.upsertSurface('main', 'main', [{ id: 'c1', component: 'Text', text: 'hello' }])
+    mgr.setRoot('main', 'main', 'c1', { catalogId: '@test/my-catalog', theme: 'dark' })
+
+    const { ws, msgs } = await connectAndCollect(2, 'main')
+
+    const createMsg = msgs.find(m => m.type === 'a2ui.createSurface')!
+    expect(createMsg).toBeTruthy()
+    expect(createMsg.catalogId).toBe('@test/my-catalog')
+    expect(createMsg.theme).toBe('dark')
+    ws.close()
   })
 })

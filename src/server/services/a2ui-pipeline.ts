@@ -2,7 +2,7 @@ import type { Gateway } from './gateway.js'
 import type { A2UIManager } from './a2ui-manager.js'
 
 /** Default catalog URI when none is provided by createSurface */
-const DEFAULT_CATALOG_ID = 'https://haliphax-openclaw.github.io/a2ui/1.0/catalog/all'
+const DEFAULT_CATALOG_ID = '@haliphax-openclaw/a2ui-catalog-all'
 
 /** v0.8 → v0.9 command name aliases */
 const COMMAND_ALIASES: Record<string, string> = {

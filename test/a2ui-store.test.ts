@@ -63,6 +63,30 @@ describe('A2UIStore', () => {
     store.close()
   })
 
+  it('persists catalogId on save and load', () => {
+    const store = new A2UIStore(dbPath)
+    store.save('main', { surfaceId: 's1', components: new Map(), root: 'c1', dataModel: {}, catalogId: '@test/my-catalog' })
+    const row = store.load('main', 's1')!
+    expect(row.catalogId).toBe('@test/my-catalog')
+    store.close()
+  })
+
+  it('persists theme on save and load', () => {
+    const store = new A2UIStore(dbPath)
+    store.save('main', { surfaceId: 's1', components: new Map(), root: 'c1', dataModel: {}, theme: 'cyberpunk' })
+    const row = store.load('main', 's1')!
+    expect(row.theme).toBe('cyberpunk')
+    store.close()
+  })
+
+  it('catalogId defaults to null when omitted', () => {
+    const store = new A2UIStore(dbPath)
+    store.save('main', { surfaceId: 's1', components: new Map(), root: null, dataModel: {} })
+    const row = store.load('main', 's1')!
+    expect(row.catalogId).toBeNull()
+    store.close()
+  })
+
   it('save overwrites existing surface', () => {
     const store = new A2UIStore(dbPath)
     store.save('main', { surfaceId: 's1', components: new Map([['c1', { old: true }]]), root: null, dataModel: {} })
@@ -156,6 +180,34 @@ describe('A2UIManager + A2UIStore integration', () => {
     expect(surface.components.get('c1')).toEqual({ component: 'Text', text: 'persisted' })
     expect(surface.root).toBe('c1')
     expect(surface.dataModel).toEqual({ key: 'val' })
+    store2.close()
+  })
+
+  it('persists catalogId via setRoot and survives restart', () => {
+    const store1 = new A2UIStore(dbPath)
+    const mgr1 = new A2UIManager(store1)
+    mgr1.upsertSurface('main', 's1', [{ id: 'c1', component: 'Text', text: 'hi' }])
+    mgr1.setRoot('main', 's1', 'c1', { catalogId: '@haliphax-openclaw/a2ui-catalog-all' })
+    store1.close()
+
+    // Simulate restart
+    const store2 = new A2UIStore(dbPath)
+    const mgr2 = new A2UIManager(store2)
+    const surface = mgr2.getSurface('main', 's1')!
+    expect(surface.catalogId).toBe('@haliphax-openclaw/a2ui-catalog-all')
+    store2.close()
+  })
+
+  it('persists theme via setRoot and survives restart', () => {
+    const store1 = new A2UIStore(dbPath)
+    const mgr1 = new A2UIManager(store1)
+    mgr1.upsertSurface('main', 's1', [{ id: 'c1', component: 'Text', text: 'hi' }])
+    mgr1.setRoot('main', 's1', 'c1', { theme: 'cyberpunk' })
+    store1.close()
+
+    const store2 = new A2UIStore(dbPath)
+    const mgr2 = new A2UIManager(store2)
+    expect(mgr2.getSurface('main', 's1')!.theme).toBe('cyberpunk')
     store2.close()
   })
 
