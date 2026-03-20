@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { a2uiModule, type A2UIState } from '../src/client/store/a2ui'
+import { a2uiModule, type A2UIState } from '../../src/client/store/a2ui'
 
 // Minimal Vuex-like test harness: call mutations directly on state
 function createState(): A2UIState {

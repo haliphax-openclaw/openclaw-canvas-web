@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock wsClient
 const mockSend = vi.fn()
-vi.mock('../src/client/services/ws-client', () => ({
+vi.mock('../../src/client/services/ws-client', () => ({
   wsClient: { send: mockSend },
 }))
 
@@ -112,7 +112,7 @@ describe('A2UISlider interaction', () => {
 describe('A2UINode componentMap', () => {
   it('registers all 12 built-in component types', async () => {
     // Read the compiled A2UINode to verify the componentMap keys
-    const mod = await import('../src/client/components/A2UINode.vue')
+    const mod = await import('../../src/client/components/A2UINode.vue')
     const comp = (mod.default as any)
     // The componentMap is internal, but we can verify the component exports exist
     // by checking the setup resolves known type names

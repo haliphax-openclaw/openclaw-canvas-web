@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { processA2UICommand } from '../src/server/services/a2ui-commands.js'
+import { processA2UICommand } from '../../src/server/services/a2ui-commands.js'
 
 function makeMocks() {
   const a2uiManager = {

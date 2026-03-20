@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { A2UIManager } from '../src/server/services/a2ui-manager.js'
+import { A2UIManager } from '../../src/server/services/a2ui-manager.js'
 
 let mgr: A2UIManager
 

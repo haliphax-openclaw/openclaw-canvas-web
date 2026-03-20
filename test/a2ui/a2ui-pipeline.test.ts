@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { processPipelineCommand, processBatch, processA2UICommand, type ValidationResult } from '../src/server/services/a2ui-pipeline.js'
+import { processPipelineCommand, processBatch, processA2UICommand, type ValidationResult } from '../../src/server/services/a2ui-pipeline.js'
 
 function makeMocks() {
   const a2uiManager = {

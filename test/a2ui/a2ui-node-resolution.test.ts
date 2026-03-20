@@ -25,12 +25,12 @@ vi.mock('virtual:openclaw-catalogs', () => ({
 }))
 
 // Mock wsClient (required by some component imports)
-vi.mock('../src/client/services/ws-client', () => ({
+vi.mock('../../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn() },
 }))
 
 // Now import the resolution function
-const { resolveA2UIComponent } = await import('../src/client/components/A2UINode.vue')
+const { resolveA2UIComponent } = await import('../../src/client/components/A2UINode.vue')
 
 describe('A2UINode catalog component resolution', () => {
   describe('catalog components', () => {

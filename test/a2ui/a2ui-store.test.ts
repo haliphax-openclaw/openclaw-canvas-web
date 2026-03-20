@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { A2UIStore } from '../src/server/services/a2ui-store.js'
-import { A2UIManager } from '../src/server/services/a2ui-manager.js'
+import { A2UIStore } from '../../src/server/services/a2ui-store.js'
+import { A2UIManager } from '../../src/server/services/a2ui-manager.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'

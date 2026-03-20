@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import http from 'node:http'
 import { WebSocket } from 'ws'
-import { Gateway } from '../src/server/services/gateway.js'
-import { A2UIManager } from '../src/server/services/a2ui-manager.js'
+import { Gateway } from '../../src/server/services/gateway.js'
+import { A2UIManager } from '../../src/server/services/a2ui-manager.js'
 
 let server: http.Server
 let gateway: Gateway
