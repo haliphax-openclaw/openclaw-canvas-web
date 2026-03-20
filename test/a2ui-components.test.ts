@@ -11,6 +11,11 @@ vi.mock('../src/client/services/ws-client', () => ({
   wsClient: { send: mockSend },
 }))
 
+// Mock the virtual catalog module (no catalog packages in test)
+vi.mock('virtual:openclaw-catalogs', () => ({
+  catalogComponents: {},
+}))
+
 beforeEach(() => mockSend.mockClear())
 
 // --- Badge logic ---

@@ -4,7 +4,9 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
+import type { Component } from 'vue'
 import { useStore } from 'vuex'
+import { catalogComponents } from 'virtual:openclaw-catalogs'
 import A2UIColumn from './A2UIColumn.vue'
 import A2UIRow from './A2UIRow.vue'
 import A2UIText from './A2UIText.vue'
@@ -23,7 +25,8 @@ import A2UIRepeat from './A2UIRepeat.vue'
 import A2UIAccordion from './A2UIAccordion.vue'
 import A2UITabs from './A2UITabs.vue'
 
-const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
+/** Built-in component map — highest priority in resolution */
+const builtinMap: Record<string, Component> = {
   Column: A2UIColumn,
   Row: A2UIRow,
   Text: A2UIText,
@@ -42,6 +45,27 @@ const componentMap: Record<string, ReturnType<typeof defineComponent>> = {
   Repeat: A2UIRepeat,
   Accordion: A2UIAccordion,
   Tabs: A2UITabs,
+}
+
+/**
+ * Resolve a component by name using two-tier lookup:
+ * 1. Built-in map (always wins)
+ * 2. Catalog components from virtual:openclaw-catalogs
+ *
+ * Exported for testability.
+ */
+export function resolveA2UIComponent(name: string | null): Component | null {
+  if (!name) return null
+
+  // Built-in always wins
+  if (builtinMap[name]) return builtinMap[name]
+
+  // Catalog fallback
+  // TODO: catalogId filtering — restrict catalog components by surface catalogId
+  const catalogEntry = catalogComponents[name]
+  if (catalogEntry) return catalogEntry.component
+
+  return null
 }
 
 export default defineComponent({
@@ -74,10 +98,7 @@ export default defineComponent({
       return props
     })
 
-    const resolvedComponent = computed(() => {
-      const name = typeName.value
-      return name ? componentMap[name] ?? null : null
-    })
+    const resolvedComponent = computed(() => resolveA2UIComponent(typeName.value))
 
     return { resolvedComponent, componentDef }
   },

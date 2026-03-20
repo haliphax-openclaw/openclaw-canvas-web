@@ -9,6 +9,11 @@ vi.mock('../src/client/services/ws-client', () => ({
   wsClient: { send: vi.fn(), on: vi.fn(), off: vi.fn(), connect: vi.fn() },
 }))
 
+// Mock the virtual catalog module (no catalog packages in test)
+vi.mock('virtual:openclaw-catalogs', () => ({
+  catalogComponents: {},
+}))
+
 // Mock deep-link for DeepLinkConfirm and composables
 vi.mock('../src/client/services/deep-link', () => ({
   parseOpenclawUrl: vi.fn(),
