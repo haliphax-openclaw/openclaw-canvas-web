@@ -46,6 +46,19 @@ Layered container. Children are positioned absolutely on top of each other (z-st
 |------|------|-------------|
 | `children` | `string[]` | Ordered list of child component IDs (later items render on top) |
 
+### Wrap
+
+Flex-wrap container. Children flow left-to-right and wrap onto new lines when they exceed the container width. Useful for groups of buttons, badges, or any set of items that should reflow responsively.
+
+```json
+{"Wrap": {"children": ["btn1", "btn2", "btn3", "btn4"], "gap": "8px"}}
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `string[]` | Ordered list of child component IDs |
+| `gap` | `string` | CSS gap between children (default: `"8px"`) |
+
 ### Spacer
 
 Flexible space filler. Expands to fill available space in a Row or Column (`flex: 1`). Takes no props.
