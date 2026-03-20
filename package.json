@@ -2,6 +2,7 @@
   "name": "openclaw-canvas",
   "version": "0.1.0",
   "private": true,
+  "workspaces": ["packages/*"],
   "license": "Unlicense",
   "type": "module",
   "scripts": {
