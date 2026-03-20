@@ -244,6 +244,41 @@ Inside a Repeat template with transforms:
 {"Repeat": {"dataSource": {"source": "scores"}, "transforms": {"percentOfMax": {"fn": "percentOfMax"}}, "template": {"ProgressBar": {"label": "{{name}}: {{score}}", "value": "{{score | percentOfMax}}"}}}}
 ```
 
+### AudioPlayer
+
+Embedded audio with custom play/pause, seek, and volume controls. `url` may be `http(s):` or `openclaw-canvas://` (session-scoped files).
+
+```json
+{"AudioPlayer": {"url": "https://example.com/audio.mp3", "description": "Episode 1"}}
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `url` | `string` | Audio source URL |
+| `description` | `string` | Optional title or summary |
+| `autoplay` | `boolean` | Start playing automatically (default: `false`) |
+| `loop` | `boolean` | Loop playback (default: `false`) |
+| `muted` | `boolean` | Initially muted (default: `false`) |
+
+Play/pause controls use presentation-friendly emoji glyphs (e.g. ▶️ / ⏸️) for consistent rendering across platforms.
+
+### Video
+
+HTML5 video with native controls and responsive sizing.
+
+```json
+{"Video": {"url": "https://example.com/clip.mp4", "poster": "https://example.com/poster.jpg", "controls": true}}
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `url` | `string` | Video source URL |
+| `poster` | `string` | Image URL shown before playback |
+| `controls` | `boolean` | Show native controls (default: `true`) |
+| `autoplay` | `boolean` | Default: `false` |
+| `loop` | `boolean` | Default: `false` |
+| `muted` | `boolean` | Default: `false` |
+
 ### Table
 
 Displays tabular data with optional sorting. Scrolls horizontally when content exceeds viewport width.
