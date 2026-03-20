@@ -22,8 +22,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch } from 'vue'
-import { useDataSource, useSortable, formatString, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
+import { defineComponent, computed, ref, watch, toRaw } from 'vue'
+import { useDataSource, useSortable, deepInterpolate, formatString, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'
@@ -32,17 +32,6 @@ const templateComponents: Record<string, ReturnType<typeof defineComponent>> = {
   ProgressBar: A2UIProgressBar,
   Text: A2UIText,
   Badge: A2UIBadge,
-}
-
-function deepResolve(obj: unknown, row: Record<string, unknown>, transforms: Record<string, any>, allRows: Record<string, unknown>[]): unknown {
-  if (typeof obj === 'string') return formatString(obj, row, { transforms, allRows })
-  if (Array.isArray(obj)) return obj.map(v => deepResolve(v, row, transforms, allRows))
-  if (obj && typeof obj === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [k, v] of Object.entries(obj)) out[k] = deepResolve(v, row, transforms, allRows)
-    return out
-  }
-  return obj
 }
 
 export default defineComponent({
@@ -74,10 +63,21 @@ export default defineComponent({
       const comp = templateComponents[typeName]
       if (!comp) return []
       const innerDef = template[typeName]
-      return rows.map((row: Record<string, unknown>) => ({
-        component: comp,
-        def: deepResolve(innerDef, row, transforms, rows) as Record<string, unknown>,
-      }))
+      const fmtOpts = { transforms, allRows: rows.map((r) => ({ ...toRaw(r) })) }
+      return rows.map((row: Record<string, unknown>) => {
+        const plainRow = { ...toRaw(row) }
+        const interpolated = deepInterpolate(innerDef, plainRow, fmtOpts) as Record<string, unknown>
+        for (const k of ['label', 'value', 'text'] as const) {
+          const v = interpolated[k]
+          if (typeof v === 'string' && v.includes('${')) {
+            interpolated[k] = formatString(v, plainRow, fmtOpts)
+          }
+        }
+        return {
+          component: comp,
+          def: interpolated,
+        }
+      })
     })
 
     return { resolvedItems, sortable, sortDir }

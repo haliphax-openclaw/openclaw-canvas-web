@@ -15,6 +15,7 @@ vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', 
 
 import A2UIRepeat from '../../packages/a2ui-catalog-extended/src/A2UIRepeat.vue'
 import A2UIText from '../../packages/a2ui-catalog-basic/src/A2UIText.vue'
+import A2UIProgressBar from '../../packages/a2ui-catalog-extended/src/A2UIProgressBar.vue'
 import { mountWith } from '../__helpers__/mount'
 
 describe('A2UIRepeat', () => {
@@ -37,6 +38,41 @@ describe('A2UIRepeat', () => {
     expect(texts).toHaveLength(2)
     expect(texts[0].text()).toBe('Alice')
     expect(texts[1].text()).toBe('Bob')
+  })
+
+  it('interpolates ProgressBar label and value for each row before mounting child', () => {
+    const surfaces = {
+      s1: {
+        components: {}, root: null, dataModel: {},
+        sources: {
+          samples: {
+            fields: ['code', 'taxon', 'mass_g'],
+            rows: [
+              { code: 'S-901', taxon: 'Cryopeg brine cells', mass_g: 240 },
+              { code: 'S-902', taxon: 'Ice-algae mat', mass_g: 120 },
+            ],
+          },
+        },
+        filters: {},
+      },
+    }
+    const def = {
+      dataSource: { source: 'samples' },
+      transforms: { percentOfMax: { fn: 'percentOfMax' } },
+      template: {
+        ProgressBar: {
+          label: '${code} — ${taxon}',
+          value: '${mass_g | percentOfMax}',
+        },
+      },
+    }
+    const w = mountWith(A2UIRepeat, { def, surfaceId: 's1', componentId: 'r1' }, surfaces)
+    const bars = w.findAllComponents(A2UIProgressBar)
+    expect(bars).toHaveLength(2)
+    expect(bars[0].find('.a2ui-progress-label').text()).toBe('S-901 — Cryopeg brine cells')
+    expect(bars[1].find('.a2ui-progress-label').text()).toBe('S-902 — Ice-algae mat')
+    expect(Number(bars[0].find('progress').attributes('value'))).toBeCloseTo(100, 5)
+    expect(Number(bars[1].find('progress').attributes('value'))).toBeCloseTo(50, 5)
   })
 
   it('shows emptyText when no rows', () => {

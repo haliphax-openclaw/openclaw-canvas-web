@@ -1,0 +1,43 @@
+import { toRaw } from 'vue'
+import { formatString, type FormatStringOptions } from './format-string'
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object') return false
+  const proto = Object.getPrototypeOf(value)
+  return proto === null || proto === Object.prototype
+}
+
+/**
+ * Recursively runs {@link formatString} on every string in a plain object / array tree.
+ * Used by Repeat so template defs passed to ProgressBar/Text/etc. are fully resolved
+ * (those children often have no dataSource and cannot interpolate themselves).
+ */
+export function deepInterpolate(
+  value: unknown,
+  row: Record<string, unknown>,
+  options?: FormatStringOptions,
+): unknown {
+  const plainRow = toRaw(row) as Record<string, unknown>
+  const plainOpts =
+    options?.allRows != null
+      ? { ...options, allRows: options.allRows.map((r) => toRaw(r) as Record<string, unknown>) }
+      : options
+
+  if (typeof value === 'string') {
+    return formatString(value, plainRow, plainOpts)
+  }
+  if (value === null || value === undefined) {
+    return value
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => deepInterpolate(item, plainRow, plainOpts))
+  }
+  if (isPlainObject(value)) {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = deepInterpolate(v, plainRow, plainOpts)
+    }
+    return out
+  }
+  return value
+}
