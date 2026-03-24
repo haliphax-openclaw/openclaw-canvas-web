@@ -25,4 +25,8 @@ export default defineComponent({
 
 <style scoped>
 .a2ui-row { display: flex; flex-direction: row; gap: 16px; }
+/* Must live here: scoped .a2ui-row[data-v-*] beats global custom.css, which blocked stacking */
+@media (max-width: 960px) {
+  .a2ui-row { flex-direction: column; }
+}
 </style>
