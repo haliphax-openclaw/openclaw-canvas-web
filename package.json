@@ -6,10 +6,12 @@
   "license": "Unlicense",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "tsx watch src/server/index.ts",
-    "dev:client": "NODE_ENV=development vite",
     "build": "NODE_ENV=development vite build",
+    "clean": "rm -rf dist node_modules mcp/node_modules packages/*/node_modules",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "NODE_ENV=development vite",
+    "dev:server": "tsx watch src/server/index.ts",
+    "setup": "npm ci; cd mcp; npm ci",
     "start": "tsx src/server/index.ts",
     "test": "vitest run"
   },

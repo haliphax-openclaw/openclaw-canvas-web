@@ -108,7 +108,7 @@ This project uses npm workspaces. All packages live in `packages/`:
 Install all dependencies (including workspace packages) from the repo root:
 
 ```bash
-npm install
+npm ci
 ```
 
 npm automatically symlinks workspace packages into `node_modules/`, so cross-package imports resolve locally during development.
@@ -164,8 +164,10 @@ The root path (`/`) redirects to `/main/` by default.
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Run server + Vite dev server concurrently |
 | `npm run build` | Build the Vue SPA to `dist/client/` |
+| `npm run clean` | Delete build artifacts and dependencies |
+| `npm run dev` | Run server + Vite dev server concurrently |
+| `npm run setup` | Cleanly install all dependencies for all projects |
 | `npm start` | Start the production server |
 | `npm test` | Run tests (vitest) |
 
