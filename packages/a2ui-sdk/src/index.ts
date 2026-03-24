@@ -18,4 +18,5 @@ export { sendEvent, registerWsSend } from './ws'
 // Utilities
 export { formatString } from './utils/format-string'
 export type { FormatStringOptions } from './utils/format-string'
+export { materializeDataRow } from './utils/materialize-data-row'
 export { getDataModelValue, resolveDynamicString, resolveDynamicBoolean } from './utils/data-model-resolve'

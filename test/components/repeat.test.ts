@@ -13,8 +13,10 @@ vi.mock('../../src/client/services/deep-link', () => ({
 }))
 vi.stubGlobal('location', { origin: 'http://localhost:3456', protocol: 'http:', host: 'localhost:3456' })
 
+import { reactive } from 'vue'
 import A2UIRepeat from '../../packages/a2ui-catalog-extended/src/A2UIRepeat.vue'
 import A2UIText from '../../packages/a2ui-catalog-basic/src/A2UIText.vue'
+import A2UIProgressBar from '../../packages/a2ui-catalog-extended/src/A2UIProgressBar.vue'
 import { mountWith } from '../__helpers__/mount'
 
 describe('A2UIRepeat', () => {
@@ -130,5 +132,78 @@ describe('A2UIRepeat sorting', () => {
     await w.find('.a2ui-repeat-sort select').setValue('')
     const texts = w.findAllComponents(A2UIText)
     expect(texts.map(t => t.text())).toEqual(['Charlie', 'Alice', 'Bob'])
+  })
+})
+
+describe('A2UIRepeat with ProgressBar', () => {
+  it('interpolates label and value per row when template repeats ProgressBar with same dataSource', () => {
+    const surfaces = {
+      s1: {
+        components: {},
+        root: null,
+        dataModel: {},
+        sources: {
+          items: {
+            fields: ['name', 'pct'],
+            rows: [
+              reactive({ name: 'Alpha', pct: 25 }),
+              reactive({ name: 'Beta', pct: 75 }),
+            ],
+          },
+        },
+        filters: {},
+      },
+    }
+    const def = {
+      dataSource: { source: 'items' },
+      template: {
+        ProgressBar: {
+          dataSource: { source: 'items' },
+          label: '${name} — ${pct}%',
+          value: '${pct}',
+        },
+      },
+    }
+    const w = mountWith(A2UIRepeat, { def, surfaceId: 's1', componentId: 'r1' }, surfaces)
+    const bars = w.findAllComponents(A2UIProgressBar)
+    expect(bars).toHaveLength(2)
+    expect(bars[0].find('.a2ui-progress-label').text()).toBe('Alpha — 25%')
+    expect(bars[1].find('.a2ui-progress-label').text()).toBe('Beta — 75%')
+    expect(bars[0].find('progress').element.getAttribute('value')).toBe('25')
+    expect(bars[1].find('progress').element.getAttribute('value')).toBe('75')
+  })
+
+  it('interpolates ProgressBar props when rows are field-aligned arrays', () => {
+    const surfaces = {
+      s1: {
+        components: {},
+        root: null,
+        dataModel: {},
+        sources: {
+          items: {
+            fields: ['name', 'pct'],
+            rows: [
+              ['North', 30],
+              ['South', 90],
+            ],
+          },
+        },
+        filters: {},
+      },
+    }
+    const def = {
+      dataSource: { source: 'items' },
+      template: {
+        ProgressBar: {
+          label: '${name} (${pct}%)',
+          value: '${pct}',
+        },
+      },
+    }
+    const w = mountWith(A2UIRepeat, { def, surfaceId: 's1', componentId: 'r1' }, surfaces)
+    const bars = w.findAllComponents(A2UIProgressBar)
+    expect(bars).toHaveLength(2)
+    expect(bars[0].find('.a2ui-progress-label').text()).toBe('North (30%)')
+    expect(bars[1].find('.a2ui-progress-label').text()).toBe('South (90%)')
   })
 })

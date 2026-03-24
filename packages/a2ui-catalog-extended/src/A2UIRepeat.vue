@@ -23,7 +23,8 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch } from 'vue'
-import { useDataSource, useSortable, formatString, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
+import { useStore } from 'vuex'
+import { useDataSource, useSortable, formatString, materializeDataRow, type SortDirection } from '@haliphax-openclaw/a2ui-sdk'
 import A2UIProgressBar from './A2UIProgressBar.vue'
 import A2UIText from './A2UIText.vue'
 import A2UIBadge from './A2UIBadge.vue'
@@ -45,6 +46,12 @@ function deepResolve(obj: unknown, row: Record<string, unknown>, transforms: Rec
   return obj
 }
 
+/** Drop repeat-item dataSource so children use pre-interpolated props only (avoids full-source binding). */
+function withoutDataSource(def: Record<string, unknown>): Record<string, unknown> {
+  const { dataSource: _removed, ...rest } = def
+  return rest
+}
+
 export default defineComponent({
   name: 'A2UIRepeat',
   props: {
@@ -53,7 +60,16 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
+    const store = useStore()
     const { filteredRows } = useDataSource({ def: props.def as any, surfaceId: props.surfaceId })
+    const sourceName = computed(() => (props.def as any)?.dataSource?.source as string | undefined)
+    const rowFields = computed((): readonly string[] | null => {
+      const name = sourceName.value
+      if (!name) return null
+      const s = store.state.a2ui?.surfaces?.[props.surfaceId]
+      const src = s?.sources?.[name]
+      return src?.fields?.length ? src.fields : null
+    })
     const sortable = computed(() => !!(props.def as any).sortable)
     const sortFieldName = computed(() => (props.def as any).sortField as string | undefined)
 
@@ -74,10 +90,15 @@ export default defineComponent({
       const comp = templateComponents[typeName]
       if (!comp) return []
       const innerDef = template[typeName]
-      return rows.map((row: Record<string, unknown>) => ({
-        component: comp,
-        def: deepResolve(innerDef, row, transforms, rows) as Record<string, unknown>,
-      }))
+      const fields = rowFields.value
+      const materializedRows = rows.map((row: unknown) => materializeDataRow(row, fields))
+      return materializedRows.map((plainRow) => {
+        const resolved = deepResolve(innerDef, plainRow, transforms, materializedRows) as Record<string, unknown>
+        return {
+          component: comp,
+          def: withoutDataSource(resolved),
+        }
+      })
     })
 
     return { resolvedItems, sortable, sortDir }
