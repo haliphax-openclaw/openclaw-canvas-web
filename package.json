@@ -11,7 +11,7 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "NODE_ENV=development vite",
     "dev:server": "tsx watch src/server/index.ts",
-    "setup": "npm ci; cd mcp; npm ci",
+    "setup": "npm ci --include=dev; cd mcp; npm ci --include=dev",
     "start": "tsx src/server/index.ts",
     "test": "vitest run"
   },

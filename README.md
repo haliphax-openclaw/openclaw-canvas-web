@@ -5,12 +5,12 @@ A cross-platform canvas server for OpenClaw. Serves HTML content, renders A2UI v
 ## Quick Start
 
 ```bash
-npm install --include=dev
+npm run setup
 npm run build
-OPENCLAW_CANVAS_PORT=9999 npm start
+npm start
 ```
 
-Open `http://localhost:9999` in a browser.
+Open `http://localhost:3456` in a browser.
 
 ## Architecture
 
