@@ -77,8 +77,31 @@ export default defineComponent({
 <style scoped>
 /* min-width: 0 so nested wide content (e.g. tables) can shrink; overflow scrolls inside children */
 .a2ui-tabs { min-width: 0; width: 100%; box-sizing: border-box; }
-.a2ui-tabs-content { position: relative; display: grid; min-width: 0; }
+/* Mirror DaisyUI tab label inset (.tab uses --tab-p); used for panel horizontal alignment. */
+.a2ui-tabs > .tabs {
+  --tab-p: 0.75rem;
+}
+.a2ui-tabs-content { position: relative; display: grid; min-width: 0; box-sizing: border-box; }
 .a2ui-tabs-content--fixed { height: var(--tabs-content-height); overflow: auto; }
-.a2ui-tabs-panel { grid-area: 1 / 1; min-width: 0; }
+/* Vertical gap on the content box so it clears the tab underline / border (panel padding was easy to miss). */
+.a2ui-tabs .tabs.tabs-top .tab-content.a2ui-tabs-content {
+  padding-top: 1rem;
+}
+.a2ui-tabs .tabs.tabs-bottom .tab-content.a2ui-tabs-content {
+  padding-bottom: 1rem;
+}
+.a2ui-tabs-panel {
+  grid-area: 1 / 1;
+  min-width: 0;
+  box-sizing: border-box;
+  /* Narrower than full --tab-p so panel text lines up with tab label (tabs-border tabs still use --tab-p). */
+  padding-inline: max(0.375rem, calc(var(--tab-p) - 0.25rem));
+  padding-bottom: 1rem;
+}
+/* position=hidden: no .tabs / --tab-p */
+.a2ui-tabs > .a2ui-tabs-content:not(.tab-content) .a2ui-tabs-panel {
+  padding-inline: 0.5rem;
+  padding-top: 1rem;
+}
 .a2ui-tabs-panel--hidden { visibility: hidden; pointer-events: none; }
 </style>
