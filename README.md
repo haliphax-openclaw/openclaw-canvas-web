@@ -27,12 +27,12 @@ packages/
 ├── a2ui-catalog-basic/           # @haliphax-openclaw/a2ui-catalog-basic
 │   ├── catalog.json              # JSON Schema catalog definition
 │   └── src/
-│       ├── index.ts              # PackageDefinition (Column, Row, Text, Button, Image, Tabs, Divider, Slider, Checkbox, ChoicePicker)
+│       ├── index.ts              # PackageDefinition
 │       └── *.vue                 # Component implementations
 ├── a2ui-catalog-extended/        # @haliphax-openclaw/a2ui-catalog-extended
 │   ├── catalog.json
 │   └── src/
-│       ├── index.ts              # PackageDefinition (Badge, Table, Stack, Spacer, ProgressBar, Repeat, Accordion)
+│       ├── index.ts              # PackageDefinition
 │       └── *.vue
 ├── a2ui-catalog-all/             # @haliphax-openclaw/a2ui-catalog-all
 │   ├── catalog.json
@@ -90,8 +90,9 @@ src/
 │   │   ├── format-string.ts      # String formatting utilities
 │   │   └── url-schemes.ts        # URL scheme parser (openclaw://, openclaw-fileprompt://, openclaw-canvas://)
 │   └── styles/
+│       ├── custom.css            # Custom styleeet
 │       └── tailwind.css          # Tailwind + DaisyUI (all themes)
-test/                             # vitest tests (427 tests across 41 files)
+test/                             # vitest tests
 ```
 
 ## Monorepo Structure
