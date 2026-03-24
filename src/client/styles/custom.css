@@ -11,3 +11,10 @@ h3 { font-size: 1.25rem; font-weight: 600; }
 h4 { font-size: 1.125rem; font-weight: 600; }
 h5 { font-size: 1rem; font-weight: 600; }
 h6 { font-size: 0.875rem; font-weight: 600; }
+
+/* Row: columns default to content-width; share space so nested layouts (e.g. Accordion)
+ * can use the full column width. Collapse width is set on A2UIColumn. */
+.a2ui-row > .a2ui-column {
+  flex: 1 1 0;
+  min-width: 0;
+}

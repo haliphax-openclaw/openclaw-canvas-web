@@ -75,8 +75,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-tabs-content { position: relative; display: grid; }
+/* min-width: 0 so nested wide content (e.g. tables) can shrink; overflow scrolls inside children */
+.a2ui-tabs { min-width: 0; width: 100%; box-sizing: border-box; }
+.a2ui-tabs-content { position: relative; display: grid; min-width: 0; }
 .a2ui-tabs-content--fixed { height: var(--tabs-content-height); overflow: auto; }
-.a2ui-tabs-panel { grid-area: 1 / 1; }
+.a2ui-tabs-panel { grid-area: 1 / 1; min-width: 0; }
 .a2ui-tabs-panel--hidden { visibility: hidden; pointer-events: none; }
 </style>

@@ -89,7 +89,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.a2ui-table-wrapper { overflow-x: auto; width: 100%; }
+/* min-width: 0 so flex/grid ancestors don’t grow with table intrinsic width; scroll inside wrapper */
+.a2ui-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
 .a2ui-table-wrapper .table { width: max-content; min-width: 100%; }
 .sortable th { cursor: pointer; }
 </style>
