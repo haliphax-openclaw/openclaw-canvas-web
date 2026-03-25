@@ -99,12 +99,12 @@ test/                             # vitest tests
 
 This project uses npm workspaces. All packages live in `packages/`:
 
-| Package | Description |
-|---------|-------------|
-| `@haliphax-openclaw/a2ui-sdk` | Component SDK — types, composables, filters, event helpers |
-| `@haliphax-openclaw/a2ui-catalog-basic` | Basic catalog — Column, Row, Text, Button, Image, Tabs, Divider, Slider, Checkbox, ChoicePicker |
-| `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — Badge, Table, Stack, Spacer, ProgressBar, Repeat, Accordion |
-| `@haliphax-openclaw/a2ui-catalog-all` | All catalog — re-exports basic + extended |
+| Package                                    | Description                                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `@haliphax-openclaw/a2ui-sdk`              | Component SDK — types, composables, filters, event helpers                                      |
+| `@haliphax-openclaw/a2ui-catalog-basic`    | Basic catalog — Column, Row, Text, Button, Image, Tabs, Divider, Slider, Checkbox, ChoicePicker |
+| `@haliphax-openclaw/a2ui-catalog-extended` | Extended catalog — Badge, Table, Stack, Spacer, ProgressBar, Repeat, Accordion                  |
+| `@haliphax-openclaw/a2ui-catalog-all`      | All catalog — re-exports basic + extended                                                       |
 
 Install all dependencies (including workspace packages) from the repo root:
 
@@ -123,26 +123,30 @@ npm automatically symlinks workspace packages into `node_modules/`, so cross-pac
 
 See [docs/creating-catalog-packages.md](docs/creating-catalog-packages.md) for the full guide on authoring catalog packages.
 
-## MCP Server
+## Gateway Node
 
-The canvas server registers as an OpenClaw gateway node, exposing an MCP-compatible tool interface that agents can invoke via `mcporter`. On startup, it connects to the gateway WebSocket, authenticates with Ed25519 signatures, and advertises the following commands:
+The canvas server registers as an OpenClaw gateway node, exposing a tool interface that agents can access via `openclaw node invoke`. On startup, it connects to the gateway WebSocket, authenticates with Ed25519 signatures, and advertises the following commands:
 
-| Command | Description |
-|---------|-------------|
-| `canvas.present` | Show/present canvas content |
-| `canvas.hide` | Hide the canvas panel |
-| `canvas.navigate` | Navigate to a canvas session/path or external URL |
-| `canvas.eval` | Execute JavaScript in the canvas context |
-| `canvas.snapshot` | Capture the current canvas as a base64 PNG |
-| `canvas.a2ui.push` | Push A2UI surface commands (structured) |
-| `canvas.a2ui.pushJSONL` | Push A2UI JSONL payload (string) |
-| `canvas.a2ui.reset` | Clear A2UI surface state |
+| Command                 | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `canvas.present`        | Show/present canvas content                       |
+| `canvas.hide`           | Hide the canvas panel                             |
+| `canvas.navigate`       | Navigate to a canvas session/path or external URL |
+| `canvas.eval`           | Execute JavaScript in the canvas context          |
+| `canvas.snapshot`       | Capture the current canvas as a base64 PNG        |
+| `canvas.a2ui.push`      | Push A2UI surface commands (structured)           |
+| `canvas.a2ui.pushJSONL` | Push A2UI JSONL payload (string)                  |
+| `canvas.a2ui.reset`     | Clear A2UI surface state                          |
 
 Node identity (Ed25519 keypair and device ID) is generated on first run and stored at `~/.openclaw-canvas/node-identity.json`. The gateway URL and auth token are read from environment variables or `openclaw.json`.
 
+## MCP Server
+
+The project includes an MCP server that agents can invoke using `mcporter` which exposes all of the same commands as the gateway node interface without the node-routing context overhead.
+
 ## Agent Skill
 
-A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server.
+A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server. The skill expects that the [MCP server](#MCP Server) is configured.
 
 ## Canvas Session URLs
 
@@ -153,36 +157,38 @@ http://<host>:<port>/<sessionId>/
 ```
 
 For example:
+
 - `http://localhost:3456/main/` — the default `main` session
 - `http://localhost:3456/developer/` — the `developer` session
 
 When running behind a reverse proxy with a base path (e.g., `OPENCLAW_CANVAS_BASE_PATH=/canvas`):
+
 - `https://example.com/canvas/developer/`
 
 The root path (`/`) redirects to `/main/` by default.
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run build` | Build the Vue SPA to `dist/client/` |
-| `npm run clean` | Delete build artifacts and dependencies |
-| `npm run dev` | Run server + Vite dev server concurrently |
+| Command         | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `npm run build` | Build the Vue SPA to `dist/client/`               |
+| `npm run clean` | Delete build artifacts and dependencies           |
+| `npm run dev`   | Run server + Vite dev server concurrently         |
 | `npm run setup` | Cleanly install all dependencies for all projects |
-| `npm start` | Start the production server |
-| `npm test` | Run tests (vitest) |
+| `npm start`     | Start the production server                       |
+| `npm test`      | Run tests (vitest)                                |
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENCLAW_CANVAS_HOST` | `0.0.0.0` | Bind address |
-| `OPENCLAW_CANVAS_PORT` | `3456` | Listen port |
-| `OPENCLAW_CANVAS_BASE_PATH` | `/` | Public base path when behind a reverse proxy (e.g. `/canvas`) |
-| `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false` | Skip deep link confirmation dialog when `true` |
-| `OPENCLAW_CANVAS_A2UI_DB` | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence |
-| `OPENCLAW_GATEWAY_WS_URL` | `ws://127.0.0.1:18789` | Gateway WebSocket URL for deep link and file-spawn proxying |
-| `OPENCLAW_GATEWAY_TOKEN` | *(from openclaw.json)* | Gateway auth token for agent deep links and file-spawn (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
+| Variable                       | Default                            | Description                                                                                                                     |
+| ------------------------------ | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `OPENCLAW_CANVAS_HOST`         | `0.0.0.0`                          | Bind address                                                                                                                    |
+| `OPENCLAW_CANVAS_PORT`         | `3456`                             | Listen port                                                                                                                     |
+| `OPENCLAW_CANVAS_BASE_PATH`    | `/`                                | Public base path when behind a reverse proxy (e.g. `/canvas`)                                                                   |
+| `OPENCLAW_CANVAS_SKIP_CONFIRM` | `false`                            | Skip deep link confirmation dialog when `true`                                                                                  |
+| `OPENCLAW_CANVAS_A2UI_DB`      | `~/.openclaw-canvas/a2ui-cache.db` | Path to SQLite database for A2UI surface persistence                                                                            |
+| `OPENCLAW_GATEWAY_WS_URL`      | `ws://127.0.0.1:18789`             | Gateway WebSocket URL for deep link and file-spawn proxying                                                                     |
+| `OPENCLAW_GATEWAY_TOKEN`       | _(from openclaw.json)_             | Gateway auth token for agent deep links and file-spawn (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
 
 ## Gateway Protocol
 
@@ -191,42 +197,63 @@ Connect via WebSocket to `/gateway`. Send JSON messages with a `command` field. 
 ### Commands
 
 **canvas.show** — Show the canvas panel.
+
 ```json
 { "id": "1", "command": "canvas.show", "session": "my-project" }
 ```
 
 **canvas.hide** — Hide the canvas panel.
+
 ```json
 { "id": "2", "command": "canvas.hide" }
 ```
 
 **canvas.navigate** — Navigate to a session/path.
+
 ```json
-{ "id": "3", "command": "canvas.navigate", "session": "demo", "path": "page.html" }
+{
+  "id": "3",
+  "command": "canvas.navigate",
+  "session": "demo",
+  "path": "page.html"
+}
 ```
 
 **canvas.navigateExternal** — Load an external URL (http/https only).
+
 ```json
-{ "id": "4", "command": "canvas.navigateExternal", "url": "https://example.com" }
+{
+  "id": "4",
+  "command": "canvas.navigateExternal",
+  "url": "https://example.com"
+}
 ```
 
 **canvas.eval** — Evaluate JS in the canvas iframe.
+
 ```json
 { "id": "5", "command": "canvas.eval", "js": "document.title" }
 ```
 
 **canvas.snapshot** — Capture the canvas as a base64 PNG. A snapshot helper script (using `dom-to-image-more`) is injected into canvas HTML at serve time — the same pattern as deep link injection. When a snapshot is requested, the parent SPA sends a `postMessage` to the iframe, the injected script captures `document.body` from within the frame, and sends the image back via `postMessage`. This works for same-origin files and `data:` URLs. External cross-origin URLs cannot be captured. Falls back to parent-level DOM capture for A2UI surfaces. 30s timeout.
+
 ```json
 { "id": "6", "command": "canvas.snapshot" }
 → { "id": "6", "ok": true, "image": "data:image/png;base64,..." }
 ```
 
 **a2ui.push** — Push A2UI JSONL payload.
+
 ```json
-{ "id": "7", "command": "a2ui.push", "payload": "{\"updateComponents\":{...}}\n{\"createSurface\":{...}}" }
+{
+  "id": "7",
+  "command": "a2ui.push",
+  "payload": "{\"updateComponents\":{...}}\n{\"createSurface\":{...}}"
+}
 ```
 
 **a2ui.reset** — Clear all A2UI surfaces.
+
 ```json
 { "id": "8", "command": "a2ui.reset" }
 ```
@@ -258,8 +285,9 @@ Reference files in other canvas sessions without hardcoding the server origin or
 **Format:** `openclaw-canvas://<session>/<path>`
 
 **Example:**
+
 ```html
-<img src="openclaw-canvas://my-project/logo.png">
+<img src="openclaw-canvas://my-project/logo.png" />
 <a href="openclaw-canvas://dashboard/index.html">Open Dashboard</a>
 ```
 
@@ -267,11 +295,11 @@ These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` base
 
 ## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/agent` | POST | Proxies deep link requests to the gateway's `/tools/invoke` endpoint (`sessions_spawn`) |
-| `/api/file-spawn` | POST | Reads a prompt file from the workspace associated with the canvas session and spawns a subagent via `/tools/invoke` (`sessions_spawn`) |
-| `/api/canvas-config` | GET | Returns canvas configuration for the SPA |
+| Endpoint             | Method | Description                                                                                                                            |
+| -------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/agent`         | POST   | Proxies deep link requests to the gateway's `/tools/invoke` endpoint (`sessions_spawn`)                                                |
+| `/api/file-spawn`    | POST   | Reads a prompt file from the workspace associated with the canvas session and spawns a subagent via `/tools/invoke` (`sessions_spawn`) |
+| `/api/canvas-config` | GET    | Returns canvas configuration for the SPA                                                                                               |
 
 ### GET /api/canvas-config
 
@@ -294,6 +322,7 @@ Returns configuration used by the SPA for deep link handling.
 When a user clicks an `openclaw://` link in canvas content, a confirmation dialog appears (unless `OPENCLAW_CANVAS_SKIP_CONFIRM=true` or the URL includes a `key` parameter).
 
 The dialog includes a collapsible "Options" section with controls for:
+
 - **Agent** — dropdown populated from the canvas config API
 - **Model** — free-text input
 - **Thinking** — on / off / stream
@@ -316,12 +345,12 @@ A2UI surface state is persisted to a local SQLite database so it survives server
 
 The server includes a normalization layer (`src/server/services/a2ui-commands.ts`) that auto-converts v0.8 commands and component shapes to v0.9 format with deprecation warnings logged. v0.8 payloads still work but are deprecated:
 
-| v0.8 (deprecated) | v0.9 |
-|--------------------|------|
-| `surfaceUpdate` | `updateComponents` |
-| `beginRendering` | `createSurface` |
-| `dataModelUpdate` | `updateDataModel` |
-| `usageHint` (Text prop) | `variant` |
+| v0.8 (deprecated)                                                           | v0.9                                                             |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `surfaceUpdate`                                                             | `updateComponents`                                               |
+| `beginRendering`                                                            | `createSurface`                                                  |
+| `dataModelUpdate`                                                           | `updateDataModel`                                                |
+| `usageHint` (Text prop)                                                     | `variant`                                                        |
 | Wrapped component shape: `{ id, component: { "Text": { "text": "..." } } }` | Flat component shape: `{ id, component: "Text", "text": "..." }` |
 
 `dataSourcePush` and `deleteSurface` are unchanged.
