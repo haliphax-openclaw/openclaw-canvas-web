@@ -41,10 +41,4 @@ describe('A2UIIcon', () => {
     expect(w.find('svg').attributes('width')).toBe('24')
     expect(w.find('path').attributes('fill')).toBe('currentColor')
   })
-
-  it('accepts legacy def.icon when name is absent', () => {
-    const w = mount(A2UIIcon, { props: { ...baseProps, def: { icon: 'search' } } })
-    expect(w.find('svg').exists()).toBe(true)
-    expect(w.find('path').attributes('d')).toBeTruthy()
-  })
 })

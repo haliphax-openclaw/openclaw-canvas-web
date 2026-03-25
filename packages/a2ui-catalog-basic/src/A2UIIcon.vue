@@ -16,17 +16,11 @@
 import { computed, defineComponent } from 'vue'
 import { iconMap } from './icon-map'
 
-/** v0.9 catalog field is `name`; `icon` is accepted as a legacy alias in payloads. */
-function resolveIconRef(def: Record<string, unknown>): string | { path: string } | null {
+function resolveName(def: Record<string, unknown>): string | { path: string } | null {
   const name = def.name
   if (typeof name === 'string') return name
   if (typeof name === 'object' && name !== null && 'path' in name && typeof (name as { path: unknown }).path === 'string') {
     return name as { path: string }
-  }
-  const icon = def.icon
-  if (typeof icon === 'string') return icon
-  if (typeof icon === 'object' && icon !== null && 'path' in icon && typeof (icon as { path: unknown }).path === 'string') {
-    return icon as { path: string }
   }
   return null
 }
@@ -39,7 +33,7 @@ export default defineComponent({
     componentId: { type: String, required: true },
   },
   setup(props) {
-    const refVal = computed(() => resolveIconRef(props.def as Record<string, unknown>))
+    const refVal = computed(() => resolveName(props.def as Record<string, unknown>))
 
     const size = computed(() => {
       const n = (props.def as Record<string, unknown>).size
