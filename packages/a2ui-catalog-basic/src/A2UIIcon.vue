@@ -13,37 +13,53 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, type PropType } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { iconMap } from './icon-map'
+
+/** v0.9 catalog field is `name`; `icon` is accepted as a legacy alias in payloads. */
+function resolveIconRef(def: Record<string, unknown>): string | { path: string } | null {
+  const name = def.name
+  if (typeof name === 'string') return name
+  if (typeof name === 'object' && name !== null && 'path' in name && typeof (name as { path: unknown }).path === 'string') {
+    return name as { path: string }
+  }
+  const icon = def.icon
+  if (typeof icon === 'string') return icon
+  if (typeof icon === 'object' && icon !== null && 'path' in icon && typeof (icon as { path: unknown }).path === 'string') {
+    return icon as { path: string }
+  }
+  return null
+}
 
 export default defineComponent({
   name: 'A2UIIcon',
   props: {
-    icon: {
-      type: [String, Object] as PropType<string | { path: string }>,
-      required: true,
-    },
-    size: {
-      type: Number,
-      default: 24,
-    },
-    color: {
-      type: String,
-      default: 'currentColor',
-    },
+    def: { type: Object, required: true },
+    surfaceId: { type: String, required: true },
+    componentId: { type: String, required: true },
   },
   setup(props) {
+    const refVal = computed(() => resolveIconRef(props.def as Record<string, unknown>))
+
+    const size = computed(() => {
+      const n = (props.def as Record<string, unknown>).size
+      return typeof n === 'number' && Number.isFinite(n) ? n : 24
+    })
+
+    const color = computed(() => {
+      const c = (props.def as Record<string, unknown>).color
+      return typeof c === 'string' && c.length > 0 ? c : 'currentColor'
+    })
+
     const pathData = computed(() => {
-      if (typeof props.icon === 'object' && props.icon?.path) {
-        return props.icon.path
-      }
-      if (typeof props.icon === 'string') {
-        return iconMap[props.icon] ?? null
-      }
+      const v = refVal.value
+      if (!v) return null
+      if (typeof v === 'object' && v?.path) return v.path
+      if (typeof v === 'string') return iconMap[v] ?? null
       return null
     })
 
-    return { pathData }
+    return { pathData, size, color }
   },
 })
 </script>

@@ -465,6 +465,7 @@
       "description": "Displays a named icon or custom SVG path",
       "schema": {
         "type": "object",
+        "required": ["name"],
         "properties": {
           "name": {
             "description": "The icon name (string) or an object with a custom SVG path ({ path: string })",
@@ -494,6 +495,14 @@
                 "required": ["path"]
               }
             ]
+          },
+          "size": {
+            "type": "number",
+            "description": "SVG width/height in px (renderer extension)"
+          },
+          "color": {
+            "type": "string",
+            "description": "Fill color (renderer extension)"
           }
         }
       }

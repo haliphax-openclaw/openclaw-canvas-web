@@ -17,7 +17,7 @@ const TEST_SCHEMAS: Record<string, ComponentSchema> = {
   Modal:         { props: { trigger: { type: 'string' }, content: { type: 'string' } } },
   TextField:     { props: { label: { type: 'string|object', required: true }, value: { type: 'string|object' }, variant: { type: 'string' }, validationRegexp: { type: 'string' }, checks: { type: 'array' }, accessibility: { type: 'object' }, placeholder: { type: 'string' } } },
   DateTimeInput: { props: { label: { type: 'string' }, value: { type: 'string' }, enableDate: { type: 'boolean' }, enableTime: { type: 'boolean' }, min: { type: 'string' }, max: { type: 'string' } } },
-  Icon:          { props: { icon: { type: 'string|object', required: true }, size: { type: 'number' }, color: { type: 'string' } } },
+  Icon:          { props: { name: { type: 'string|object', required: true }, size: { type: 'number' }, color: { type: 'string' } } },
   AudioPlayer:   { props: { url: { type: 'string', required: true }, description: { type: 'string' }, autoplay: { type: 'boolean' }, loop: { type: 'boolean' }, muted: { type: 'boolean' } } },
   Video:         { props: { src: { type: 'string' }, url: { type: 'string' }, poster: { type: 'string' }, autoplay: { type: 'boolean' }, loop: { type: 'boolean' }, muted: { type: 'boolean' }, controls: { type: 'boolean' } } },
   Badge:         { props: { text: { type: 'string' }, variant: { type: 'string' }, dataSource: { type: 'object' } } },
@@ -149,19 +149,19 @@ describe('validateComponent', () => {
     expect(r.errors.some(e => e.includes("'value'"))).toBe(true)
   })
 
-  it('passes Icon with string', () => {
-    const r = validateComponent({ id: 'c1', component: 'Icon', icon: 'check' }, resolve)
+  it('passes Icon with string name', () => {
+    const r = validateComponent({ id: 'c1', component: 'Icon', name: 'check' }, resolve)
     expect(r.errors).toEqual([])
   })
 
-  it('passes Icon with object', () => {
-    const r = validateComponent({ id: 'c1', component: 'Icon', icon: { path: 'M0 0' } }, resolve)
+  it('passes Icon with path object name', () => {
+    const r = validateComponent({ id: 'c1', component: 'Icon', name: { path: 'M0 0' } }, resolve)
     expect(r.errors).toEqual([])
   })
 
-  it('errors on Icon with array', () => {
-    const r = validateComponent({ id: 'c1', component: 'Icon', icon: ['bad'] }, resolve)
-    expect(r.errors.some(e => e.includes("'icon'") && e.includes("'string|object'"))).toBe(true)
+  it('errors on Icon with array name', () => {
+    const r = validateComponent({ id: 'c1', component: 'Icon', name: ['bad'] }, resolve)
+    expect(r.errors.some(e => e.includes("'name'") && e.includes("'string|object'"))).toBe(true)
   })
 
   it('passes Divider with no props', () => {
