@@ -146,7 +146,7 @@ The project includes an MCP server that agents can invoke using `mcporter` which
 
 ## Agent Skill
 
-A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server. The skill expects that the [MCP server](#MCP Server) is configured.
+A complementary [Canvas agent skill](https://github.com/haliphax-openclaw/skills/blob/main/canvas/SKILL.md) is available with usage instructions, JSONL command reference, component docs, and examples for agents interacting with this server. The skill expects that the MCP server is configured.
 
 ## Canvas Session URLs
 
