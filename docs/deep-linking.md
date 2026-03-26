@@ -17,7 +17,7 @@ Three custom URL schemes are supported:
 | Scheme | Purpose | Example |
 |--------|---------|---------|
 | `openclaw://` | Agent deep links | `openclaw://agent?message=Run+the+tests` |
-| `openclaw-fileprompt://` | File-based subagent spawn | `openclaw-fileprompt://prompts/deploy.md?agentId=dev` |
+| `openclaw-fileprompt://` | File-based subagent spawn | `openclaw-fileprompt://jsonl/task.md?agentId=dev` |
 | `openclaw-canvas://` | Session file references | `openclaw-canvas://my-project/logo.png` |
 
 A shared utility (`src/client/utils/url-schemes.ts`) provides `parseOpenClawUrl()` for parsing all three schemes.
@@ -97,26 +97,47 @@ When the user clicks "Fix this", the confirmation dialog appears, and on approva
 
 ## File-Based Subagent Spawn — `openclaw-fileprompt://` URLs
 
-The `openclaw-fileprompt://` scheme spawns a subagent with its prompt loaded from a file in the canvas workspace. The canvas server's `/api/file-spawn` endpoint reads the file and passes its contents as the task to `sessions_spawn` via the gateway's `/tools/invoke` endpoint.
+The `openclaw-fileprompt://` scheme spawns a subagent whose **task** is the **full text** of a file on the canvas host. The canvas server's `/api/file-spawn` endpoint reads that file and passes its contents to `sessions_spawn` via the gateway's `/tools/invoke` endpoint (same tool as `openclaw://`).
 
-### URL Format
+### URL format
 
 ```
-openclaw-fileprompt://<path>?agentId=<id>&model=<model>
+openclaw-fileprompt://<path>?agentId=<id>&model=<model>&sessionKey=<key>
 ```
 
-### Parameters
+**`<path>` is not a query parameter.** It is the URL path immediately after `openclaw-fileprompt://` (everything before `?`). For example, to load `jsonl/instructions.md` under the resolved root below, use:
+
+```
+openclaw-fileprompt://jsonl/instructions.md?agentId=developer
+```
+
+The SPA parses this into `{ path: "jsonl/instructions.md", params: { agentId: "developer", ... } }` and POSTs to `/api/file-spawn` with JSON `{ "file": "jsonl/instructions.md", "agentId": "developer", ... }`. The JSON field is named `file` for historical reasons; it is **always** populated from the URL path, not from `?file=`.
+
+### Where files are read from
+
+The server resolves the file with `path.resolve(root, <path>)` where `root` is:
+
+1. **If `agentId` is set and matches an agent in `openclaw.json`:**  
+   `<that agent's workspace>/canvas`  
+   (e.g. `~/.openclaw/workspaces/developer/canvas` for agent `developer`).
+2. **Otherwise:** `OPENCLAW_CANVAS_ROOT` (default `~/.openclaw/workspace/canvas`).
+
+So prompts are read from the agent's **`canvas/`** directory (often `canvas/jsonl/...`), not from the full agent workspace above `canvas/`. Path traversal outside `root` is rejected.
+
+### Query parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `file` | Yes | File path relative to the canvas workspace |
-| `agentId` | No | Target agent ID |
-| `model` | No | Model override |
+| `agentId` | No | Selects which agent's `…/workspace/.../canvas` directory is used to resolve `<path>` when the agent is registered. |
+| `model` | No | Model override forwarded to `sessions_spawn`. |
+| `sessionKey` | No | Same as `openclaw://`: target session for completion announcements. Omitted → `"devnull"` (see below). |
 
-### Example
+There is **no** `workspace` query parameter on the canvas server; cwd/workspace for the **child** run is determined by the gateway's `sessions_spawn`, not by `/api/file-spawn`.
+
+### Example (HTML)
 
 ```html
-<a href="openclaw-fileprompt://prompts/deploy.md?agentId=developer">Deploy</a>
+<a href="openclaw-fileprompt://jsonl/deploy-notes.md?agentId=developer">Deploy</a>
 ```
 
 ## API Proxy
@@ -124,24 +145,28 @@ openclaw-fileprompt://<path>?agentId=<id>&model=<model>
 Deep link execution is proxied through the canvas server's `/api/agent` endpoint, which calls the gateway's `/tools/invoke` endpoint to spawn an isolated subagent session via `sessions_spawn`. This avoids the hooks security boundary, which injects warning text into the agent's prompt.
 
 ```
-Client → POST /api/agent { message, agentId, ... }
+Client → POST /api/agent { message, agentId, model?, sessionKey?, ... }
        → Gateway /tools/invoke (sessions_spawn)
        → Isolated subagent run triggered
 
-Client → POST /api/file-spawn { file, agentId, ... }
-       → Read file from canvas workspace
+Client → POST /api/file-spawn { file: "<path from URL>", agentId?, model?, sessionKey?, ... }
+       → Read file under <agent>/canvas or CANVAS_ROOT
        → Gateway /tools/invoke (sessions_spawn)
        → Subagent run triggered with file contents as task
 ```
 
 ### Suppressing Completion Announcements
 
-By default, `sessions_spawn` auto-announces completion back to the parent session, which costs tokens. To suppress this, the proxy sets `sessionKey` to `"devnull"` by default — a nonexistent session that silently drops the announcement.
+By default, `sessions_spawn` auto-announces completion back to the parent session, which costs tokens. **Both** `/api/agent` and `/api/file-spawn` set `sessionKey` to `"devnull"` when it is omitted — a nonexistent session that silently drops the announcement.
 
-To route the completion to a specific session instead (e.g., for monitoring), pass `sessionKey` in the deep link URL:
+To route the completion to a specific session instead (e.g., for monitoring), pass `sessionKey` in the URL query string for **either** scheme:
 
 ```
 openclaw://agent?message=Refresh+data&agentId=developer&sessionKey=agent:developer:discord:channel:123
+```
+
+```
+openclaw-fileprompt://jsonl/task.md?agentId=developer&sessionKey=agent:developer:discord:channel:123
 ```
 
 If `sessionKey` is omitted, it defaults to `"devnull"` (no announcement).
@@ -171,9 +196,9 @@ Agent trigger:
 {"Button": {"label": "Refresh", "href": "openclaw://agent?message=Refresh+data&agentId=developer"}}
 ```
 
-File-spawn trigger:
+File-spawn trigger (path is under that agent's `canvas/` directory):
 ```json
-{"Button": {"label": "Deploy", "href": "openclaw-fileprompt://prompts/deploy.md?agentId=developer"}}
+{"Button": {"label": "Deploy", "href": "openclaw-fileprompt://jsonl/deploy-notes.md?agentId=developer"}}
 ```
 
 ## Gateway Configuration

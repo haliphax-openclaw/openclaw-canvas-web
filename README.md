@@ -272,10 +272,10 @@ See [docs/deep-linking.md](docs/deep-linking.md) for the full URL format, parame
 
 ### `openclaw-fileprompt://` — File-Based Subagent Spawn
 
-Spawn a subagent with its prompt loaded from a file in the workspace associated with the canvas session. The server reads the file and passes its contents as the task to `sessions_spawn` via the gateway.
+Spawn a subagent whose task is the contents of a file. The **path after the scheme** identifies the file (not `?file=`). The server resolves it under **`<agent workspace>/canvas`** when `agentId` matches a configured agent, otherwise under `OPENCLAW_CANVAS_ROOT`. See [docs/deep-linking.md](docs/deep-linking.md#file-based-subagent-spawn--openclaw-fileprompt-urls).
 
 ```html
-<a href="openclaw-fileprompt://prompts/deploy.md?agentId=developer">Deploy</a>
+<a href="openclaw-fileprompt://jsonl/deploy-notes.md?agentId=developer">Deploy</a>
 ```
 
 ### `openclaw-canvas://` — Canvas File References
@@ -298,7 +298,7 @@ These are rewritten to `http(s)://<host>:<port>/<base>/_c/<session>/<path>` base
 | Endpoint             | Method | Description                                                                                                                            |
 | -------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `/api/agent`         | POST   | Proxies deep link requests to the gateway's `/tools/invoke` endpoint (`sessions_spawn`)                                                |
-| `/api/file-spawn`    | POST   | Reads a prompt file from the workspace associated with the canvas session and spawns a subagent via `/tools/invoke` (`sessions_spawn`) |
+| `/api/file-spawn`    | POST   | Reads a prompt file from `<agent>/canvas` or `OPENCLAW_CANVAS_ROOT`; spawns via `/tools/invoke` (`sessions_spawn`) — see [docs/deep-linking.md](docs/deep-linking.md) |
 | `/api/canvas-config` | GET    | Returns canvas configuration for the SPA                                                                                               |
 
 ### GET /api/canvas-config
@@ -382,7 +382,7 @@ The canvas web server provides feature parity with the macOS OpenClaw app's canv
 Features available in the web server that are not present in the macOS app:
 
 - **`data:` URL support** — `canvas.present` and `canvas.navigate` accept `data:text/html` URLs with automatic deep link and snapshot script injection.
-- **`openclaw-fileprompt://` deep links** — Spawn subagents with prompts loaded directly from workspace files. The server reads the file and passes its contents as the task, removing the indirection of telling an agent to load a file. See [Custom URL Protocols](#openclaw-fileprompt----file-based-subagent-spawn).
+- **`openclaw-fileprompt://` deep links** — Spawn subagents with prompts loaded from files under **`<agent>/canvas`** (URL path after the scheme). The server reads the file and passes its contents as the task. See [Custom URL Protocols](#openclaw-fileprompt----file-based-subagent-spawn).
 - **Enhanced confirmation dialog** — Collapsible "Options" section with controls for agent, model, thinking mode, and session key.
 - **Skip confirmation globally** — `OPENCLAW_CANVAS_SKIP_CONFIRM=true` env var bypasses the deep link confirmation dialog for all requests.
 - **Canvas config API** — `GET /api/canvas-config` exposes available agents and configuration to the SPA.

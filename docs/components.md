@@ -369,7 +369,7 @@ Clickable button. Sends an `a2ui.buttonClick` WebSocket message with the compone
 | Prop | Type | Description |
 |------|------|-------------|
 | `label` | `string` | Button text (also accepts `text`; falls back to `"Button"`) |
-| `href` | `string` | Optional `openclaw://` deep link URL to trigger on click |
+| `href` | `string` | Optional `openclaw://` or `openclaw-fileprompt://` URL; triggers on click without the iframe confirmation dialog |
 
 ### Checkbox
 
