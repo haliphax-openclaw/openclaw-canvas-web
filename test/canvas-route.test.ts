@@ -122,6 +122,24 @@ describe('canvasRoute', () => {
     await startServer()
     const res = await get('/_c/nosuch/index.html')
     expect(res.status).toBe(404)
+    expect(res.body).toContain('Not found')
+  })
+
+  it('returns 404 for directory without index.html', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'sess', 'tools'), { recursive: true })
+    await startServer()
+    const res = await get('/_c/sess/tools')
+    expect(res.status).toBe(404)
+    expect(res.body).toContain('Not found')
+  })
+
+  it('returns 404 for missing file under session', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'sess'))
+    fs.writeFileSync(path.join(tmpDir, 'sess', 'index.html'), '<h1>hi</h1>')
+    await startServer()
+    const res = await get('/_c/sess/nope.txt')
+    expect(res.status).toBe(404)
+    expect(res.body).toContain('Not found')
   })
 
   it('sets security headers', async () => {

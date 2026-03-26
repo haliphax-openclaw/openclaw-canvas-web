@@ -12,6 +12,7 @@
         :src="externalUrl"
         class="canvas-frame"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        @load="onIframeLoad"
       />
       <iframe
         v-else-if="iframeSrc"
@@ -19,6 +20,7 @@
         :src="iframeSrc"
         class="canvas-frame"
         sandbox="allow-scripts allow-same-origin allow-forms"
+        @load="onIframeLoad"
       />
       <div v-else class="canvas-loading">Loading…</div>
     </template>
@@ -35,6 +37,7 @@ import { parseOpenclawUrl, executeDeepLink, fetchCanvasConfig, type DeepLinkRequ
 import A2UIRenderer from '../components/A2UIRenderer.vue'
 import DeepLinkConfirm from '../components/DeepLinkConfirm.vue'
 import domtoimage from 'dom-to-image-more'
+import { SPA_DOCUMENT_TITLE, resolveCanvasDocumentTitle } from '../utils/document-title-sync'
 
 export default defineComponent({
   name: 'CanvasView',
@@ -195,6 +198,26 @@ export default defineComponent({
       store.commit('a2ui/clearAll')
     }
 
+    function applySpaDocumentTitle() {
+      document.title = SPA_DOCUMENT_TITLE
+    }
+
+    /** Same-origin canvas iframes expose the embedded document title; cross-origin blocks access → fall back to SPA title. */
+    function syncTitleFromIframe() {
+      document.title = resolveCanvasDocumentTitle({
+        hasA2UISurface: hasA2UISurface.value,
+        iframeContentDocument: iframe.value?.contentDocument ?? undefined,
+      })
+    }
+
+    function onIframeLoad() {
+      syncTitleFromIframe()
+    }
+
+    watch(hasA2UISurface, (a2ui) => {
+      if (a2ui) applySpaDocumentTitle()
+    }, { immediate: true })
+
     // Handle postMessage from iframes for openclaw:// deep links
     async function onDeepLinkMessage(e: MessageEvent) {
       if (e.data?.type !== 'openclaw-deeplink' || !e.data?.url) return
@@ -234,7 +257,7 @@ export default defineComponent({
 
     // Attach deep link interceptor on iframe load via @load in template
 
-    return { iframeSrc, iframe, canvasRoot, visible, reload, hasA2UISurface, activeSurfaceId, externalUrl, deepLinkConfirm }
+    return { iframeSrc, iframe, canvasRoot, visible, reload, hasA2UISurface, activeSurfaceId, externalUrl, deepLinkConfirm, onIframeLoad }
   },
 })
 </script>

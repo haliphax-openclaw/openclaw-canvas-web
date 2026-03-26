@@ -10,7 +10,7 @@ export function canvasRoute(fileResolver: FileResolver, basePath: string = ''): 
   const router = Router()
 
   // Shared handler for canvas file serving with deep link injection
-  async function serveCanvasFile(session: string, subpath: string, res: any, next: any) {
+  async function serveCanvasFile(session: string, subpath: string, res: any) {
     res.setHeader('Content-Security-Policy', "frame-ancestors 'self'")
     res.setHeader('X-Frame-Options', 'SAMEORIGIN')
     const resolved = await fileResolver.resolve(session, subpath)
@@ -22,7 +22,12 @@ export function canvasRoute(fileResolver: FileResolver, basePath: string = ''): 
           return
         }
       }
-      return next()
+      // Do not fall through to the SPA catch-all: returning index.html for /_c/... breaks the
+      // iframe (nested SPA bootstraps under /_c/<session>/... and can infinite-reload).
+      res.status(404).type('html').send(
+        '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Not found</title></head><body><p>Not found</p></body></html>',
+      )
+      return
     }
 
     const contentType = mime.lookup(resolved) || 'application/octet-stream'
@@ -44,16 +49,16 @@ export function canvasRoute(fileResolver: FileResolver, basePath: string = ''): 
   }
 
   // Canvas file serving under /_c/ prefix (no conflicts with SPA routes)
-  router.get(`/_c/:session/{*subpath}`, async (req, res, next) => {
+  router.get(`/_c/:session/{*subpath}`, async (req, res) => {
     const session = req.params.session as string
     const rawSubpath = (req.params as any).subpath
     const subpath = Array.isArray(rawSubpath) ? rawSubpath.join('/') : (rawSubpath || 'index.html')
-    await serveCanvasFile(session, subpath, res, next)
+    await serveCanvasFile(session, subpath, res)
   })
 
-  router.get(`/_c/:session`, async (req, res, next) => {
+  router.get(`/_c/:session`, async (req, res) => {
     const session = req.params.session as string
-    await serveCanvasFile(session, 'index.html', res, next)
+    await serveCanvasFile(session, 'index.html', res)
   })
 
   return router
