@@ -192,6 +192,26 @@ Map templates support `${$value}` for single aggregates and `${$key}` for compou
 {"Badge": {"variant": "success", "dataSource": {"source": "runs", "aggregates": {"$count": {"fn": "count", "where": {"field": "status", "op": "eq", "value": "pass"}}}, "map": {"text": "✓ ${$count}"}}}}
 ```
 
+### Icon
+
+Renders a 24×24 viewBox SVG from the built-in icon map or a custom path. Matches the [A2UI basic catalog](https://a2ui.org/specification/v0_9/basic_catalog.json) Icon component: **`name`** is required — either a string from the catalog enum (e.g. `home`, `search`, `settings`, `warning`) or an object `{ "path": "<path d attribute>" }` for a custom glyph.
+
+**Flat `updateComponents` examples:**
+
+```json
+{"id": "icon-home", "component": "Icon", "name": "home"}
+{"id": "icon-warn", "component": "Icon", "name": "warning", "size": 28, "color": "#fbbf24"}
+{"id": "icon-custom", "component": "Icon", "name": {"path": "M12 2L2 7l10 5 10-5-10-5z"}}
+```
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `name` | `string` \| `{ path: string }` | Yes | Built-in icon key or custom SVG path data (`d`) |
+| `size` | `number` | No | Width and height in px (default: `24`) |
+| `color` | `string` | No | Fill color (default: `currentColor`) |
+
+The renderer treats icons as decorative (`aria-hidden="true"`).
+
 ### Image
 
 Displays an image. Supports `openclaw-canvas://` URLs for canvas-relative paths.
