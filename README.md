@@ -190,6 +190,47 @@ The root path (`/`) redirects to `/main/` by default.
 | `OPENCLAW_GATEWAY_WS_URL`      | `ws://127.0.0.1:18789`             | Gateway WebSocket URL for deep link and file-spawn proxying                                                                     |
 | `OPENCLAW_GATEWAY_TOKEN`       | _(from openclaw.json)_             | Gateway auth token for agent deep links and file-spawn (`/tools/invoke`). Falls back to `gateway.auth.token` in `openclaw.json` |
 
+## Gateway Configuration
+
+Agent deep links and file-spawn both use the gateway's `/tools/invoke` endpoint with `sessions_spawn`. The following settings control deep link behavior:
+
+### Agent Deep Links & File Spawn (`/tools/invoke`)
+
+| Setting | Type | Description |
+|---------|------|-------------|
+| `gateway.auth.token` | `string` | Bearer token used by the canvas server to authenticate with the gateway. Must match the `OPENCLAW_GATEWAY_TOKEN` environment variable (or be readable from `openclaw.json`) |
+| `gateway.tools.allow` | `string[]` | Must include `"sessions_spawn"` to permit agent deep links and file-spawn via `/tools/invoke` |
+
+Example configuration:
+
+```json
+{
+  "gateway": {
+    "auth": {
+      "mode": "token",
+      "token": "your-gateway-token"
+    },
+    "tools": {
+      "allow": ["sessions_spawn", "sessions_send", "sessions_list"]
+    }
+  }
+}
+```
+
+Without `gateway.auth.token` and `sessions_spawn` in `gateway.tools.allow`, the canvas server's `/api/agent` and `/api/file-spawn` proxies will receive an authentication failure or 404 from the gateway.
+
+### Disabling the built-in canvas tool
+
+OpenClaw includes a built-in `canvas` tool designed for the desktop app. When using the canvas web server, this tool can cause confusion — agents may attempt to use it instead of `openclaw nodes invoke`, and its `jsonlPath` parameter rejects paths outside the OpenClaw state directory. To prevent this, add `canvas` to the global tool denylist:
+
+```json
+{
+  "tools": {
+    "deny": ["canvas"]
+  }
+}
+```
+
 ## Gateway Protocol
 
 Connect via WebSocket to `/gateway`. Send JSON messages with a `command` field. Responses include the original `id` if provided.

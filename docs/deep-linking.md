@@ -201,47 +201,6 @@ File-spawn trigger (path is under that agent's `canvas/` directory):
 {"Button": {"label": "Deploy", "href": "openclaw-fileprompt://jsonl/deploy-notes.md?agentId=developer"}}
 ```
 
-## Gateway Configuration
-
-Agent deep links and file-spawn both use the gateway's `/tools/invoke` endpoint with `sessions_spawn`. The following settings control deep link behavior:
-
-### Agent Deep Links & File Spawn (`/tools/invoke`)
-
-| Setting | Type | Description |
-|---------|------|-------------|
-| `gateway.auth.token` | `string` | Bearer token used by the canvas server to authenticate with the gateway. Must match the `OPENCLAW_GATEWAY_TOKEN` environment variable (or be readable from `openclaw.json`) |
-| `gateway.tools.allow` | `string[]` | Must include `"sessions_spawn"` to permit agent deep links and file-spawn via `/tools/invoke` |
-
-Example configuration:
-
-```json
-{
-  "gateway": {
-    "auth": {
-      "mode": "token",
-      "token": "your-gateway-token"
-    },
-    "tools": {
-      "allow": ["sessions_spawn", "sessions_send", "sessions_list"]
-    }
-  }
-}
-```
-
-Without `gateway.auth.token` and `sessions_spawn` in `gateway.tools.allow`, the canvas server's `/api/agent` and `/api/file-spawn` proxies will receive an authentication failure or 404 from the gateway.
-
-### Disabling the built-in canvas tool
-
-OpenClaw includes a built-in `canvas` tool designed for the desktop app. When using the canvas web server, this tool can cause confusion — agents may attempt to use it instead of `openclaw nodes invoke`, and its `jsonlPath` parameter rejects paths outside the OpenClaw state directory. To prevent this, add `canvas` to the global tool denylist:
-
-```json
-{
-  "tools": {
-    "deny": ["canvas"]
-  }
-}
-```
-
 ## Security Considerations
 
 - All deep links require user confirmation by default (confirmation dialog)
