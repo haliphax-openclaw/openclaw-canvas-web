@@ -59,4 +59,11 @@ describe('A2UIAudioPlayer', () => {
     })
     expect(w.find('audio').attributes('src')).toBe('http://localhost:3456/_c/proj/track.mp3')
   })
+
+  it('uses step any on seek so duration need not align with a fixed step grid', () => {
+    const w = mount(A2UIAudioPlayer, {
+      props: { def: { url: 'https://example.com/a.mp3' }, componentId: 'ap1' },
+    })
+    expect(w.find('.a2ui-audio-seek').attributes('step')).toBe('any')
+  })
 })

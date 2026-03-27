@@ -26,7 +26,7 @@
         min="0"
         :max="duration"
         :value="currentTime"
-        step="0.1"
+        step="any"
         @input="onSeek"
         aria-label="Seek"
       />
